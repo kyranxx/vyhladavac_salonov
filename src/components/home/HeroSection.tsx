@@ -28,8 +28,8 @@ export function HeroSection() {
             setTimeout(() => {
                 setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
                 setIsAnimating(false);
-            }, 300);
-        }, 2500);
+            }, 200);
+        }, 1800);
 
         return () => clearInterval(interval);
     }, []);
