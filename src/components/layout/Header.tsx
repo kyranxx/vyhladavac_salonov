@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import styles from './Header.module.css';
 
 export function Header() {
@@ -32,6 +33,7 @@ export function Header() {
 
                 {/* Desktop Actions */}
                 <div className={styles.actions}>
+                    <LanguageSwitcher />
                     <Link href="/prihlasenie" className={styles.loginButton}>
                         Prihlásiť sa
                     </Link>

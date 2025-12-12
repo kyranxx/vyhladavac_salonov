@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
+import { CookieConsent } from '@/components/layout/CookieConsent';
+import { AuthProvider } from '@/components/providers/AuthProvider';
 
 const inter = Inter({
     subsets: ['latin', 'latin-ext'],
@@ -65,8 +67,14 @@ export default function RootLayout({
                 <GoogleAnalytics />
                 <MicrosoftClarity />
 
-                {children}
+                <AuthProvider>
+                    {children}
+                </AuthProvider>
+
+                {/* Cookie Consent Banner */}
+                <CookieConsent />
             </body>
         </html>
     );
 }
+

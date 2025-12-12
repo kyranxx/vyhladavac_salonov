@@ -1,0 +1,322 @@
+.main {
+    min-height: 100vh;
+    background: var(--color-background);
+}
+
+/* Hero */
+.hero {
+    position: relative;
+    min-height: 300px;
+    display: flex;
+    align-items: flex-end;
+    padding: var(--spacing-2xl);
+    background: linear-gradient(135deg, #2D2A26 0%, #1A1918 100%);
+}
+
+.heroOverlay {
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A86C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.heroContent {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    color: white;
+}
+
+.badges {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.verifiedBadge {
+    background: #2E7D32;
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+}
+
+.premiumBadge {
+    background: var(--color-primary);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+}
+
+.salonName {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.salonLocation {
+    font-size: var(--font-size-lg);
+    opacity: 0.9;
+    margin-bottom: var(--spacing-md);
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.ratingStars {
+    font-size: var(--font-size-lg);
+}
+
+.ratingValue {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+}
+
+.reviewCount {
+    opacity: 0.8;
+}
+
+/* Container */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+/* Layout */
+.layout {
+    display: grid;
+    gap: var(--spacing-2xl);
+}
+
+@media (min-width: 1024px) {
+    .layout {
+        grid-template-columns: 1fr 380px;
+    }
+}
+
+/* Main Column */
+.mainColumn {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xl);
+}
+
+.section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-border);
+}
+
+.sectionTitle {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.description {
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-lg);
+}
+
+.categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.category {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+}
+
+/* Services */
+.servicesList {
+    display: flex;
+    flex-direction: column;
+}
+
+.serviceItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.serviceItem:last-child {
+    border-bottom: none;
+}
+
+.serviceInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.serviceName {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.serviceDuration {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.servicePrice {
+    font-weight: 600;
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
+
+/* Gallery Placeholder */
+.galleryPlaceholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background: var(--color-background-alt);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-muted);
+}
+
+.galleryPlaceholder span {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Sidebar */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.contactCard,
+.hoursCard {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-border);
+}
+
+.contactTitle,
+.hoursTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-lg);
+}
+
+.contactButton {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--color-primary);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    transition: var(--transition-fast);
+}
+
+.contactButton:hover {
+    background: var(--color-primary-dark);
+}
+
+.websiteButton {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-md);
+    background: white;
+    color: var(--color-text);
+    text-align: center;
+    text-decoration: none;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    transition: var(--transition-fast);
+}
+
+.websiteButton:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.contactInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.contactRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contactLabel {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.contactValue {
+    color: var(--color-text);
+}
+
+.contactLink {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.contactLink:hover {
+    text-decoration: underline;
+}
+
+/* Opening Hours */
+.hoursList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hoursRow {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.hoursRow:last-child {
+    border-bottom: none;
+}
+
+.dayName {
+    color: var(--color-text-secondary);
+}
+
+.hours {
+    font-weight: 500;
+    color: var(--color-text);
+}

@@ -53,47 +53,47 @@ A comprehensive directory/catalog of salons and beauty services in Slovakia. The
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| 1 | Mobile-first, fully responsive design | ⬜ |
-| 2 | 3 languages: Slovak, English, Hungarian (i18n) | ⬜ |
-| 3 | 100/100 PageSpeed score | ⬜ |
-| 4 | Zero console errors/warnings | ⬜ |
-| 5 | Top-level security (HTTPS, SQL injection, XSS, CSRF) | ⬜ |
-| 6 | SEO optimized (meta tags, schema.org, sitemap, robots.txt) | ⬜ |
-| 7 | Admin dashboard with full control | ⬜ |
-| 8 | Next.js 14+ with App Router | ⬜ |
-| 9 | Supabase (PostgreSQL + Auth + RLS) | ⬜ |
-| 10 | Cloudflare R2 / Supabase Storage for images | ⬜ |
-| 11 | Vercel hosting | ⬜ |
-| 12 | GitHub version control | ⬜ |
-| 13 | Google Analytics 4 | ⬜ |
-| 14 | Microsoft Clarity | ⬜ |
-| 15 | Google Search Console integration | ⬜ |
-| 16 | Dynamic sitemap generation | ⬜ |
-| 17 | Structured data (LocalBusiness schema) | ⬜ |
-| 18 | City + Category landing pages for SEO | ⬜ |
-| 19 | Meta descriptions, OG tags for sharing | ⬜ |
-| 20 | Cookie consent banner (GDPR) | ⬜ |
-| 21 | Privacy policy & Terms of service | ⬜ |
-| 22 | Stripe payment integration | ⬜ |
-| 23 | User registration & authentication | ⬜ |
-| 24 | Listing approval workflow | ⬜ |
-| 25 | Search with filters (city, category) | ⬜ |
+| 1 | Mobile-first, fully responsive design | ✅ |
+| 2 | 3 languages: Slovak, English, Hungarian (i18n) | ✅ |
+| 3 | 100/100 PageSpeed score | 🔄 |
+| 4 | Zero console errors/warnings | 🔄 |
+| 5 | Top-level security (HTTPS, SQL injection, XSS, CSRF) | ✅ |
+| 6 | SEO optimized (meta tags, schema.org, sitemap, robots.txt) | ✅ |
+| 7 | Admin dashboard with full control | 🔄 |
+| 8 | Next.js 14+ with App Router | ✅ |
+| 9 | Supabase (PostgreSQL + Auth + RLS) | ✅ |
+| 10 | Cloudflare R2 / Supabase Storage for images | 🔄 |
+| 11 | Vercel hosting | ✅ |
+| 12 | GitHub version control | ✅ |
+| 13 | Google Analytics 4 | ✅ |
+| 14 | Microsoft Clarity | ✅ |
+| 15 | Google Search Console integration | ✅ |
+| 16 | Dynamic sitemap generation | ✅ |
+| 17 | Structured data (LocalBusiness schema) | 🔄 |
+| 18 | City + Category landing pages for SEO | ✅ |
+| 19 | Meta descriptions, OG tags for sharing | ✅ |
+| 20 | Cookie consent banner (GDPR) | ✅ |
+| 21 | Privacy policy & Terms of service | ✅ |
+| 22 | Stripe payment integration | 🔄 |
+| 23 | User registration & authentication | ✅ |
+| 24 | Listing approval workflow | 🔄 |
+| 25 | Search with filters (city, category) | ✅ |
 
 ### 🟡 HIGH Priority Requirements
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| 26 | Image optimization (WebP, lazy loading) | ⬜ |
-| 27 | CDN for static assets | ⬜ |
-| 28 | Rate limiting on forms/API | ⬜ |
-| 29 | Bing Webmaster Tools | ⬜ |
-| 30 | Admin 2FA authentication | ⬜ |
-| 31 | Security headers (CSP, HSTS) | ⬜ |
-| 32 | 404 and error pages | ⬜ |
-| 33 | Loading skeletons for UX | ⬜ |
-| 34 | Breadcrumb navigation | ⬜ |
-| 35 | Email notifications for admin | ⬜ |
-| 36 | Database backup strategy | ⬜ |
+| 26 | Image optimization (WebP, lazy loading) | ✅ |
+| 27 | CDN for static assets | 🔄 |
+| 28 | Rate limiting on forms/API | 🔄 |
+| 29 | Bing Webmaster Tools | 🔄 |
+| 30 | Admin 2FA authentication | 🔄 |
+| 31 | Security headers (CSP, HSTS) | 🔄 |
+| 32 | 404 and error pages | ✅ |
+| 33 | Loading skeletons for UX | 🔄 |
+| 34 | Breadcrumb navigation | 🔄 |
+| 35 | Email notifications for admin | 🔄 |
+| 36 | Database backup strategy | 🔄 |
 
 ---
 
