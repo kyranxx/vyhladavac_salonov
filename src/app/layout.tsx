@@ -47,6 +47,10 @@ export const metadata: Metadata = {
     },
     verification: {
         google: 'Uuu_J9NwozI5jZRea28koZyPuqNHhbQYg26Gxdpk0os',
+        // Bing Webmaster - add your verification code here
+        other: {
+            'msvalidate.01': 'YOUR_BING_VERIFICATION_CODE',
+        },
     },
 };
 
