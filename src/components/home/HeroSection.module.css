@@ -95,6 +95,35 @@
     border-radius: 4px;
 }
 
+/* Rotating Text Animation */
+.rotatingText {
+    display: inline-block;
+    min-width: 280px;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .rotatingText {
+        min-width: 180px;
+        display: block;
+    }
+}
+
+.word {
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.fadeIn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fadeOut {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
 .subtitle {
     font-size: var(--font-size-lg);
     color: var(--color-text-secondary);

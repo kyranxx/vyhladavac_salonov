@@ -1,13 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './HeroSection.module.css';
+
+const rotatingWords = [
+    'salón krásy',
+    'kaderníctvo',
+    'wellness',
+    'nechtový salón',
+    'kozmetiku',
+    'masáže',
+    'barbershop',
+    'make-up štúdio',
+];
 
 export function HeroSection() {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
+    const [currentWordIndex, setCurrentWordIndex] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIsAnimating(true);
+            setTimeout(() => {
+                setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
+                setIsAnimating(false);
+            }, 300);
+        }, 2500);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const cities = [
         { value: 'bratislava', label: 'Bratislava' },
@@ -37,7 +62,12 @@ export function HeroSection() {
             <div className={styles.container}>
                 <div className={styles.content}>
                     <h1 className={styles.title}>
-                        Nájdite <span className={styles.highlight}>salón krásy</span>
+                        Nájdite{' '}
+                        <span className={`${styles.highlight} ${styles.rotatingText}`}>
+                            <span className={`${styles.word} ${isAnimating ? styles.fadeOut : styles.fadeIn}`}>
+                                {rotatingWords[currentWordIndex]}
+                            </span>
+                        </span>
                         <br />vo vašom meste
                     </h1>
 
