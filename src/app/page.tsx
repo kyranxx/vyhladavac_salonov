@@ -1,22 +1,24 @@
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { HeroSection } from '@/components/home/HeroSection';
+import { CategoryGrid } from '@/components/home/CategoryGrid';
+import { PopularCities } from '@/components/home/PopularCities';
+import { HowItWorks } from '@/components/home/HowItWorks';
+import { ForOwners } from '@/components/home/ForOwners';
+import styles from './page.module.css';
+
 export default function Home() {
     return (
-        <main className="hero">
-            <div className="hero-content">
-                <h1>🏢 Salon Finder SK</h1>
-                <p className="tagline">Nájdite salóny krásy vo vašom meste</p>
-                <p className="status">🚧 Stránka sa pripravuje...</p>
-                <div className="coming-soon">
-                    <p>Čoskoro tu nájdete:</p>
-                    <ul>
-                        <li>✂️ Kaderníctva</li>
-                        <li>💅 Manikúra & Pedikúra</li>
-                        <li>✨ Kozmetika</li>
-                        <li>💆 Masáže</li>
-                        <li>🎨 Make-up & Tetovanie</li>
-                    </ul>
-                </div>
-                <p className="footer-note">© 2024 Salon Finder SK</p>
-            </div>
-        </main>
+        <>
+            <Header />
+            <main className={styles.main}>
+                <HeroSection />
+                <CategoryGrid />
+                <PopularCities />
+                <HowItWorks />
+                <ForOwners />
+            </main>
+            <Footer />
+        </>
     );
 }

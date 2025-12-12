@@ -1,16 +1,51 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
+import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
+
+const inter = Inter({
+    subsets: ['latin', 'latin-ext'],
+    display: 'swap',
+    variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
-    title: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
+    title: {
+        default: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
+        template: '%s | Salon Finder SK',
+    },
     description: 'Najväčší katalóg salónov krásy na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby vo vašom meste.',
-    keywords: 'salóny krásy, kaderníctvo, kozmetika, manikúra, Slovensko, Bratislava, Košice',
+    keywords: ['salóny krásy', 'kaderníctvo', 'kozmetika', 'manikúra', 'pedikúra', 'masáže', 'Slovensko', 'Bratislava', 'Košice'],
     authors: [{ name: 'Salon Finder SK' }],
+    creator: 'Apollo Tech s.r.o.',
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://vyhladavac-salonov.vercel.app'),
     openGraph: {
-        title: 'Salon Finder SK',
-        description: 'Nájdite najlepšie salóny krásy vo vašom meste',
+        title: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
+        description: 'Najväčší katalóg salónov krásy na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby vo vašom meste.',
         type: 'website',
         locale: 'sk_SK',
+        alternateLocale: ['en_US', 'hu_HU'],
+        siteName: 'Salon Finder SK',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Salon Finder SK',
+        description: 'Nájdite najlepšie salóny krásy vo vašom meste',
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
+    },
+    verification: {
+        // Add your verification codes here when ready
+        // google: 'your-google-verification-code',
     },
 };
 
@@ -20,8 +55,19 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="sk">
-            <body>{children}</body>
+        <html lang="sk" className={inter.variable}>
+            <head>
+                <link rel="icon" href="/favicon.ico" sizes="any" />
+                <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+                <meta name="theme-color" content="#C9A86C" />
+            </head>
+            <body className={inter.className}>
+                {/* Analytics - both components check for env vars before rendering */}
+                <GoogleAnalytics />
+                <MicrosoftClarity />
+
+                {children}
+            </body>
         </html>
     );
 }

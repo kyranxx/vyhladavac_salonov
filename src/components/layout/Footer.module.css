@@ -1,0 +1,140 @@
+.footer {
+    background: var(--color-background-alt);
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-3xl) 0 var(--spacing-xl);
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.grid {
+    display: grid;
+    gap: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+@media (min-width: 640px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid {
+        grid-template-columns: 2fr repeat(4, 1fr);
+    }
+}
+
+/* Brand Column */
+.brandColumn {
+    grid-column: span 1;
+}
+
+@media (min-width: 640px) {
+    .brandColumn {
+        grid-column: span 2;
+    }
+}
+
+@media (min-width: 1024px) {
+    .brandColumn {
+        grid-column: span 1;
+    }
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.logoIcon {
+    font-size: 1.5em;
+}
+
+.logoText {
+    color: var(--color-text);
+}
+
+.description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    max-width: 300px;
+}
+
+/* Link Columns */
+.linkColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.columnTitle {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.linkList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.linkList a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: var(--transition-fast);
+}
+
+.linkList a:hover {
+    color: var(--color-primary);
+}
+
+/* Bottom Bar */
+.bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 640px) {
+    .bottom {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.copyright {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.company {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.company a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.company a:hover {
+    text-decoration: underline;
+}

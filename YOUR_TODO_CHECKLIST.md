@@ -4,43 +4,47 @@ This checklist contains all the steps YOU need to complete. I'll handle the codi
 
 ---
 
-## 🔴 BEFORE WE START CODING
-
-Complete these steps first, then tell me when ready.
+## 🟢 COMPLETED - BEFORE WE START CODING
 
 ### 1. Create Accounts
 
 | # | Service | Status | Your Notes |
 |---|---------|--------|------------|
-| 1.1 | **GitHub** - https://github.com | ⬜ | |
-| 1.2 | **Supabase** - https://supabase.com | ⬜ | |
-| 1.3 | **Vercel** - https://vercel.com | ⬜ | |
-| 1.4 | **Stripe** - https://stripe.com | ⬜ | |
-| 1.5 | **Google Analytics** - https://analytics.google.com | ⬜ | |
-| 1.6 | **Microsoft Clarity** - https://clarity.microsoft.com | ⬜ | |
-| 1.7 | **Google Search Console** - https://search.google.com/search-console | ⬜ | |
+| 1.1 | **GitHub** - https://github.com | ✅ DONE | kyranxx/vyhladavac_salonov |
+| 1.2 | **Supabase** - https://supabase.com | ✅ DONE | salon-finder (txodloobftonmurltjpm) |
+| 1.3 | **Vercel** - https://vercel.com | ✅ DONE | vyhladavac-salonov.vercel.app |
+| 1.4 | **Stripe** - https://stripe.com | ✅ DONE | Vyhladavac-salonov (Test mode) |
+| 1.5 | **Google Analytics** - https://analytics.google.com | ⬜ Pending | |
+| 1.6 | **Microsoft Clarity** - https://clarity.microsoft.com | ⬜ Pending | |
+| 1.7 | **Google Search Console** - https://search.google.com/search-console | ⬜ Pending | |
 
 ---
 
-### 2. Collect API Keys & Credentials
+### 2. Collect API Keys & Credentials ✅ DONE
 
-After creating accounts, collect these values. **KEEP THEM SECRET!**
+All keys collected and added to `.env` and Vercel:
 
 ```
-# Supabase (Project Settings → API)
-NEXT_PUBLIC_SUPABASE_URL=___________________________
-NEXT_PUBLIC_SUPABASE_ANON_KEY=___________________________
-SUPABASE_SERVICE_ROLE_KEY=___________________________
+# Supabase ✅
+NEXT_PUBLIC_SUPABASE_URL=https://txodloobftonmurltjpm.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
-# Stripe (Dashboard → Developers → API keys)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=___________________________
-STRIPE_SECRET_KEY=___________________________
+# Stripe ✅
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51SdXc...
+STRIPE_SECRET_KEY=sk_test_51SdXc...
 
-# Google Analytics
-NEXT_PUBLIC_GA_MEASUREMENT_ID=___________________________
+# Stripe Products Created ✅
+- Premium Monthly: price_1SdXsFKD2JDE6csJ3JchrhQO (€3/month)
+- Premium Yearly: price_1SdXsGKD2JDE6csJke2BCvt6 (€30/year)
+- Featured 7 Days: price_1SdXsHKD2JDE6csJnTVz7dat (€5)
+- Verified Badge: price_1SdXsIKD2JDE6csJhaVQLqYl (€20/year)
 
-# Microsoft Clarity
-NEXT_PUBLIC_CLARITY_PROJECT_ID=___________________________
+# Google Analytics (add when ready)
+NEXT_PUBLIC_GA_MEASUREMENT_ID=
+
+# Microsoft Clarity (add when ready)
+NEXT_PUBLIC_CLARITY_PROJECT_ID=
 ```
 
 ---
@@ -102,16 +106,16 @@ I'll provide base translations. You need to review/correct:
 
 ---
 
-### 7. Configure Stripe Products
+### 7. Configure Stripe Products ✅ DONE
 
-In Stripe Dashboard → Products, create:
+In Stripe Dashboard → Products (all created automatically):
 
 | Product | Price | Type | Status |
 |---------|-------|------|--------|
-| Premium Monthly | 3.00 EUR | Recurring/month | ⬜ |
-| Premium Yearly | 30.00 EUR | Recurring/year | ⬜ |
-| Featured 7 Days | 5.00 EUR | One-time | ⬜ |
-| Verified Badge | 20.00 EUR | One-time | ⬜ |
+| Premium Mesačné | €3.00/month | Recurring | ✅ Created |
+| Premium Ročné | €30.00/year | Recurring | ✅ Created |
+| Zvýraznenie 7 dní | €5.00 | One-time | ✅ Created |
+| Overený salón | €20.00/year | Recurring | ✅ Created |
 
 ---
 
@@ -147,11 +151,12 @@ In Stripe Dashboard → Products, create:
 
 ---
 
-### 11. Initial Data
+### 11. Initial Data ✅ PARTIALLY DONE
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Review districts list | ⬜ | I'll provide, you verify |
+| Review districts list | ✅ | 26 Slovak cities/districts added |
+| Review categories list | ✅ | 32 categories added (17 primary + 15 secondary) |
 | Add first 5-10 real salons | ⬜ | Optional, helps test |
 
 ---
@@ -194,4 +199,20 @@ Use this space for any questions or notes:
 
 ---
 
-**Last Updated:** December 12, 2024
+## 🏆 PROJECT PROGRESS
+
+| Phase | Status | Completion |
+|-------|--------|------------|
+| 1. Accounts & Setup | ✅ DONE | 100% |
+| 2. Database Design | ✅ DONE | 100% |
+| 3. Core Infrastructure | ✅ DONE | 100% |
+| 4. Frontend Development | 🔄 IN PROGRESS | 10% |
+| 5. User Authentication | ⬜ | 0% |
+| 6. Admin Dashboard | ⬜ | 0% |
+| 7. Payment Integration | ⬜ | 0% |
+| 8. SEO & Analytics | ⬜ | 0% |
+| 9. Testing & Launch | ⬜ | 0% |
+
+---
+
+**Last Updated:** December 12, 2024 - 4:10 PM
