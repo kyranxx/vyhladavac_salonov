@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3001';
 
 const pages = [
     { path: '/', name: 'Homepage' },
