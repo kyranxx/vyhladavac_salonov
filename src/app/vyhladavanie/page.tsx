@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -91,7 +91,7 @@ const cities = [
     { slug: 'presov', name: 'Prešov' },
 ];
 
-export default function SearchPage() {
+function SearchContent() {
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('q') || '';
     const initialCity = searchParams.get('mesto') || 'all';
@@ -133,85 +133,104 @@ export default function SearchPage() {
     }, [query, selectedCategory, selectedCity]);
 
     return (
+        <div className={styles.container}>
+            {/* Search Header */}
+            <div className={styles.searchHeader}>
+                <h1 className={styles.title}>Vyhľadávanie salónov</h1>
+
+                {/* Search Form */}
+                <div className={styles.searchForm}>
+                    <div className={styles.searchInputWrapper}>
+                        <span className={styles.searchIcon}>🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Čo hľadáte? (napr. kaderníctvo, manikúra...)"
+                            className={styles.searchInput}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                        />
+                    </div>
+
+                    <select
+                        className={styles.filterSelect}
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                    >
+                        {categories.map((cat) => (
+                            <option key={cat.slug} value={cat.slug}>
+                                {cat.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        className={styles.filterSelect}
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                    >
+                        {cities.map((city) => (
+                            <option key={city.slug} value={city.slug}>
+                                {city.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            {/* Results */}
+            <div className={styles.results}>
+                <p className={styles.resultCount}>
+                    {results.length === 0 ? (
+                        'Žiadne výsledky'
+                    ) : (
+                        <>
+                            Nájdených <strong>{results.length}</strong> salónov
+                            {query && (
+                                <>
+                                    {' '}pre "<strong>{query}</strong>"
+                                </>
+                            )}
+                        </>
+                    )}
+                </p>
+
+                {results.length > 0 ? (
+                    <div className={styles.grid}>
+                        {results.map((salon) => (
+                            <SalonCard key={salon.id} salon={salon} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className={styles.noResults}>
+                        <span className={styles.noResultsIcon}>🔍</span>
+                        <h2>Žiadne výsledky</h2>
+                        <p>Skúste upraviť vyhľadávanie alebo filtre</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function SearchLoading() {
+    return (
+        <div className={styles.container}>
+            <div className={styles.searchHeader}>
+                <h1 className={styles.title}>Vyhľadávanie salónov</h1>
+                <div className={styles.loading}>Načítavam...</div>
+            </div>
+        </div>
+    );
+}
+
+export default function SearchPage() {
+    return (
         <>
             <Header />
             <main className={styles.main}>
-                <div className={styles.container}>
-                    {/* Search Header */}
-                    <div className={styles.searchHeader}>
-                        <h1 className={styles.title}>Vyhľadávanie salónov</h1>
-
-                        {/* Search Form */}
-                        <div className={styles.searchForm}>
-                            <div className={styles.searchInputWrapper}>
-                                <span className={styles.searchIcon}>🔍</span>
-                                <input
-                                    type="text"
-                                    placeholder="Čo hľadáte? (napr. kaderníctvo, manikúra...)"
-                                    className={styles.searchInput}
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                />
-                            </div>
-
-                            <select
-                                className={styles.filterSelect}
-                                value={selectedCategory}
-                                onChange={(e) => setSelectedCategory(e.target.value)}
-                            >
-                                {categories.map((cat) => (
-                                    <option key={cat.slug} value={cat.slug}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <select
-                                className={styles.filterSelect}
-                                value={selectedCity}
-                                onChange={(e) => setSelectedCity(e.target.value)}
-                            >
-                                {cities.map((city) => (
-                                    <option key={city.slug} value={city.slug}>
-                                        {city.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Results */}
-                    <div className={styles.results}>
-                        <p className={styles.resultCount}>
-                            {results.length === 0 ? (
-                                'Žiadne výsledky'
-                            ) : (
-                                <>
-                                    Nájdených <strong>{results.length}</strong> salónov
-                                    {query && (
-                                        <>
-                                            {' '}pre "<strong>{query}</strong>"
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </p>
-
-                        {results.length > 0 ? (
-                            <div className={styles.grid}>
-                                {results.map((salon) => (
-                                    <SalonCard key={salon.id} salon={salon} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className={styles.noResults}>
-                                <span className={styles.noResultsIcon}>🔍</span>
-                                <h2>Žiadne výsledky</h2>
-                                <p>Skúste upraviť vyhľadávanie alebo filtre</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <Suspense fallback={<SearchLoading />}>
+                    <SearchContent />
+                </Suspense>
             </main>
             <Footer />
         </>
