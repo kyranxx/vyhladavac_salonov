@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 const plans = [
@@ -17,7 +19,6 @@ const plans = [
             'Otváracie hodiny',
             '1 fotografia',
         ],
-        current: true,
     },
     {
         id: 'premium-monthly',
@@ -71,27 +72,71 @@ const addons = [
 
 export default function SubscriptionPage() {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
     const [loading, setLoading] = useState<string | null>(null);
+    const [currentTier, setCurrentTier] = useState<string>('free');
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Check for success/cancel URL params
+    useEffect(() => {
+        if (searchParams.get('success') === 'true') {
+            setMessage({
+                type: 'success',
+                text: '🎉 Platba bola úspešná! Váš prémiový plán je teraz aktívny.',
+            });
+        } else if (searchParams.get('canceled') === 'true') {
+            setMessage({
+                type: 'error',
+                text: 'Platba bola zrušená. Môžete to skúsiť znova.',
+            });
+        }
+    }, [searchParams]);
+
+    // Load current subscription status
+    useEffect(() => {
+        if (user) {
+            loadSubscriptionStatus();
+        }
+    }, [user]);
+
+    const loadSubscriptionStatus = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase || !user) return;
+
+        try {
+            // Get user's salon
+            const { data: salon } = await supabase
+                .from('salons')
+                .select('tier')
+                .eq('user_id', user.id)
+                .single();
+
+            if (salon?.tier) {
+                setCurrentTier(salon.tier);
+            }
+        } catch {
+            // User might not have a salon yet
+        }
+    };
 
     const handleSubscribe = async (priceId: string | null, planName: string) => {
         if (!priceId) return;
         if (!user) {
-            alert('Musíte byť prihlásený.');
+            alert('Musíte byť prihlásený pre zakúpenie predplatného.');
             return;
         }
 
         setLoading(planName);
+        setMessage(null);
 
         try {
-            const response = await fetch('/api/subscriptions/create-checkout', {
+            const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     priceId,
-                    userEmail: user.email,
-                    userId: user.id,
                     successUrl: `${window.location.origin}/dashboard/predplatne?success=true`,
                     cancelUrl: `${window.location.origin}/dashboard/predplatne?canceled=true`,
                 }),
@@ -106,7 +151,10 @@ export default function SubscriptionPage() {
             }
         } catch (error) {
             console.error('Checkout error:', error);
-            alert('Nepodarilo sa vytvoriť platbu. Skúste to znova.');
+            setMessage({
+                type: 'error',
+                text: 'Nepodarilo sa vytvoriť platbu. Skúste to znova.',
+            });
         } finally {
             setLoading(null);
         }
@@ -119,45 +167,56 @@ export default function SubscriptionPage() {
                 <p className={styles.subtitle}>Vyberte si plán, ktorý vám vyhovuje</p>
             </div>
 
+            {/* Success/Error Message */}
+            {message && (
+                <div className={`${styles.message} ${styles[message.type]}`}>
+                    {message.text}
+                </div>
+            )}
+
             <div className={styles.content}>
                 {/* Pricing Plans */}
                 <div className={styles.plansGrid}>
-                    {plans.map((plan) => (
-                        <div
-                            key={plan.id}
-                            className={`${styles.planCard} ${plan.recommended ? styles.recommended : ''} ${plan.current ? styles.current : ''}`}
-                        >
-                            {plan.recommended && (
-                                <span className={styles.recommendedBadge}>Odporúčané</span>
-                            )}
-                            {plan.current && (
-                                <span className={styles.currentBadge}>Aktuálny plán</span>
-                            )}
-                            {plan.savings && (
-                                <span className={styles.savingsBadge}>{plan.savings}</span>
-                            )}
-
-                            <h3 className={styles.planName}>{plan.name}</h3>
-                            <div className={styles.planPrice}>
-                                <span className={styles.price}>{plan.price}</span>
-                                <span className={styles.period}>{plan.period}</span>
-                            </div>
-
-                            <ul className={styles.featuresList}>
-                                {plan.features.map((feature, index) => (
-                                    <li key={index}>✓ {feature}</li>
-                                ))}
-                            </ul>
-
-                            <button
-                                className={plan.current ? styles.currentButton : styles.selectButton}
-                                disabled={plan.current || loading === plan.name}
-                                onClick={() => handleSubscribe(plan.priceId, plan.name)}
+                    {plans.map((plan) => {
+                        const isCurrent = (plan.id === 'free' && currentTier === 'free') ||
+                            (plan.id.includes('premium') && currentTier === 'premium');
+                        return (
+                            <div
+                                key={plan.id}
+                                className={`${styles.planCard} ${plan.recommended ? styles.recommended : ''} ${isCurrent ? styles.current : ''}`}
                             >
-                                {loading === plan.name ? 'Načítavam...' : plan.current ? 'Aktívny' : 'Objednať'}
-                            </button>
-                        </div>
-                    ))}
+                                {plan.recommended && (
+                                    <span className={styles.recommendedBadge}>Odporúčané</span>
+                                )}
+                                {isCurrent && (
+                                    <span className={styles.currentBadge}>Aktuálny plán</span>
+                                )}
+                                {plan.savings && (
+                                    <span className={styles.savingsBadge}>{plan.savings}</span>
+                                )}
+
+                                <h3 className={styles.planName}>{plan.name}</h3>
+                                <div className={styles.planPrice}>
+                                    <span className={styles.price}>{plan.price}</span>
+                                    <span className={styles.period}>{plan.period}</span>
+                                </div>
+
+                                <ul className={styles.featuresList}>
+                                    {plan.features.map((feature, index) => (
+                                        <li key={index}>✓ {feature}</li>
+                                    ))}
+                                </ul>
+
+                                <button
+                                    className={isCurrent ? styles.currentButton : styles.selectButton}
+                                    disabled={isCurrent || loading === plan.name || !plan.priceId}
+                                    onClick={() => handleSubscribe(plan.priceId, plan.name)}
+                                >
+                                    {loading === plan.name ? 'Načítavam...' : isCurrent ? 'Aktívny' : plan.priceId ? 'Objednať' : 'Základný plán'}
+                                </button>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Add-ons */}

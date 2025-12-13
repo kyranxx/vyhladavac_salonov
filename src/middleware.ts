@@ -1,36 +1,55 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 export const locales = ['sk', 'en', 'hu'];
 export const defaultLocale = 'sk';
 
-// Get the preferred locale from the request
-function getLocale(request: NextRequest) {
-    // Check if locale is already in the pathname
-    const pathname = request.nextUrl.pathname;
-    const pathnameLocale = locales.find(
-        (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-    );
+// Simple in-memory rate limiting (resets on deploy)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-    if (pathnameLocale) return pathnameLocale;
+function isRateLimited(ip: string, limit: number = 100, windowMs: number = 60000): boolean {
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
 
-    // Check Accept-Language header
-    const acceptLanguage = request.headers.get('accept-language');
-    if (acceptLanguage) {
-        const preferredLocale = acceptLanguage
-            .split(',')
-            .map((lang) => lang.split(';')[0].trim().substring(0, 2))
-            .find((lang) => locales.includes(lang));
-        if (preferredLocale) return preferredLocale;
+    if (!record || now > record.resetTime) {
+        rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
+        return false;
     }
 
-    return defaultLocale;
+    if (record.count >= limit) {
+        return true;
+    }
+
+    record.count++;
+    return false;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
+    let response = NextResponse.next({
+        request: {
+            headers: request.headers,
+        },
+    });
 
-    // Skip for API routes, static files, etc.
+    // Rate limiting for API routes
+    if (pathname.startsWith('/api')) {
+        const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+
+        // Stricter limits for auth endpoints
+        if (pathname.includes('/auth') || pathname.includes('/login')) {
+            if (isRateLimited(ip, 10, 60000)) {
+                return new NextResponse('Too Many Requests', { status: 429 });
+            }
+        } else {
+            if (isRateLimited(ip, 100, 60000)) {
+                return new NextResponse('Too Many Requests', { status: 429 });
+            }
+        }
+    }
+
+    // Skip locale processing for certain paths
     if (
         pathname.startsWith('/_next') ||
         pathname.startsWith('/api') ||
@@ -39,7 +58,34 @@ export function middleware(request: NextRequest) {
         pathname.startsWith('/admin') ||
         pathname.startsWith('/dashboard')
     ) {
-        return NextResponse.next();
+        // Still refresh Supabase session for protected routes
+        if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) {
+            try {
+                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+                const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+                if (supabaseUrl && supabaseAnonKey) {
+                    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+                        cookies: {
+                            getAll() {
+                                return request.cookies.getAll();
+                            },
+                            setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+                                cookiesToSet.forEach(({ name, value, options }) => {
+                                    response.cookies.set(name, value, options);
+                                });
+                            },
+                        },
+                    });
+
+                    // Refresh session - this extends the session lifetime
+                    await supabase.auth.getUser();
+                }
+            } catch {
+                // Ignore auth errors in middleware
+            }
+        }
+        return response;
     }
 
     // Check if the pathname already has a locale
@@ -53,17 +99,15 @@ export function middleware(request: NextRequest) {
             const newPathname = pathname.replace(`/${defaultLocale}`, '') || '/';
             return NextResponse.redirect(new URL(newPathname, request.url));
         }
-        return NextResponse.next();
+        return response;
     }
 
-    // For default locale, don't add prefix (keep URL clean)
-    // For other locales, they need to explicitly navigate to /en or /hu
-    return NextResponse.next();
+    return response;
 }
 
 export const config = {
     matcher: [
-        // Skip all internal paths (_next, api, etc.)
-        '/((?!_next|api|auth|admin|dashboard|.*\\..*).*)',
+        // Match all paths except static files
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
