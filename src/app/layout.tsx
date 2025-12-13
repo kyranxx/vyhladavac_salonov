@@ -62,8 +62,8 @@ export default function RootLayout({
     return (
         <html lang="sk" className={inter.variable}>
             <head>
-                <link rel="icon" href="/favicon.ico" sizes="any" />
-                <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+                <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+                <link rel="icon" href="/favicon.ico" sizes="32x32" />
                 <meta name="theme-color" content="#C9A86C" />
             </head>
             <body className={inter.className}>

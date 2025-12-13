@@ -5,6 +5,7 @@ const BASE_URL = 'http://localhost:3001';
 const pages = [
     { path: '/', name: 'Homepage' },
     { path: '/salony', name: 'Salons List' },
+    { path: '/kategorie', name: 'Categories List' },
     { path: '/cennik', name: 'Pricing' },
     { path: '/pre-majitelov', name: 'For Owners' },
     { path: '/prihlasenie', name: 'Login' },
