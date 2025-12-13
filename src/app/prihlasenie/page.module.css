@@ -183,3 +183,71 @@
 .link:hover {
     text-decoration: underline;
 }
+
+/* Success Message */
+.successMessage {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+}
+
+.successIcon {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.successMessage h1 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
+}
+
+.successMessage p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.successMessage .submitButton {
+    margin-top: var(--spacing-md);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Checkbox styles */
+.checkboxGroup {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.checkbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--color-primary);
+}
+
+.checkboxLabel {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+/* Row layout for registration */
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 480px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+}

@@ -18,10 +18,19 @@
     margin: 0;
 }
 
-.content {
+.successMessage {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 .section {
@@ -35,11 +44,129 @@
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-primary, #1f2937);
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 1rem 0;
 }
 
 .sectionDescription {
     color: var(--text-secondary, #6b7280);
+    margin: 0;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.formGroup:last-child {
+    margin-bottom: 0;
+}
+
+.formGroup label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #1f2937);
+}
+
+.formGroup input,
+.formGroup textarea {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    resize: vertical;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: #c19a6b;
+}
+
+/* Toggle Group */
+.toggleGroup {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.toggleInfo {
+    flex: 1;
+}
+
+.toggleLabel {
+    font-weight: 500;
+    color: var(--text-primary, #1f2937);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.toggleInfo p {
+    color: var(--text-secondary, #6b7280);
     font-size: 0.875rem;
     margin: 0;
+}
+
+.toggle {
+    width: 48px;
+    height: 28px;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.toggle.toggleActive {
+    background: #c19a6b;
+}
+
+.toggleHandle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle.toggleActive .toggleHandle {
+    transform: translateX(20px);
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.saveButton {
+    padding: 0.75rem 1.5rem;
+    background: #c19a6b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.saveButton:hover {
+    background: #a67c4a;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }

@@ -32,21 +32,101 @@ export default function MySalonPage() {
         { value: 'masaze', label: 'Masáže' },
         { value: 'wellness', label: 'Wellness & Spa' },
         { value: 'tetovacie-studio', label: 'Tetovacie štúdio' },
-        { value: 'solárium', label: 'Solárium' },
+        { value: 'solarium', label: 'Solárium' },
+        { value: 'permanentny-makeup', label: 'Permanentný make-up' },
+        { value: 'mihalnice', label: 'Mihalnice' },
+        { value: 'obočie', label: 'Obočie' },
     ];
 
+    // All Slovak cities and major towns
     const cities = [
         { value: '', label: 'Vyberte mesto...' },
+        // Major cities
         { value: 'Bratislava', label: 'Bratislava' },
         { value: 'Košice', label: 'Košice' },
+        { value: 'Prešov', label: 'Prešov' },
         { value: 'Žilina', label: 'Žilina' },
         { value: 'Nitra', label: 'Nitra' },
-        { value: 'Prešov', label: 'Prešov' },
         { value: 'Banská Bystrica', label: 'Banská Bystrica' },
         { value: 'Trnava', label: 'Trnava' },
         { value: 'Trenčín', label: 'Trenčín' },
+        // Other cities
         { value: 'Martin', label: 'Martin' },
         { value: 'Poprad', label: 'Poprad' },
+        { value: 'Prievidza', label: 'Prievidza' },
+        { value: 'Zvolen', label: 'Zvolen' },
+        { value: 'Považská Bystrica', label: 'Považská Bystrica' },
+        { value: 'Michalovce', label: 'Michalovce' },
+        { value: 'Nové Zámky', label: 'Nové Zámky' },
+        { value: 'Spišská Nová Ves', label: 'Spišská Nová Ves' },
+        { value: 'Komárno', label: 'Komárno' },
+        { value: 'Levice', label: 'Levice' },
+        { value: 'Humenné', label: 'Humenné' },
+        { value: 'Bardejov', label: 'Bardejov' },
+        { value: 'Liptovský Mikuláš', label: 'Liptovský Mikuláš' },
+        { value: 'Ružomberok', label: 'Ružomberok' },
+        { value: 'Piešťany', label: 'Piešťany' },
+        { value: 'Lučenec', label: 'Lučenec' },
+        { value: 'Topoľčany', label: 'Topoľčany' },
+        { value: 'Partizánske', label: 'Partizánske' },
+        { value: 'Dunajská Streda', label: 'Dunajská Streda' },
+        { value: 'Čadca', label: 'Čadca' },
+        { value: 'Dolný Kubín', label: 'Dolný Kubín' },
+        { value: 'Pezinok', label: 'Pezinok' },
+        { value: 'Hlohovec', label: 'Hlohovec' },
+        { value: 'Senica', label: 'Senica' },
+        { value: 'Šaľa', label: 'Šaľa' },
+        { value: 'Galanta', label: 'Galanta' },
+        { value: 'Snina', label: 'Snina' },
+        { value: 'Trebišov', label: 'Trebišov' },
+        { value: 'Vranov nad Topľou', label: 'Vranov nad Topľou' },
+        { value: 'Brezno', label: 'Brezno' },
+        { value: 'Detva', label: 'Detva' },
+        { value: 'Rimavská Sobota', label: 'Rimavská Sobota' },
+        { value: 'Revúca', label: 'Revúca' },
+        { value: 'Kežmarok', label: 'Kežmarok' },
+        { value: 'Stará Ľubovňa', label: 'Stará Ľubovňa' },
+        { value: 'Svidník', label: 'Svidník' },
+        { value: 'Medzilaborce', label: 'Medzilaborce' },
+        { value: 'Sabinov', label: 'Sabinov' },
+        { value: 'Stropkov', label: 'Stropkov' },
+        { value: 'Rožňava', label: 'Rožňava' },
+        { value: 'Moldava nad Bodvou', label: 'Moldava nad Bodvou' },
+        { value: 'Gelnica', label: 'Gelnica' },
+        { value: 'Sobrance', label: 'Sobrance' },
+        { value: 'Malacky', label: 'Malacky' },
+        { value: 'Senec', label: 'Senec' },
+        { value: 'Stupava', label: 'Stupava' },
+        { value: 'Skalica', label: 'Skalica' },
+        { value: 'Myjava', label: 'Myjava' },
+        { value: 'Nové Mesto nad Váhom', label: 'Nové Mesto nad Váhom' },
+        { value: 'Púchov', label: 'Púchov' },
+        { value: 'Dubnica nad Váhom', label: 'Dubnica nad Váhom' },
+        { value: 'Ilava', label: 'Ilava' },
+        { value: 'Bánovce nad Bebravou', label: 'Bánovce nad Bebravou' },
+        { value: 'Bojnice', label: 'Bojnice' },
+        { value: 'Handlová', label: 'Handlová' },
+        { value: 'Žiar nad Hronom', label: 'Žiar nad Hronom' },
+        { value: 'Banská Štiavnica', label: 'Banská Štiavnica' },
+        { value: 'Kremnica', label: 'Kremnica' },
+        { value: 'Fiľakovo', label: 'Fiľakovo' },
+        { value: 'Veľký Krtíš', label: 'Veľký Krtíš' },
+        { value: 'Kysucké Nové Mesto', label: 'Kysucké Nové Mesto' },
+        { value: 'Námestovo', label: 'Námestovo' },
+        { value: 'Tvrdošín', label: 'Tvrdošín' },
+        { value: 'Turčianske Teplice', label: 'Turčianske Teplice' },
+        { value: 'Bytča', label: 'Bytča' },
+        { value: 'Svit', label: 'Svit' },
+        { value: 'Vysoké Tatry', label: 'Vysoké Tatry' },
+        { value: 'Štúrovo', label: 'Štúrovo' },
+        { value: 'Hurbanovo', label: 'Hurbanovo' },
+        { value: 'Kolárovo', label: 'Kolárovo' },
+        { value: 'Veľký Meder', label: 'Veľký Meder' },
+        { value: 'Šamorín', label: 'Šamorín' },
+        { value: 'Želiezovce', label: 'Želiezovce' },
+        { value: 'Vráble', label: 'Vráble' },
+        { value: 'Zlaté Moravce', label: 'Zlaté Moravce' },
+        { value: 'Iné', label: 'Iné mesto...' },
     ];
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -70,20 +150,21 @@ export default function MySalonPage() {
                 name: salonName,
                 phone: phone,
                 address: address,
-                district_id: null, // Will be linked properly in production
+                city: city, // This field was missing!
                 description_sk: description,
-                website: website,
-                status: 'pending', // Needs admin approval
+                website: website || null,
+                status: 'pending',
                 tier: 'free',
-                slug: salonName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + city.toLowerCase(),
+                slug: salonName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
             });
 
             if (dbError) throw dbError;
 
             setSuccess(true);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Error creating salon:', err);
-            setError('Nepodarilo sa vytvoriť salón. Skúste to znova.');
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            setError('Nepodarilo sa vytvoriť salón: ' + errorMessage);
         } finally {
             setLoading(false);
         }
