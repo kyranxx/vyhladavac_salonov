@@ -1,8 +1,11 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SalonCard } from '@/components/salon/SalonCard';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { getTranslation } from '@/lib/translations';
 import styles from '@/app/kategoria/[slug]/page.module.css';
 
@@ -10,107 +13,111 @@ interface Props {
     params: { slug: string };
 }
 
-// Category data with translations
-const categoriesData: Record<string, { name_hu: string; name_sk: string; description: string; icon: string }> = {
-    'damske-kadernictvo': {
-        name_hu: 'Női fodrászat',
-        name_sk: 'Dámske kaderníctvo',
-        description: 'Találja meg a legjobb női fodrászatokat. Vágás, festés, formázás és egyebek.',
-        icon: '💇‍♀️',
-    },
-    'panske-kadernictvo': {
-        name_hu: 'Férfi fodrászat',
-        name_sk: 'Pánske kaderníctvo',
-        description: 'Professzionális borbély- és férfi fodrászati szolgáltatások.',
-        icon: '💇‍♂️',
-    },
-    'kozmetika': {
-        name_hu: 'Kozmetika',
-        name_sk: 'Kozmetika',
-        description: 'Szépségszalonok és bőrápolási kezelések.',
-        icon: '✨',
-    },
-    'manikura': {
-        name_hu: 'Manikűr',
-        name_sk: 'Manikúra',
-        description: 'Zselés körmök, manikűr, körömdizájn és nail art.',
-        icon: '💅',
-    },
-    'pedikura': {
-        name_hu: 'Pedikűr',
-        name_sk: 'Pedikúra',
-        description: 'Professzionális pedikűr és lábápolás.',
-        icon: '🦶',
-    },
-    'masaze': {
-        name_hu: 'Masszázs',
-        name_sk: 'Masáže',
-        description: 'Relaxációs és terápiás masszázsok.',
-        icon: '💆',
-    },
-    'make-up': {
-        name_hu: 'Smink',
-        name_sk: 'Make-up',
-        description: 'Professzionális smink esküvőre, partikra és különleges alkalmakra.',
-        icon: '💄',
-    },
-    'wellness': {
-        name_hu: 'Wellness & Spa',
-        name_sk: 'Wellness',
-        description: 'Wellness központok, szaunák és relaxációs kezelések.',
-        icon: '🧖',
-    },
-};
+interface Salon {
+    id: string;
+    slug: string;
+    name: string;
+    description_sk: string;
+    address: string;
+    city: string;
+    tier: string;
+    is_verified?: boolean;
+}
 
-// Mock salons
-const mockSalons = [
-    {
-        id: '1',
-        slug: 'beauty-salon-bratislava',
-        name: 'Beauty Salon Bratislava',
-        description: 'Professzionális szépségszalon Pozsony központjában.',
-        address: 'Obchodná 25',
-        district: 'Bratislava',
-        categories: ['Fodrászat', 'Kozmetika'],
-        rating: 4.8,
-        reviewCount: 127,
-        isPremium: true,
-        isVerified: true,
-        isFeatured: true,
-    },
-    {
-        id: '2',
-        slug: 'hair-studio-kosice',
-        name: 'Hair Studio Košice',
-        description: 'Modern fodrászat a legújabb trendekkel.',
-        address: 'Hlavná 45',
-        district: 'Košice',
-        categories: ['Női fodrászat', 'Festés'],
-        rating: 4.6,
-        reviewCount: 84,
-        isPremium: true,
-        isVerified: true,
-    },
-];
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const category = categoriesData[params.slug];
-
-    if (!category) {
-        return { title: 'Kategória nem található' };
-    }
-
-    return {
-        title: `${category.name_hu} | Salon Finder SK`,
-        description: category.description,
-    };
+interface Category {
+    id: string;
+    slug: string;
+    name_hu: string;
+    description_hu: string;
+    icon: string;
 }
 
 export default function CategoryPageHU({ params }: Props) {
-    const category = categoriesData[params.slug];
+    const [category, setCategory] = useState<Category | null>(null);
+    const [salons, setSalons] = useState<Salon[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [notFoundState, setNotFoundState] = useState(false);
     const t = getTranslation('hu');
 
-    if (!category) {
+    useEffect(() => {
+        loadData();
+    }, [params.slug]);
+
+    const loadData = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data: categoryData, error: categoryError } = await supabase
+                .from('categories')
+                .select('*')
+                .eq('slug', params.slug)
+                .single();
+
+            if (categoryError || !categoryData) {
+                setNotFoundState(true);
+                setLoading(false);
+                return;
+            }
+
+            setCategory(categoryData);
+
+            const { data: salonCats } = await supabase
+                .from('salon_categories')
+                .select('salon_id')
+                .eq('category_id', categoryData.id);
+
+            if (salonCats && salonCats.length > 0) {
+                const salonIds = salonCats.map(sc => sc.salon_id);
+
+                const { data: salonsData } = await supabase
+                    .from('salons')
+                    .select('*')
+                    .in('id', salonIds)
+                    .eq('status', 'approved')
+                    .order('tier', { ascending: false });
+
+                setSalons(salonsData || []);
+            }
+        } catch (error) {
+            console.error('Error loading data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const transformSalon = (salon: Salon) => ({
+        id: salon.id,
+        slug: salon.slug,
+        name: salon.name,
+        description: salon.description_sk,
+        address: salon.address,
+        district: salon.city,
+        categories: [],
+        rating: 0,
+        reviewCount: 0,
+        isPremium: salon.tier === 'premium',
+        isVerified: salon.is_verified || false,
+    });
+
+    if (loading) {
+        return (
+            <>
+                <Header locale="hu" />
+                <main className={styles.main}>
+                    <div className={styles.container}>
+                        <div className={styles.loading}>Betöltés...</div>
+                    </div>
+                </main>
+                <Footer locale="hu" translations={t} />
+            </>
+        );
+    }
+
+    if (notFoundState || !category) {
         notFound();
     }
 
@@ -118,27 +125,34 @@ export default function CategoryPageHU({ params }: Props) {
         <>
             <Header locale="hu" />
             <main className={styles.main}>
-                {/* Category Hero */}
                 <section className={styles.hero}>
                     <div className={styles.heroContent}>
-                        <span className={styles.heroIcon}>{category.icon}</span>
-                        <h1 className={styles.heroTitle}>{category.name_hu}</h1>
-                        <p className={styles.heroDescription}>{category.description}</p>
+                        <span className={styles.heroIcon}>{category.icon || '✨'}</span>
+                        <h1 className={styles.heroTitle}>{category.name_hu || category.slug}</h1>
+                        <p className={styles.heroDescription}>{category.description_hu}</p>
                     </div>
                 </section>
 
                 <div className={styles.container}>
                     <div className={styles.header}>
                         <p className={styles.resultCount}>
-                            Találat: <strong>{mockSalons.length}</strong> szalon a <strong>{category.name_hu}</strong> kategóriában
+                            Találat: <strong>{salons.length}</strong> szalon a <strong>{category.name_hu}</strong> kategóriában
                         </p>
                     </div>
 
-                    <div className={styles.grid}>
-                        {mockSalons.map((salon) => (
-                            <SalonCard key={salon.id} salon={salon} />
-                        ))}
-                    </div>
+                    {salons.length > 0 ? (
+                        <div className={styles.grid}>
+                            {salons.map((salon) => (
+                                <SalonCard key={salon.id} salon={transformSalon(salon)} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            <span className={styles.emptyIcon}>🔍</span>
+                            <h3>Nincs szalon</h3>
+                            <p>Ebben a kategóriában még nincsenek szalonok.</p>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer locale="hu" translations={t} />

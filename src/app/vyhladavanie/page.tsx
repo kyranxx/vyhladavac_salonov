@@ -1,224 +1,154 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SalonCard } from '@/components/salon/SalonCard';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
-// Mock salons for search
-const allSalons = [
-    {
-        id: '1',
-        slug: 'beauty-salon-bratislava',
-        name: 'Beauty Salon Bratislava',
-        description: 'Profesionálny salón krásy v centre Bratislavy.',
-        address: 'Obchodná 25',
-        district: 'Bratislava',
-        categories: ['Kaderníctvo', 'Kozmetika', 'Manikúra'],
-        rating: 4.8,
-        reviewCount: 127,
-        isPremium: true,
-        isVerified: true,
-        isFeatured: true,
-    },
-    {
-        id: '2',
-        slug: 'nail-studio-kosice',
-        name: 'Nail Studio Košice',
-        description: 'Špecializujeme sa na gélové nechty a manikúru.',
-        address: 'Hlavná 89',
-        district: 'Košice',
-        categories: ['Manikúra', 'Pedikúra', 'Nechtový dizajn'],
-        rating: 4.6,
-        reviewCount: 84,
-        isPremium: true,
-        isVerified: true,
-    },
-    {
-        id: '3',
-        slug: 'wellness-spa-zilina',
-        name: 'Wellness & Spa Žilina',
-        description: 'Relaxačné centrum s masážami a wellness procedúrami.',
-        address: 'Mariánske námestie 5',
-        district: 'Žilina',
-        categories: ['Masáže', 'Wellness', 'Spa'],
-        rating: 4.9,
-        reviewCount: 203,
-        isVerified: true,
-    },
-    {
-        id: '4',
-        slug: 'barbershop-nitra',
-        name: 'Gentleman Barbershop Nitra',
-        description: 'Tradičný barbershop pre pánov.',
-        address: 'Štefánikova 15',
-        district: 'Nitra',
-        categories: ['Barbershop', 'Pánske kaderníctvo'],
-        rating: 4.7,
-        reviewCount: 56,
-        isPremium: true,
-    },
-    {
-        id: '5',
-        slug: 'kozmetika-presov',
-        name: 'Studio Kozmetika Prešov',
-        description: 'Profesionálna starostlivosť o pleť.',
-        address: 'Jarková 23',
-        district: 'Prešov',
-        categories: ['Kozmetika', 'Líčenie'],
-        rating: 4.5,
-        reviewCount: 42,
-    },
-];
+interface Salon {
+    id: string;
+    slug: string;
+    name: string;
+    description_sk: string;
+    address: string;
+    city: string;
+    tier: string;
+    is_verified?: boolean;
+}
 
-const categories = [
-    { slug: 'all', name: 'Všetky kategórie' },
-    { slug: 'kadernictvo', name: 'Kaderníctvo' },
-    { slug: 'kozmetika', name: 'Kozmetika' },
-    { slug: 'manikura', name: 'Manikúra' },
-    { slug: 'masaze', name: 'Masáže' },
-    { slug: 'wellness', name: 'Wellness' },
-];
-
-const cities = [
-    { slug: 'all', name: 'Všetky mestá' },
-    { slug: 'bratislava', name: 'Bratislava' },
-    { slug: 'kosice', name: 'Košice' },
-    { slug: 'zilina', name: 'Žilina' },
-    { slug: 'nitra', name: 'Nitra' },
-    { slug: 'presov', name: 'Prešov' },
-];
+function normalizeText(text: string): string {
+    return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/-/g, ' ');
+}
 
 function SearchContent() {
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('q') || '';
-    const initialCity = searchParams.get('mesto') || 'all';
 
-    const [query, setQuery] = useState(initialQuery);
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [selectedCity, setSelectedCity] = useState(initialCity);
-    const [results, setResults] = useState(allSalons);
+    const [salons, setSalons] = useState<Salon[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState(initialQuery);
 
     useEffect(() => {
-        // Filter salons based on search criteria
-        let filtered = allSalons;
+        loadSalons();
+    }, []);
 
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            filtered = filtered.filter(
-                (salon) =>
-                    salon.name.toLowerCase().includes(lowerQuery) ||
-                    salon.description.toLowerCase().includes(lowerQuery) ||
-                    salon.categories.some((cat) => cat.toLowerCase().includes(lowerQuery))
-            );
+    const loadSalons = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) {
+            setLoading(false);
+            return;
         }
 
-        if (selectedCity !== 'all') {
-            filtered = filtered.filter(
-                (salon) => salon.district.toLowerCase() === selectedCity.toLowerCase()
-            );
-        }
+        try {
+            const { data, error } = await supabase
+                .from('salons')
+                .select('*')
+                .eq('status', 'approved')
+                .order('tier', { ascending: false })
+                .order('name');
 
-        if (selectedCategory !== 'all') {
-            filtered = filtered.filter((salon) =>
-                salon.categories.some((cat) =>
-                    cat.toLowerCase().includes(selectedCategory.toLowerCase())
-                )
-            );
+            if (error) throw error;
+            setSalons(data || []);
+        } catch (error) {
+            console.error('Error loading salons:', error);
+        } finally {
+            setLoading(false);
         }
+    };
 
-        setResults(filtered);
-    }, [query, selectedCategory, selectedCity]);
+    const filteredSalons = useMemo(() => {
+        if (!searchQuery.trim()) return salons;
+
+        const query = normalizeText(searchQuery);
+        return salons.filter((salon) => {
+            const name = normalizeText(salon.name || '');
+            const description = normalizeText(salon.description_sk || '');
+            const city = normalizeText(salon.city || '');
+            const address = normalizeText(salon.address || '');
+
+            return name.includes(query) ||
+                description.includes(query) ||
+                city.includes(query) ||
+                address.includes(query);
+        });
+    }, [salons, searchQuery]);
+
+    const transformSalon = (salon: Salon) => ({
+        id: salon.id,
+        slug: salon.slug,
+        name: salon.name,
+        description: salon.description_sk,
+        address: salon.address,
+        district: salon.city,
+        categories: [],
+        rating: 0,
+        reviewCount: 0,
+        isPremium: salon.tier === 'premium',
+        isVerified: salon.is_verified || false,
+    });
 
     return (
         <div className={styles.container}>
-            {/* Search Header */}
-            <div className={styles.searchHeader}>
-                <h1 className={styles.title}>Vyhľadávanie salónov</h1>
-
-                {/* Search Form */}
-                <div className={styles.searchForm}>
-                    <div className={styles.searchInputWrapper}>
-                        <span className={styles.searchIcon}>🔍</span>
-                        <input
-                            type="text"
-                            placeholder="Čo hľadáte? (napr. kaderníctvo, manikúra...)"
-                            className={styles.searchInput}
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                        />
-                    </div>
-
-                    <select
-                        className={styles.filterSelect}
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                    >
-                        {categories.map((cat) => (
-                            <option key={cat.slug} value={cat.slug}>
-                                {cat.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className={styles.filterSelect}
-                        value={selectedCity}
-                        onChange={(e) => setSelectedCity(e.target.value)}
-                    >
-                        {cities.map((city) => (
-                            <option key={city.slug} value={city.slug}>
-                                {city.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            {/* Results */}
-            <div className={styles.results}>
-                <p className={styles.resultCount}>
-                    {results.length === 0 ? (
-                        'Žiadne výsledky'
-                    ) : (
-                        <>
-                            Nájdených <strong>{results.length}</strong> salónov
-                            {query && (
-                                <>
-                                    {' '}pre "<strong>{query}</strong>"
-                                </>
-                            )}
-                        </>
-                    )}
+            <div className={styles.header}>
+                <h1 className={styles.title}>Vyhľadávanie</h1>
+                <p className={styles.subtitle}>
+                    Nájdite salón podľa názvu, lokality alebo služby
                 </p>
-
-                {results.length > 0 ? (
-                    <div className={styles.grid}>
-                        {results.map((salon) => (
-                            <SalonCard key={salon.id} salon={salon} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className={styles.noResults}>
-                        <span className={styles.noResultsIcon}>🔍</span>
-                        <h2>Žiadne výsledky</h2>
-                        <p>Skúste upraviť vyhľadávanie alebo filtre</p>
-                    </div>
-                )}
             </div>
-        </div>
-    );
-}
 
-function SearchLoading() {
-    return (
-        <div className={styles.container}>
-            <div className={styles.searchHeader}>
-                <h1 className={styles.title}>Vyhľadávanie salónov</h1>
+            <div className={styles.searchBox}>
+                <input
+                    type="text"
+                    placeholder="Hľadať salón, mesto, službu..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={styles.searchInput}
+                    autoFocus
+                />
+            </div>
+
+            {loading ? (
                 <div className={styles.loading}>Načítavam...</div>
-            </div>
+            ) : (
+                <>
+                    <div className={styles.results}>
+                        <p className={styles.resultCount}>
+                            {searchQuery ? (
+                                <>
+                                    Výsledky pre "<strong>{searchQuery}</strong>": {filteredSalons.length} salónov
+                                </>
+                            ) : (
+                                <>Všetky salóny: {filteredSalons.length}</>
+                            )}
+                        </p>
+                    </div>
+
+                    {filteredSalons.length > 0 ? (
+                        <div className={styles.grid}>
+                            {filteredSalons.map((salon) => (
+                                <SalonCard key={salon.id} salon={transformSalon(salon)} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            <span className={styles.emptyIcon}>🔍</span>
+                            <h3>Žiadne výsledky</h3>
+                            <p>
+                                {searchQuery
+                                    ? 'Skúste iné hľadané slovo alebo kategóriu.'
+                                    : 'Zatiaľ neboli zaregistrované žiadne salóny.'}
+                            </p>
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 }
@@ -228,7 +158,7 @@ export default function SearchPage() {
         <>
             <Header />
             <main className={styles.main}>
-                <Suspense fallback={<SearchLoading />}>
+                <Suspense fallback={<div className={styles.loading}>Načítavam...</div>}>
                     <SearchContent />
                 </Suspense>
             </main>

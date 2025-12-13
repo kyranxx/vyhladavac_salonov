@@ -1,86 +1,132 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SalonCard } from '@/components/salon/SalonCard';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Props {
     params: { city: string };
 }
 
-// Mock cities data
-const citiesData: Record<string, { name: string; region: string }> = {
-    'bratislava': { name: 'Bratislava', region: 'Bratislavský kraj' },
-    'kosice': { name: 'Košice', region: 'Košický kraj' },
-    'zilina': { name: 'Žilina', region: 'Žilinský kraj' },
-    'nitra': { name: 'Nitra', region: 'Nitriansky kraj' },
-    'presov': { name: 'Prešov', region: 'Prešovský kraj' },
-    'banska-bystrica': { name: 'Banská Bystrica', region: 'Banskobystrický kraj' },
-    'trnava': { name: 'Trnava', region: 'Trnavský kraj' },
-    'trencin': { name: 'Trenčín', region: 'Trenčiansky kraj' },
-};
-
-// Mock salons
-const mockSalons = [
-    {
-        id: '1',
-        slug: 'beauty-salon-bratislava',
-        name: 'Beauty Salon Bratislava',
-        description: 'Profesionálny salón krásy v centre mesta.',
-        address: 'Obchodná 25',
-        district: 'Staré Mesto',
-        categories: ['Kaderníctvo', 'Kozmetika', 'Manikúra'],
-        rating: 4.8,
-        reviewCount: 127,
-        isPremium: true,
-        isVerified: true,
-        isFeatured: true,
-    },
-    {
-        id: '2',
-        slug: 'nail-studio-city',
-        name: 'Nail Studio',
-        description: 'Špecializujeme sa na gélové nechty a manikúru.',
-        address: 'Hlavná 89',
-        district: 'Centrum',
-        categories: ['Manikúra', 'Pedikúra'],
-        rating: 4.6,
-        reviewCount: 84,
-        isPremium: true,
-        isVerified: true,
-    },
-    {
-        id: '3',
-        slug: 'wellness-spa-city',
-        name: 'Wellness & Spa',
-        description: 'Relaxačné centrum s masážami a wellness procedúrami.',
-        address: 'Mariánske námestie 5',
-        district: 'Centrum',
-        categories: ['Masáže', 'Wellness'],
-        rating: 4.9,
-        reviewCount: 203,
-        isVerified: true,
-    },
-];
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const city = citiesData[params.city];
-
-    if (!city) {
-        return { title: 'Mesto nenájdené' };
-    }
-
-    return {
-        title: `Salóny v meste ${city.name} | Salon Finder SK`,
-        description: `Nájdite najlepšie salóny krásy v meste ${city.name}. Kaderníctva, kozmetika, manikúra a ďalšie služby.`,
-    };
+interface Salon {
+    id: string;
+    slug: string;
+    name: string;
+    description_sk: string;
+    address: string;
+    city: string;
+    tier: string;
+    is_verified?: boolean;
 }
 
-export default function CityPage({ params }: Props) {
-    const city = citiesData[params.city];
+// City slug to name mapping
+const cityNames: Record<string, string> = {
+    'bratislava': 'Bratislava',
+    'kosice': 'Košice',
+    'presov': 'Prešov',
+    'zilina': 'Žilina',
+    'nitra': 'Nitra',
+    'banska-bystrica': 'Banská Bystrica',
+    'trnava': 'Trnava',
+    'trencin': 'Trenčín',
+    'martin': 'Martin',
+    'poprad': 'Poprad',
+    'prievidza': 'Prievidza',
+    'zvolen': 'Zvolen',
+    'povazska-bystrica': 'Považská Bystrica',
+    'michalovce': 'Michalovce',
+    'nove-zamky': 'Nové Zámky',
+    'spisska-nova-ves': 'Spišská Nová Ves',
+    'komarno': 'Komárno',
+    'levice': 'Levice',
+    'humenne': 'Humenné',
+    'bardejov': 'Bardejov',
+    'liptovsky-mikulas': 'Liptovský Mikuláš',
+    'ruzomberok': 'Ružomberok',
+    'piestany': 'Piešťany',
+    'lucenec': 'Lučenec',
+    'dunajska-streda': 'Dunajská Streda',
+    'cadca': 'Čadca',
+    'pezinok': 'Pezinok',
+    'malacky': 'Malacky',
+    'senec': 'Senec',
+};
 
-    if (!city) {
+export default function CitySalonsPage({ params }: Props) {
+    const [salons, setSalons] = useState<Salon[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [notFoundState, setNotFoundState] = useState(false);
+
+    const citySlug = params.city;
+    const cityName = cityNames[citySlug];
+
+    useEffect(() => {
+        if (!cityName) {
+            setNotFoundState(true);
+            setLoading(false);
+            return;
+        }
+        loadSalons();
+    }, [citySlug, cityName]);
+
+    const loadSalons = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('salons')
+                .select('*')
+                .eq('status', 'approved')
+                .eq('city', cityName)
+                .order('tier', { ascending: false })
+                .order('name');
+
+            if (error) throw error;
+            setSalons(data || []);
+        } catch (error) {
+            console.error('Error loading salons:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const transformSalon = (salon: Salon) => ({
+        id: salon.id,
+        slug: salon.slug,
+        name: salon.name,
+        description: salon.description_sk,
+        address: salon.address,
+        district: salon.city,
+        categories: [],
+        rating: 0,
+        reviewCount: 0,
+        isPremium: salon.tier === 'premium',
+        isVerified: salon.is_verified || false,
+    });
+
+    if (loading) {
+        return (
+            <>
+                <Header />
+                <main className={styles.main}>
+                    <div className={styles.container}>
+                        <div className={styles.loading}>Načítavam salóny...</div>
+                    </div>
+                </main>
+                <Footer />
+            </>
+        );
+    }
+
+    if (notFoundState || !cityName) {
         notFound();
     }
 
@@ -92,9 +138,9 @@ export default function CityPage({ params }: Props) {
                 <section className={styles.hero}>
                     <div className={styles.heroContent}>
                         <span className={styles.heroIcon}>📍</span>
-                        <h1 className={styles.heroTitle}>Salóny v meste {city.name}</h1>
+                        <h1 className={styles.heroTitle}>Salóny v meste {cityName}</h1>
                         <p className={styles.heroDescription}>
-                            {city.region} • Nájdite najlepšie salóny krásy vo vašom okolí
+                            Nájdite najlepšie salóny krásy v meste {cityName}
                         </p>
                     </div>
                 </section>
@@ -102,15 +148,23 @@ export default function CityPage({ params }: Props) {
                 <div className={styles.container}>
                     <div className={styles.header}>
                         <p className={styles.resultCount}>
-                            Nájdených <strong>{mockSalons.length}</strong> salónov v meste <strong>{city.name}</strong>
+                            Nájdených <strong>{salons.length}</strong> salónov v meste <strong>{cityName}</strong>
                         </p>
                     </div>
 
-                    <div className={styles.grid}>
-                        {mockSalons.map((salon) => (
-                            <SalonCard key={salon.id} salon={salon} />
-                        ))}
-                    </div>
+                    {salons.length > 0 ? (
+                        <div className={styles.grid}>
+                            {salons.map((salon) => (
+                                <SalonCard key={salon.id} salon={transformSalon(salon)} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            <span className={styles.emptyIcon}>🔍</span>
+                            <h3>Žiadne salóny</h3>
+                            <p>V tomto meste zatiaľ nie sú žiadne salóny.</p>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer />
