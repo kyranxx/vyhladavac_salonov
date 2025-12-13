@@ -3,16 +3,25 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { getTranslation } from '@/lib/translations';
 import styles from './Header.module.css';
 
-export function Header() {
+interface HeaderProps {
+    locale?: string;
+}
+
+export function Header({ locale = 'sk' }: HeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const t = getTranslation(locale);
+
+    // Base path for links (add locale prefix for non-default)
+    const basePath = locale === 'sk' ? '' : `/${locale}`;
 
     return (
         <header className={styles.header}>
             <div className={styles.container}>
                 {/* Logo */}
-                <Link href="/" className={styles.logo}>
+                <Link href={basePath || '/'} className={styles.logo}>
                     <span className={styles.logoIcon}>💇</span>
                     <span className={styles.logoText}>Salon Finder</span>
                     <span className={styles.logoBadge}>SK</span>
@@ -20,14 +29,14 @@ export function Header() {
 
                 {/* Desktop Navigation */}
                 <nav className={styles.desktopNav}>
-                    <Link href="/salony" className={styles.navLink}>
-                        Všetky salóny
+                    <Link href={`${basePath}/salony`} className={styles.navLink}>
+                        {t.nav.allSalons}
                     </Link>
-                    <Link href="/kategorie" className={styles.navLink}>
-                        Kategórie
+                    <Link href={`${basePath}/kategorie`} className={styles.navLink}>
+                        {t.nav.categories}
                     </Link>
-                    <Link href="/pre-majitelov" className={styles.navLink}>
-                        Pre majiteľov
+                    <Link href={`${basePath}/pre-majitelov`} className={styles.navLink}>
+                        {t.nav.forOwners}
                     </Link>
                 </nav>
 
@@ -35,10 +44,10 @@ export function Header() {
                 <div className={styles.actions}>
                     <LanguageSwitcher />
                     <Link href="/prihlasenie" className={styles.loginButton}>
-                        Prihlásiť sa
+                        {t.nav.signIn}
                     </Link>
                     <Link href="/registracia" className={styles.registerButton}>
-                        Pridať salón
+                        {t.nav.addSalon}
                     </Link>
                 </div>
 
@@ -59,21 +68,21 @@ export function Header() {
             {/* Mobile Menu */}
             <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.open : ''}`}>
                 <nav className={styles.mobileNav}>
-                    <Link href="/salony" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                        Všetky salóny
+                    <Link href={`${basePath}/salony`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                        {t.nav.allSalons}
                     </Link>
-                    <Link href="/kategorie" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                        Kategórie
+                    <Link href={`${basePath}/kategorie`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                        {t.nav.categories}
                     </Link>
-                    <Link href="/pre-majitelov" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                        Pre majiteľov
+                    <Link href={`${basePath}/pre-majitelov`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                        {t.nav.forOwners}
                     </Link>
                     <div className={styles.mobileActions}>
                         <Link href="/prihlasenie" className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
-                            Prihlásiť sa
+                            {t.nav.signIn}
                         </Link>
                         <Link href="/registracia" className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
-                            Pridať salón zadarmo
+                            {t.nav.addSalon}
                         </Link>
                     </div>
                 </nav>

@@ -12,14 +12,27 @@ const cities = [
     { slug: 'trencin', name: 'Trenčín', count: '55+', region: 'Trenčiansky kraj' },
 ];
 
-export function PopularCities() {
+const textsByLocale: Record<string, { title: string; subtitle: string; viewAll: string; salons: string }> = {
+    sk: { title: 'Populárne mestá', subtitle: 'Nájdite salóny v najväčších slovenských mestách', viewAll: 'Zobraziť všetky mestá', salons: 'salónov' },
+    en: { title: 'Popular Cities', subtitle: 'Find salons in the largest Slovak cities', viewAll: 'View all cities', salons: 'salons' },
+    hu: { title: 'Népszerű városok', subtitle: 'Találj szalonokat a legnagyobb szlovák városokban', viewAll: 'Összes város', salons: 'szalon' },
+};
+
+interface PopularCitiesProps {
+    locale?: string;
+}
+
+export function PopularCities({ locale = 'sk' }: PopularCitiesProps) {
+    const texts = textsByLocale[locale] || textsByLocale.sk;
+    const basePath = locale === 'sk' ? '' : `/${locale}`;
+
     return (
         <section className={styles.section}>
             <div className={styles.container}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Populárne mestá</h2>
+                    <h2 className={styles.title}>{texts.title}</h2>
                     <p className={styles.subtitle}>
-                        Nájdite salóny v najväčších slovenských mestách
+                        {texts.subtitle}
                     </p>
                 </div>
 
@@ -27,14 +40,14 @@ export function PopularCities() {
                     {cities.map((city, index) => (
                         <Link
                             key={city.slug}
-                            href={`/salony/${city.slug}`}
+                            href={`${basePath}/salony/${city.slug}`}
                             className={`${styles.card} ${index === 0 ? styles.featured : ''}`}
                         >
                             <div className={styles.cardContent}>
                                 <span className={styles.pin}>📍</span>
                                 <h3 className={styles.cityName}>{city.name}</h3>
                                 <p className={styles.region}>{city.region}</p>
-                                <span className={styles.count}>{city.count} salónov</span>
+                                <span className={styles.count}>{city.count} {texts.salons}</span>
                             </div>
                             <span className={styles.arrow}>→</span>
                         </Link>
@@ -42,8 +55,8 @@ export function PopularCities() {
                 </div>
 
                 <div className={styles.footer}>
-                    <Link href="/mesta" className={styles.viewAllButton}>
-                        Zobraziť všetky mestá
+                    <Link href={`${basePath}/mesta`} className={styles.viewAllButton}>
+                        {texts.viewAll}
                         <span className={styles.arrowIcon}>→</span>
                     </Link>
                 </div>

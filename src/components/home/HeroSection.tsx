@@ -2,25 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { TranslationKey } from '@/lib/translations';
 import styles from './HeroSection.module.css';
 
-const rotatingWords = [
-    'salón krásy',
-    'kaderníctvo',
-    'wellness',
-    'nechtový salón',
-    'kozmetiku',
-    'masáže',
-    'barbershop',
-    'make-up štúdio',
-];
+const rotatingWordsByLocale: Record<string, string[]> = {
+    sk: ['salón krásy', 'kaderníctvo', 'wellness', 'nechtový salón', 'kozmetiku', 'masáže', 'barbershop', 'make-up štúdio'],
+    en: ['beauty salon', 'hair salon', 'wellness', 'nail salon', 'cosmetics', 'massage', 'barbershop', 'make-up studio'],
+    hu: ['szépségszalon', 'fodrászat', 'wellness', 'körömszalon', 'kozmetika', 'masszázs', 'borbély', 'sminkes stúdió'],
+};
 
-export function HeroSection() {
+interface HeroSectionProps {
+    locale?: string;
+    translations?: TranslationKey;
+}
+
+export function HeroSection({ locale = 'sk', translations }: HeroSectionProps) {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
+
+    const rotatingWords = rotatingWordsByLocale[locale] || rotatingWordsByLocale.sk;
+    const t = translations;
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -32,7 +36,7 @@ export function HeroSection() {
         }, 1800);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [rotatingWords.length]);
 
     const cities = [
         { value: 'bratislava', label: 'Bratislava' },
@@ -50,8 +54,11 @@ export function HeroSection() {
         const params = new URLSearchParams();
         if (searchQuery) params.set('q', searchQuery);
         if (selectedCity) params.set('mesto', selectedCity);
-        router.push(`/vyhladavanie?${params.toString()}`);
+        const basePath = locale === 'sk' ? '' : `/${locale}`;
+        router.push(`${basePath}/vyhladavanie?${params.toString()}`);
     };
+
+    const basePath = locale === 'sk' ? '' : `/${locale}`;
 
     return (
         <section className={styles.hero}>
@@ -62,18 +69,17 @@ export function HeroSection() {
             <div className={styles.container}>
                 <div className={styles.content}>
                     <h1 className={styles.title}>
-                        Nájdite{' '}
+                        {t?.hero.title || 'Nájdite'}{' '}
                         <span className={`${styles.highlight} ${styles.rotatingText}`}>
                             <span className={`${styles.word} ${isAnimating ? styles.fadeOut : styles.fadeIn}`}>
                                 {rotatingWords[currentWordIndex]}
                             </span>
                         </span>
-                        <br />vo vašom meste
+                        <br />{t?.hero.titleEnd || 'vo vašom meste'}
                     </h1>
 
                     <p className={styles.subtitle}>
-                        Prehľadajte tisíce salónov na Slovensku. Kaderníctva, kozmetika,
-                        manikúra, masáže a ďalšie služby na jednom mieste.
+                        {t?.hero.subtitle || 'Prehľadajte tisíce salónov na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby na jednom mieste.'}
                     </p>
 
                     {/* Search Form */}
@@ -83,7 +89,7 @@ export function HeroSection() {
                                 <span className={styles.inputIcon}>🔍</span>
                                 <input
                                     type="text"
-                                    placeholder="Čo hľadáte? (napr. kaderníctvo, manikúra...)"
+                                    placeholder={t?.hero.searchPlaceholder || "Čo hľadáte? (napr. kaderníctvo, manikúra...)"}
                                     className={styles.searchInput}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -97,7 +103,7 @@ export function HeroSection() {
                                     value={selectedCity}
                                     onChange={(e) => setSelectedCity(e.target.value)}
                                 >
-                                    <option value="">Všetky mestá</option>
+                                    <option value="">{t?.hero.allCities || 'Všetky mestá'}</option>
                                     {cities.map((city) => (
                                         <option key={city.value} value={city.value}>
                                             {city.label}
@@ -107,25 +113,25 @@ export function HeroSection() {
                             </div>
 
                             <button type="submit" className={styles.searchButton}>
-                                Hľadať
+                                {t?.hero.search || 'Hľadať'}
                             </button>
                         </div>
                     </form>
 
                     {/* Quick Links */}
                     <div className={styles.quickLinks}>
-                        <span className={styles.quickLinksLabel}>Populárne:</span>
-                        <a href="/kategoria/damske-kadernictvo" className={styles.quickLink}>
-                            Kaderníctvo
+                        <span className={styles.quickLinksLabel}>{t?.hero.popular || 'Populárne:'}</span>
+                        <a href={`${basePath}/kategoria/damske-kadernictvo`} className={styles.quickLink}>
+                            {locale === 'en' ? 'Hair Salon' : locale === 'hu' ? 'Fodrászat' : 'Kaderníctvo'}
                         </a>
-                        <a href="/kategoria/kozmetika" className={styles.quickLink}>
-                            Kozmetika
+                        <a href={`${basePath}/kategoria/kozmetika`} className={styles.quickLink}>
+                            {locale === 'en' ? 'Cosmetics' : locale === 'hu' ? 'Kozmetika' : 'Kozmetika'}
                         </a>
-                        <a href="/kategoria/manikura" className={styles.quickLink}>
-                            Manikúra
+                        <a href={`${basePath}/kategoria/manikura`} className={styles.quickLink}>
+                            {locale === 'en' ? 'Manicure' : locale === 'hu' ? 'Manikűr' : 'Manikúra'}
                         </a>
-                        <a href="/kategoria/masaze" className={styles.quickLink}>
-                            Masáže
+                        <a href={`${basePath}/kategoria/masaze`} className={styles.quickLink}>
+                            {locale === 'en' ? 'Massage' : locale === 'hu' ? 'Masszázs' : 'Masáže'}
                         </a>
                     </div>
                 </div>
@@ -134,17 +140,17 @@ export function HeroSection() {
                 <div className={styles.stats}>
                     <div className={styles.stat}>
                         <span className={styles.statNumber}>1000+</span>
-                        <span className={styles.statLabel}>Salónov</span>
+                        <span className={styles.statLabel}>{t?.stats.salons || 'Salónov'}</span>
                     </div>
                     <div className={styles.statDivider} />
                     <div className={styles.stat}>
                         <span className={styles.statNumber}>79</span>
-                        <span className={styles.statLabel}>Okresov</span>
+                        <span className={styles.statLabel}>{t?.stats.districts || 'Okresov'}</span>
                     </div>
                     <div className={styles.statDivider} />
                     <div className={styles.stat}>
                         <span className={styles.statNumber}>32</span>
-                        <span className={styles.statLabel}>Kategórií</span>
+                        <span className={styles.statLabel}>{t?.stats.categories || 'Kategórií'}</span>
                     </div>
                 </div>
             </div>

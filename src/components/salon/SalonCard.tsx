@@ -34,9 +34,13 @@ export function SalonCard({ salon }: SalonCardProps) {
                         className={styles.image}
                     />
                 ) : (
-                    <div className={styles.imagePlaceholder}>
-                        <span>💇</span>
-                    </div>
+                    <Image
+                        src={`https://picsum.photos/seed/${salon.id}/400/250`}
+                        alt={salon.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className={styles.image}
+                    />
                 )}
 
                 {/* Badges */}

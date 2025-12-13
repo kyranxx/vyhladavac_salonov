@@ -150,4 +150,32 @@
     border-radius: var(--radius-md);
     color: #92400E;
     font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+.statusHint p {
+    margin: 0 0 0.5rem 0;
+}
+
+.statusHint p:last-child {
+    margin-bottom: 0;
+}
+
+.statusHint ol {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+}
+
+.statusHint li {
+    margin-bottom: 0.25rem;
+}
+
+.statusHint a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.statusHint a:hover {
+    text-decoration: none;
 }
