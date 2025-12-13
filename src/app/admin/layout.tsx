@@ -17,7 +17,7 @@ const sidebarItems = [
 ];
 
 // Admin email addresses
-const ADMIN_EMAILS = ['admin@salonfinder.sk', 'admin@apollotech.sk'];
+const ADMIN_EMAILS = ['admin@salonfinder.sk', 'admin@apollotech.sk', 'blanarikdaniel@gmail.com'];
 
 export default function AdminLayout({
     children,
