@@ -1,33 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
-
-// Mock data - in production this would come from Supabase
-const initialSalons = [
-    { id: '1', name: 'Beauty Salon Bratislava', city: 'Bratislava', status: 'approved', isPremium: true, createdAt: '2024-12-10' },
-    { id: '2', name: 'Nail Studio Košice', city: 'Košice', status: 'approved', isPremium: true, createdAt: '2024-12-09' },
-    { id: '3', name: 'Wellness & Spa Žilina', city: 'Žilina', status: 'approved', isPremium: false, createdAt: '2024-12-08' },
-    { id: '4', name: 'Gentleman Barbershop Nitra', city: 'Nitra', status: 'pending', isPremium: false, createdAt: '2024-12-12' },
-    { id: '5', name: 'Studio Kozmetika Prešov', city: 'Prešov', status: 'pending', isPremium: false, createdAt: '2024-12-11' },
-];
-
-type SalonStatus = 'pending' | 'approved' | 'rejected';
 
 interface Salon {
     id: string;
     name: string;
     city: string;
     status: string;
-    isPremium: boolean;
-    createdAt: string;
+    tier: string;
+    created_at: string;
 }
 
 export default function AdminSalonsPage() {
     const [filter, setFilter] = useState('all');
-    const [salons, setSalons] = useState<Salon[]>(initialSalons);
+    const [salons, setSalons] = useState<Salon[]>([]);
+    const [loading, setLoading] = useState(true);
     const [editingSalon, setEditingSalon] = useState<Salon | null>(null);
     const [viewingSalon, setViewingSalon] = useState<Salon | null>(null);
+
+    const supabase = createBrowserSupabaseClient();
+
+    // Load salons from database
+    useEffect(() => {
+        loadSalons();
+    }, []);
+
+    const loadSalons = async () => {
+        if (!supabase) return;
+
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('salons')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error loading salons:', error);
+        } else {
+            setSalons(data || []);
+        }
+        setLoading(false);
+    };
 
     const filteredSalons = filter === 'all'
         ? salons
@@ -46,22 +61,38 @@ export default function AdminSalonsPage() {
         }
     };
 
-    const handleApprove = (id: string) => {
-        if (confirm('Naozaj chcete schváliť tento salón?')) {
-            setSalons(salons.map(s =>
-                s.id === id ? { ...s, status: 'approved' } : s
-            ));
+    const handleApprove = async (id: string) => {
+        if (!supabase) return;
+        if (!confirm('Naozaj chcete schváliť tento salón?')) return;
+
+        const { error } = await supabase
+            .from('salons')
+            .update({ status: 'approved' })
+            .eq('id', id);
+
+        if (error) {
+            alert('Chyba pri schvaľovaní: ' + error.message);
+        } else {
             alert('Salón bol schválený.');
+            loadSalons(); // Reload from database
         }
     };
 
-    const handleReject = (id: string) => {
+    const handleReject = async (id: string) => {
+        if (!supabase) return;
         const reason = prompt('Zadajte dôvod zamietnutia:');
-        if (reason) {
-            setSalons(salons.map(s =>
-                s.id === id ? { ...s, status: 'rejected' } : s
-            ));
+        if (!reason) return;
+
+        const { error } = await supabase
+            .from('salons')
+            .update({ status: 'rejected' })
+            .eq('id', id);
+
+        if (error) {
+            alert('Chyba pri zamietnutí: ' + error.message);
+        } else {
             alert('Salón bol zamietnutý.');
+            loadSalons();
         }
     };
 
@@ -73,15 +104,38 @@ export default function AdminSalonsPage() {
         setEditingSalon(salon);
     };
 
-    const handleSaveEdit = () => {
-        if (editingSalon) {
-            setSalons(salons.map(s =>
-                s.id === editingSalon.id ? editingSalon : s
-            ));
-            setEditingSalon(null);
+    const handleSaveEdit = async () => {
+        if (!editingSalon || !supabase) return;
+
+        const { error } = await supabase
+            .from('salons')
+            .update({
+                name: editingSalon.name,
+                city: editingSalon.city,
+                tier: editingSalon.tier,
+            })
+            .eq('id', editingSalon.id);
+
+        if (error) {
+            alert('Chyba pri ukladaní: ' + error.message);
+        } else {
             alert('Zmeny boli uložené.');
+            setEditingSalon(null);
+            loadSalons();
         }
     };
+
+    const formatDate = (dateStr: string) => {
+        return new Date(dateStr).toLocaleDateString('sk-SK');
+    };
+
+    if (loading) {
+        return (
+            <div className={styles.page}>
+                <div className={styles.loading}>Načítavam salóny...</div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.page}>
@@ -109,59 +163,67 @@ export default function AdminSalonsPage() {
                 </div>
             </div>
 
-            <div className={styles.table}>
-                <div className={styles.tableHeader}>
-                    <span>Názov</span>
-                    <span>Mesto</span>
-                    <span>Stav</span>
-                    <span>Premium</span>
-                    <span>Dátum</span>
-                    <span>Akcie</span>
+            {salons.length === 0 ? (
+                <div className={styles.emptyState}>
+                    <span className={styles.emptyIcon}>📋</span>
+                    <h3>Žiadne salóny</h3>
+                    <p>Zatiaľ neboli zaregistrované žiadne salóny.</p>
                 </div>
-                {filteredSalons.map((salon) => (
-                    <div key={salon.id} className={styles.tableRow}>
-                        <span className={styles.salonName}>{salon.name}</span>
-                        <span>{salon.city}</span>
-                        <span>{getStatusBadge(salon.status)}</span>
-                        <span>{salon.isPremium ? '⭐ Premium' : '—'}</span>
-                        <span>{salon.createdAt}</span>
-                        <span className={styles.actions}>
-                            <button
-                                className={styles.actionBtn}
-                                title="Zobraziť"
-                                onClick={() => handleView(salon)}
-                            >
-                                👁️
-                            </button>
-                            <button
-                                className={styles.actionBtn}
-                                title="Upraviť"
-                                onClick={() => handleEdit(salon)}
-                            >
-                                ✏️
-                            </button>
-                            {salon.status === 'pending' && (
-                                <>
-                                    <button
-                                        className={styles.approveBtn}
-                                        title="Schváliť"
-                                        onClick={() => handleApprove(salon.id)}
-                                    >
-                                        ✓
-                                    </button>
-                                    <button
-                                        className={styles.rejectBtn}
-                                        title="Zamietnuť"
-                                        onClick={() => handleReject(salon.id)}
-                                    >
-                                        ✗
-                                    </button>
-                                </>
-                            )}
-                        </span>
+            ) : (
+                <div className={styles.table}>
+                    <div className={styles.tableHeader}>
+                        <span>Názov</span>
+                        <span>Mesto</span>
+                        <span>Stav</span>
+                        <span>Tier</span>
+                        <span>Dátum</span>
+                        <span>Akcie</span>
                     </div>
-                ))}
-            </div>
+                    {filteredSalons.map((salon) => (
+                        <div key={salon.id} className={styles.tableRow}>
+                            <span className={styles.salonName}>{salon.name}</span>
+                            <span>{salon.city || '—'}</span>
+                            <span>{getStatusBadge(salon.status)}</span>
+                            <span>{salon.tier === 'premium' ? '⭐ Premium' : 'Free'}</span>
+                            <span>{formatDate(salon.created_at)}</span>
+                            <span className={styles.actions}>
+                                <button
+                                    className={styles.actionBtn}
+                                    title="Zobraziť"
+                                    onClick={() => handleView(salon)}
+                                >
+                                    👁️
+                                </button>
+                                <button
+                                    className={styles.actionBtn}
+                                    title="Upraviť"
+                                    onClick={() => handleEdit(salon)}
+                                >
+                                    ✏️
+                                </button>
+                                {salon.status === 'pending' && (
+                                    <>
+                                        <button
+                                            className={styles.approveBtn}
+                                            title="Schváliť"
+                                            onClick={() => handleApprove(salon.id)}
+                                        >
+                                            ✓
+                                        </button>
+                                        <button
+                                            className={styles.rejectBtn}
+                                            title="Zamietnuť"
+                                            onClick={() => handleReject(salon.id)}
+                                        >
+                                            ✗
+                                        </button>
+                                    </>
+                                )}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* View Modal */}
             {viewingSalon && (
@@ -170,10 +232,10 @@ export default function AdminSalonsPage() {
                         <h2>Detail salónu</h2>
                         <div className={styles.modalBody}>
                             <p><strong>Názov:</strong> {viewingSalon.name}</p>
-                            <p><strong>Mesto:</strong> {viewingSalon.city}</p>
+                            <p><strong>Mesto:</strong> {viewingSalon.city || '—'}</p>
                             <p><strong>Stav:</strong> {viewingSalon.status}</p>
-                            <p><strong>Premium:</strong> {viewingSalon.isPremium ? 'Áno' : 'Nie'}</p>
-                            <p><strong>Vytvorený:</strong> {viewingSalon.createdAt}</p>
+                            <p><strong>Tier:</strong> {viewingSalon.tier}</p>
+                            <p><strong>Vytvorený:</strong> {formatDate(viewingSalon.created_at)}</p>
                         </div>
                         <div className={styles.modalActions}>
                             <button onClick={() => setViewingSalon(null)}>Zavrieť</button>
@@ -200,19 +262,19 @@ export default function AdminSalonsPage() {
                                 <label>Mesto:</label>
                                 <input
                                     type="text"
-                                    value={editingSalon.city}
+                                    value={editingSalon.city || ''}
                                     onChange={e => setEditingSalon({ ...editingSalon, city: e.target.value })}
                                 />
                             </div>
                             <div className={styles.formGroup}>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={editingSalon.isPremium}
-                                        onChange={e => setEditingSalon({ ...editingSalon, isPremium: e.target.checked })}
-                                    />
-                                    {' '}Premium salón
-                                </label>
+                                <label>Tier:</label>
+                                <select
+                                    value={editingSalon.tier}
+                                    onChange={e => setEditingSalon({ ...editingSalon, tier: e.target.value })}
+                                >
+                                    <option value="free">Free</option>
+                                    <option value="premium">Premium</option>
+                                </select>
                             </div>
                         </div>
                         <div className={styles.modalActions}>

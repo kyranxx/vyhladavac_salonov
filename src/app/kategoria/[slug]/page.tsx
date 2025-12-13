@@ -1,118 +1,124 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SalonCard } from '@/components/salon/SalonCard';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Props {
     params: { slug: string };
 }
 
-// Mock categories data
-const categoriesData: Record<string, { name: string; description: string; icon: string }> = {
-    'damske-kadernictvo': {
-        name: 'Dámske kaderníctvo',
-        description: 'Nájdite najlepšie dámske kaderníctva na Slovensku. Strihanie, farbenie, styling a ďalšie služby.',
-        icon: '💇‍♀️',
-    },
-    'panske-kadernictvo': {
-        name: 'Pánske kaderníctvo',
-        description: 'Profesionálne pánske kaderníctva a barbershopy vo vašom meste.',
-        icon: '💇‍♂️',
-    },
-    'kozmetika': {
-        name: 'Kozmetika',
-        description: 'Kozmetické salóny a ošetrenia pleti. Starostlivosť o vašu krásu.',
-        icon: '✨',
-    },
-    'manikura': {
-        name: 'Manikúra',
-        description: 'Gélové nechty, manikúra, nechtový dizajn a nail art.',
-        icon: '💅',
-    },
-    'pedikura': {
-        name: 'Pedikúra',
-        description: 'Profesionálna pedikúra a starostlivosť o nohy.',
-        icon: '🦶',
-    },
-    'masaze': {
-        name: 'Masáže',
-        description: 'Relaxačné a liečebné masáže. Oddych pre telo i dušu.',
-        icon: '💆',
-    },
-    'make-up': {
-        name: 'Make-up',
-        description: 'Profesionálne líčenie na svadby, večierky a špeciálne príležitosti.',
-        icon: '💄',
-    },
-    'wellness': {
-        name: 'Wellness',
-        description: 'Wellness centrá, sauny a relaxačné procedúry.',
-        icon: '🧖',
-    },
-};
+interface Salon {
+    id: string;
+    slug: string;
+    name: string;
+    description_sk: string;
+    address: string;
+    city: string;
+    tier: string;
+    is_verified?: boolean;
+}
 
-// Mock salons
-const mockSalons = [
-    {
-        id: '1',
-        slug: 'beauty-salon-bratislava',
-        name: 'Beauty Salon Bratislava',
-        description: 'Profesionálny salón krásy v centre Bratislavy.',
-        address: 'Obchodná 25',
-        district: 'Bratislava',
-        categories: ['Kaderníctvo', 'Kozmetika'],
-        rating: 4.8,
-        reviewCount: 127,
-        isPremium: true,
-        isVerified: true,
-        isFeatured: true,
-    },
-    {
-        id: '2',
-        slug: 'hair-studio-kosice',
-        name: 'Hair Studio Košice',
-        description: 'Moderné kaderníctvo s najnovšími trendami.',
-        address: 'Hlavná 45',
-        district: 'Košice',
-        categories: ['Dámske kaderníctvo', 'Farbenie'],
-        rating: 4.6,
-        reviewCount: 84,
-        isPremium: true,
-        isVerified: true,
-    },
-    {
-        id: '3',
-        slug: 'style-hair-zilina',
-        name: 'Style Hair Žilina',
-        description: 'Kvalitné kaderníctvo pre celú rodinu.',
-        address: 'Národná 12',
-        district: 'Žilina',
-        categories: ['Dámske kaderníctvo', 'Pánske kaderníctvo'],
-        rating: 4.5,
-        reviewCount: 56,
-        isVerified: true,
-    },
-];
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const category = categoriesData[params.slug];
-
-    if (!category) {
-        return { title: 'Kategória nenájdená' };
-    }
-
-    return {
-        title: `${category.name} | Salon Finder SK`,
-        description: category.description,
-    };
+interface Category {
+    id: string;
+    slug: string;
+    name_sk: string;
+    description_sk: string;
+    icon: string;
 }
 
 export default function CategoryPage({ params }: Props) {
-    const category = categoriesData[params.slug];
+    const [category, setCategory] = useState<Category | null>(null);
+    const [salons, setSalons] = useState<Salon[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [notFoundState, setNotFoundState] = useState(false);
 
-    if (!category) {
+    useEffect(() => {
+        loadData();
+    }, [params.slug]);
+
+    const loadData = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // Load category
+            const { data: categoryData, error: categoryError } = await supabase
+                .from('categories')
+                .select('*')
+                .eq('slug', params.slug)
+                .single();
+
+            if (categoryError || !categoryData) {
+                setNotFoundState(true);
+                setLoading(false);
+                return;
+            }
+
+            setCategory(categoryData);
+
+            // Load salons in this category (via salon_categories junction table)
+            const { data: salonCats } = await supabase
+                .from('salon_categories')
+                .select('salon_id')
+                .eq('category_id', categoryData.id);
+
+            if (salonCats && salonCats.length > 0) {
+                const salonIds = salonCats.map(sc => sc.salon_id);
+
+                const { data: salonsData } = await supabase
+                    .from('salons')
+                    .select('*')
+                    .in('id', salonIds)
+                    .eq('status', 'approved')
+                    .order('tier', { ascending: false });
+
+                setSalons(salonsData || []);
+            }
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const transformSalon = (salon: Salon) => ({
+        id: salon.id,
+        slug: salon.slug,
+        name: salon.name,
+        description: salon.description_sk,
+        address: salon.address,
+        district: salon.city,
+        categories: [],
+        rating: 0,
+        reviewCount: 0,
+        isPremium: salon.tier === 'premium',
+        isVerified: salon.is_verified || false,
+    });
+
+    if (loading) {
+        return (
+            <>
+                <Header />
+                <main className={styles.main}>
+                    <div className={styles.container}>
+                        <div className={styles.loading}>Načítavam...</div>
+                    </div>
+                </main>
+                <Footer />
+            </>
+        );
+    }
+
+    if (notFoundState || !category) {
         notFound();
     }
 
@@ -123,24 +129,32 @@ export default function CategoryPage({ params }: Props) {
                 {/* Category Hero */}
                 <section className={styles.hero}>
                     <div className={styles.heroContent}>
-                        <span className={styles.heroIcon}>{category.icon}</span>
-                        <h1 className={styles.heroTitle}>{category.name}</h1>
-                        <p className={styles.heroDescription}>{category.description}</p>
+                        <span className={styles.heroIcon}>{category.icon || '✨'}</span>
+                        <h1 className={styles.heroTitle}>{category.name_sk}</h1>
+                        <p className={styles.heroDescription}>{category.description_sk}</p>
                     </div>
                 </section>
 
                 <div className={styles.container}>
                     <div className={styles.header}>
                         <p className={styles.resultCount}>
-                            Nájdených <strong>{mockSalons.length}</strong> salónov v kategórii <strong>{category.name}</strong>
+                            Nájdených <strong>{salons.length}</strong> salónov v kategórii <strong>{category.name_sk}</strong>
                         </p>
                     </div>
 
-                    <div className={styles.grid}>
-                        {mockSalons.map((salon) => (
-                            <SalonCard key={salon.id} salon={salon} />
-                        ))}
-                    </div>
+                    {salons.length > 0 ? (
+                        <div className={styles.grid}>
+                            {salons.map((salon) => (
+                                <SalonCard key={salon.id} salon={transformSalon(salon)} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            <span className={styles.emptyIcon}>🔍</span>
+                            <h3>Žiadne salóny</h3>
+                            <p>V tejto kategórii zatiaľ nie sú žiadne salóny.</p>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer />
