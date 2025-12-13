@@ -206,13 +206,28 @@ Use this space for any questions or notes:
 | 1. Accounts & Setup | ✅ DONE | 100% |
 | 2. Database Design | ✅ DONE | 100% |
 | 3. Core Infrastructure | ✅ DONE | 100% |
-| 4. Frontend Development | 🔄 IN PROGRESS | 10% |
-| 5. User Authentication | ⬜ | 0% |
-| 6. Admin Dashboard | ⬜ | 0% |
-| 7. Payment Integration | ⬜ | 0% |
-| 8. SEO & Analytics | ⬜ | 0% |
+| 4. Frontend Development | 🔄 IN PROGRESS | 85% |
+| 5. User Authentication | 🔄 IN PROGRESS | 70% |
+| 6. Admin Dashboard | ✅ DONE | 100% |
+| 7. Payment Integration | 🔄 READY (needs webhook) | 80% |
+| 8. SEO & Analytics | 🔄 IN PROGRESS | 60% |
 | 9. Testing & Launch | ⬜ | 0% |
 
 ---
 
-**Last Updated:** December 12, 2024 - 4:10 PM
+## 📝 What's Done:
+- ✅ Google Sign-in on login and registration pages (SK, EN, HU)
+- ✅ All localized pages (EN, HU) for registration, login, categories, about, how it works, for owners
+- ✅ Admin dashboard with full controls
+- ✅ Database schema ready (needs manual execution in Supabase)
+- ✅ Stripe products created
+- ✅ Webhook handler code ready
+
+## ⚠️ Needs YOUR Manual Action:
+1. **Google OAuth** - Configure in Supabase (see instructions above)
+2. **Stripe Webhook** - Configure in Stripe Dashboard
+3. **Database Schema** - Run schema.sql in Supabase SQL Editor
+
+---
+
+**Last Updated:** December 13, 2024 - 10:30 PM
