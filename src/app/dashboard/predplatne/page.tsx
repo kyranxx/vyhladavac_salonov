@@ -219,27 +219,33 @@ export default function SubscriptionPage() {
                     })}
                 </div>
 
-                {/* Add-ons */}
+                {/* IMPORTANT: Add-ons Section - Featured and Verified */}
                 <div className={styles.addonsSection}>
-                    <h2 className={styles.sectionTitle}>Doplnkové služby</h2>
+                    <h2 className={styles.sectionTitle}>🌟 Zvýšte viditeľnosť vášho salónu</h2>
+                    <p className={styles.sectionSubtitle}>Tieto doplnky vám pomôžu získať viac zákazníkov</p>
                     <div className={styles.addonsGrid}>
                         {addons.map((addon) => (
                             <div key={addon.id} className={styles.addonCard}>
+                                <div className={styles.addonIcon}>
+                                    {addon.id === 'featured' ? '⭐' : '✅'}
+                                </div>
                                 <div className={styles.addonInfo}>
                                     <h4 className={styles.addonName}>{addon.name}</h4>
                                     <p className={styles.addonDescription}>{addon.description}</p>
                                 </div>
-                                <div className={styles.addonPrice}>
-                                    <span>{addon.price}</span>
-                                    <span className={styles.addonPeriod}>{addon.period}</span>
+                                <div className={styles.addonPriceRow}>
+                                    <div className={styles.addonPrice}>
+                                        <span>{addon.price}</span>
+                                        <span className={styles.addonPeriod}>{addon.period}</span>
+                                    </div>
+                                    <button
+                                        className={styles.addonButton}
+                                        onClick={() => handleSubscribe(addon.priceId, addon.name)}
+                                        disabled={loading === addon.name}
+                                    >
+                                        {loading === addon.name ? 'Načítavam...' : 'Kúpiť teraz'}
+                                    </button>
                                 </div>
-                                <button
-                                    className={styles.addonButton}
-                                    onClick={() => handleSubscribe(addon.priceId, addon.name)}
-                                    disabled={loading === addon.name}
-                                >
-                                    {loading === addon.name ? 'Načítavam...' : 'Kúpiť'}
-                                </button>
                             </div>
                         ))}
                     </div>

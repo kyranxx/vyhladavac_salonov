@@ -9,12 +9,12 @@
 .title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #1f2937;
     margin: 0 0 0.5rem 0;
 }
 
 .subtitle {
-    color: var(--text-secondary);
+    color: #6b7280;
     margin: 0;
 }
 
@@ -49,7 +49,8 @@
 }
 
 .planCard.recommended {
-    border-color: var(--primary-color);
+    border-color: #c19a6b;
+    box-shadow: 0 4px 20px rgba(193, 154, 107, 0.25);
 }
 
 .planCard.current {
@@ -72,7 +73,7 @@
 }
 
 .recommendedBadge {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #c19a6b 0%, #a67c4a 100%);
     color: white;
 }
 
@@ -89,8 +90,8 @@
 .planName {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 1rem 0;
+    color: #1f2937;
+    margin: 0.5rem 0 1rem 0;
     text-align: center;
 }
 
@@ -102,12 +103,12 @@
 .price {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: #c19a6b;
 }
 
 .period {
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: #6b7280;
 }
 
 .featuresList {
@@ -120,28 +121,30 @@
 .featuresList li {
     padding: 0.5rem 0;
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: #374151;
 }
 
 .selectButton,
 .currentButton {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .selectButton {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #c19a6b 0%, #a67c4a 100%);
     color: white;
     border: none;
+    box-shadow: 0 2px 8px rgba(193, 154, 107, 0.3);
 }
 
-.selectButton:hover {
-    background: var(--primary-hover);
+.selectButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(193, 154, 107, 0.4);
 }
 
 .currentButton {
@@ -151,17 +154,28 @@
     cursor: default;
 }
 
-/* Add-ons Section */
+/* Add-ons Section - IMPORTANT FEATURES */
 .addonsSection {
-    border-top: 1px solid var(--border-color);
+    border-top: 2px solid #c19a6b;
     padding-top: 2rem;
+    background: linear-gradient(135deg, #fef7ed 0%, #fef3c7 100%);
+    margin: 0 -2rem;
+    padding: 2rem;
+    border-radius: 0 0 12px 12px;
 }
 
 .sectionTitle {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+    text-align: center;
+}
+
+.sectionSubtitle {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
 }
 
 .addonsGrid {
@@ -179,63 +193,82 @@
 .addonCard {
     background: white;
     border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e5e7eb;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
     gap: 1rem;
+    transition: all 0.2s;
+}
+
+.addonCard:hover {
+    border-color: #c19a6b;
+    transform: translateY(-2px);
+}
+
+.addonIcon {
+    font-size: 2rem;
 }
 
 .addonInfo {
     flex: 1;
-    min-width: 150px;
 }
 
 .addonName {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 0.25rem 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
 }
 
 .addonDescription {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
+    font-size: 0.875rem;
+    color: #6b7280;
     margin: 0;
+    line-height: 1.5;
+}
+
+.addonPriceRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
 }
 
 .addonPrice {
-    text-align: right;
+    text-align: left;
 }
 
 .addonPrice span:first-child {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #c19a6b;
 }
 
 .addonPeriod {
     display: block;
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: #6b7280;
 }
 
 .addonButton {
-    padding: 0.5rem 1rem;
-    background: white;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #c19a6b 0%, #a67c4a 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(193, 154, 107, 0.3);
 }
 
-.addonButton:hover {
-    background: var(--primary-color);
-    color: white;
+.addonButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(193, 154, 107, 0.4);
 }
 
 .addonButton:disabled,
