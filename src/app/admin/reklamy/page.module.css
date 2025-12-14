@@ -172,4 +172,73 @@
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.adInfo h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.adInfo p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #6b7280);
+}
+
+.adActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.statusBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.statusBadge.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.statusBadge.paused {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.statusBadge.expired {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.actionButton,
+.deleteButton {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+    background: #f3f4f6;
+}
+
+.deleteButton:hover {
+    background: #fee2e2;
+}
+
+.loading {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-secondary, #6b7280);
 }

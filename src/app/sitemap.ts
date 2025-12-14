@@ -1,6 +1,30 @@
 import { MetadataRoute } from 'next';
+import { createClient } from '@supabase/supabase-js';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+async function getSalons() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        return [];
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data, error } = await supabase
+        .from('salons')
+        .select('slug, updated_at')
+        .eq('status', 'approved');
+
+    if (error) {
+        console.error('Sitemap: Error fetching salons:', error);
+        return [];
+    }
+
+    return data || [];
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vyhladavac-salonov.vercel.app';
 
     // Static pages
@@ -28,13 +52,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
         'make-up',
         'tetovanie',
         'permanentny-make-up',
-        'riasenky',
+        'mihalnice',
+        'obočie',
         'solarium',
         'wellness',
         'fitness',
         'laserove-centrum',
         'svadobny-salon',
-        'fotostudio',
+        'barbershop',
     ];
 
     // Major cities
@@ -88,9 +113,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.9,
     }));
 
-    // TODO: Add dynamic salon pages from database
-    // const salons = await getSalons();
-    // const salonSitemap = salons.map(...)
+    // Dynamic salon pages from database
+    const salons = await getSalons();
+    const salonSitemap = salons.map((salon) => ({
+        url: `${baseUrl}/salon/${salon.slug}`,
+        lastModified: salon.updated_at ? new Date(salon.updated_at) : new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+    }));
 
-    return [...staticSitemap, ...categorySitemap, ...citySitemap];
+    return [...staticSitemap, ...categorySitemap, ...citySitemap, ...salonSitemap];
 }
