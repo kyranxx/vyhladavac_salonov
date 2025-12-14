@@ -170,3 +170,13 @@
     flex-direction: column;
     gap: 1.5rem;
 }
+
+.warningBox {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-weight: 500;
+    border: 1px solid #fde68a;
+}

@@ -1,22 +1,73 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
-export default function AdminSettingsPage() {
-    const [siteName, setSiteName] = useState('Salon Finder SK');
-    const [siteDescription, setSiteDescription] = useState('Nájdite najlepšie salóny krásy na Slovensku');
-    const [contactEmail, setContactEmail] = useState('info@salonfinder.sk');
-    const [autoApprove, setAutoApprove] = useState(false);
-    const [emailNotifications, setEmailNotifications] = useState(true);
-    const [maintenanceMode, setMaintenanceMode] = useState(false);
-    const [saved, setSaved] = useState(false);
+interface Settings {
+    site_name: string;
+    site_description: string;
+    contact_email: string;
+    auto_approve: boolean;
+    email_notifications: boolean;
+    maintenance_mode: boolean;
+}
 
-    const handleSubmit = (e: React.FormEvent) => {
+const defaultSettings: Settings = {
+    site_name: 'Salon Finder SK',
+    site_description: 'Nájdite najlepšie salóny krásy na Slovensku',
+    contact_email: 'info@salonfinder.sk',
+    auto_approve: false,
+    email_notifications: true,
+    maintenance_mode: false,
+};
+
+export default function AdminSettingsPage() {
+    const [settings, setSettings] = useState<Settings>(defaultSettings);
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadSettings();
+    }, []);
+
+    const loadSettings = async () => {
+        // Settings are stored in localStorage for now
+        // In production, you'd want to store these in a database table
+        const stored = localStorage.getItem('salon_finder_settings');
+        if (stored) {
+            try {
+                setSettings(JSON.parse(stored));
+            } catch {
+                // Use defaults
+            }
+        }
+        setLoading(false);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSaving(true);
+
+        // Save to localStorage
+        localStorage.setItem('salon_finder_settings', JSON.stringify(settings));
+
+        // Also save maintenance mode to a cookie that middleware can read
+        if (settings.maintenance_mode) {
+            document.cookie = 'maintenance_mode=true; path=/';
+        } else {
+            document.cookie = 'maintenance_mode=false; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+
+        setSaving(false);
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
     };
+
+    if (loading) {
+        return <div className={styles.container}><p>Načítavam...</p></div>;
+    }
 
     return (
         <div className={styles.container}>
@@ -40,8 +91,8 @@ export default function AdminSettingsPage() {
                         <input
                             type="text"
                             id="siteName"
-                            value={siteName}
-                            onChange={(e) => setSiteName(e.target.value)}
+                            value={settings.site_name}
+                            onChange={(e) => setSettings({ ...settings, site_name: e.target.value })}
                         />
                     </div>
 
@@ -49,8 +100,8 @@ export default function AdminSettingsPage() {
                         <label htmlFor="siteDescription">Popis stránky</label>
                         <textarea
                             id="siteDescription"
-                            value={siteDescription}
-                            onChange={(e) => setSiteDescription(e.target.value)}
+                            value={settings.site_description}
+                            onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
                             rows={3}
                         />
                     </div>
@@ -60,8 +111,8 @@ export default function AdminSettingsPage() {
                         <input
                             type="email"
                             id="contactEmail"
-                            value={contactEmail}
-                            onChange={(e) => setContactEmail(e.target.value)}
+                            value={settings.contact_email}
+                            onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
                         />
                     </div>
                 </div>
@@ -76,8 +127,8 @@ export default function AdminSettingsPage() {
                         </div>
                         <button
                             type="button"
-                            className={`${styles.toggle} ${autoApprove ? styles.toggleActive : ''}`}
-                            onClick={() => setAutoApprove(!autoApprove)}
+                            className={`${styles.toggle} ${settings.auto_approve ? styles.toggleActive : ''}`}
+                            onClick={() => setSettings({ ...settings, auto_approve: !settings.auto_approve })}
                         >
                             <span className={styles.toggleHandle}></span>
                         </button>
@@ -94,8 +145,8 @@ export default function AdminSettingsPage() {
                         </div>
                         <button
                             type="button"
-                            className={`${styles.toggle} ${emailNotifications ? styles.toggleActive : ''}`}
-                            onClick={() => setEmailNotifications(!emailNotifications)}
+                            className={`${styles.toggle} ${settings.email_notifications ? styles.toggleActive : ''}`}
+                            onClick={() => setSettings({ ...settings, email_notifications: !settings.email_notifications })}
                         >
                             <span className={styles.toggleHandle}></span>
                         </button>
@@ -108,21 +159,26 @@ export default function AdminSettingsPage() {
                     <div className={styles.toggleGroup}>
                         <div className={styles.toggleInfo}>
                             <span className={styles.toggleLabel}>Režim údržby</span>
-                            <p>Stránka bude nedostupná pre verejnosť.</p>
+                            <p>Stránka bude nedostupná pre verejnosť (okrem adminov).</p>
                         </div>
                         <button
                             type="button"
-                            className={`${styles.toggle} ${maintenanceMode ? styles.toggleActive : ''}`}
-                            onClick={() => setMaintenanceMode(!maintenanceMode)}
+                            className={`${styles.toggle} ${settings.maintenance_mode ? styles.toggleActive : ''}`}
+                            onClick={() => setSettings({ ...settings, maintenance_mode: !settings.maintenance_mode })}
                         >
                             <span className={styles.toggleHandle}></span>
                         </button>
                     </div>
+                    {settings.maintenance_mode && (
+                        <div className={styles.warningBox}>
+                            ⚠️ Režim údržby je aktívny! Verejnosť nemôže pristupovať na stránku.
+                        </div>
+                    )}
                 </div>
 
                 <div className={styles.actions}>
-                    <button type="submit" className={styles.saveButton}>
-                        Uložiť nastavenia
+                    <button type="submit" className={styles.saveButton} disabled={saving}>
+                        {saving ? 'Ukladám...' : 'Uložiť nastavenia'}
                     </button>
                 </div>
             </form>

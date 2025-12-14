@@ -103,12 +103,29 @@ export default function SubscriptionPage() {
         const supabase = createBrowserSupabaseClient();
         if (!supabase || !user) return;
 
+        // Admin emails get premium for free
+        const adminEmails = ['blanarikdaniel@gmail.com'];
+        if (user.email && adminEmails.includes(user.email)) {
+            setCurrentTier('premium');
+
+            // Also update their salon tier in database if they have one
+            try {
+                await supabase
+                    .from('salons')
+                    .update({ tier: 'premium', is_featured: true, is_verified: true })
+                    .eq('owner_id', user.id);
+            } catch {
+                // Ignore if no salon
+            }
+            return;
+        }
+
         try {
             // Get user's salon
             const { data: salon } = await supabase
                 .from('salons')
                 .select('tier')
-                .eq('user_id', user.id)
+                .eq('owner_id', user.id)
                 .single();
 
             if (salon?.tier) {
