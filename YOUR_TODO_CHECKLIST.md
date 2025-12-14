@@ -211,7 +211,7 @@ Use this space for any questions or notes:
 | 6. Admin Dashboard | ✅ DONE | 100% |
 | 7. Payment Integration | ✅ DONE | 100% |
 | 8. SEO & Analytics | ✅ DONE | 100% |
-| 9. Testing & Launch | 🔄 IN PROGRESS | 50% |
+| 9. Testing & Launch | 🔄 IN PROGRESS | 75% |
 
 ---
 
@@ -219,33 +219,43 @@ Use this space for any questions or notes:
 - ✅ Google Sign-in on login and registration pages (SK, EN, HU)
 - ✅ All localized pages (EN, HU) for registration, login, categories, about, how it works, for owners
 - ✅ Admin dashboard with full controls
-- ✅ Database schema ready (needs manual execution in Supabase)
+- ✅ Database schema ready (executed in Supabase)
 - ✅ Stripe products created
 - ✅ Webhook handler with full database integration
 - ✅ Build passes without errors
 - ✅ All TypeScript errors resolved
-- ✅ Middleware for i18n language detection
-- ✅ Salon listing page with filters
-- ✅ Category and city pages
+- ✅ Middleware for i18n language detection + rate limiting + session refresh
+- ✅ Salon listing page with real database data (no mock data!)
+- ✅ Category and city pages with real database
 - ✅ User dashboard
+- ✅ Admin salon approval persists to database
+- ✅ Admin ads page with database integration
+- ✅ Dynamic sitemap includes salon pages from database
+- ✅ Google Analytics & Microsoft Clarity components (ready for IDs)
+- ✅ City column added to salons table
+- ✅ Database password reset (security fix)
+- ✅ 16 categories seeded to database
+- ✅ Payment success/error messages on subscription page
 
-## ⚠️ Needs YOUR Manual Action:
-1. **Google OAuth** - Configure in Supabase Dashboard:
+## ⚠️ Still Needs YOUR Manual Action:
+1. **Google Analytics** - Add measurement ID:
+   - Get ID from analytics.google.com
+   - Add `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXX` to Vercel env vars
+
+2. **Microsoft Clarity** - Add project ID:
+   - Get ID from clarity.microsoft.com
+   - Add `NEXT_PUBLIC_CLARITY_PROJECT_ID=XXXXXXXX` to Vercel env vars
+
+3. **Google OAuth** - Configure in Supabase Dashboard:
    - Go to Authentication > Providers > Google
    - Add your Google OAuth credentials
-   - Set redirect URL to: `https://your-domain.vercel.app/auth/callback`
 
-2. **Stripe Webhook** - Configure in Stripe Dashboard:
+4. **Stripe Webhook** - Configure in Stripe Dashboard:
    - Go to Developers > Webhooks
-   - Add endpoint: `https://your-domain.vercel.app/api/webhook`
+   - Add endpoint: `https://vyhladavac-salonov.vercel.app/api/webhook`
    - Select events: checkout.session.completed, customer.subscription.*
-   - Copy signing secret to STRIPE_WEBHOOK_SECRET env var
-
-3. **Database Schema** - Run in Supabase SQL Editor:
-   - Go to SQL Editor in Supabase Dashboard
-   - Copy contents of `database/schema.sql`
-   - Execute the SQL
 
 ---
 
-**Last Updated:** December 13, 2024 - 11:40 PM
+**Last Updated:** December 14, 2024 - 10:30 AM
+
