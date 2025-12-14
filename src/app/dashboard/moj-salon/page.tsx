@@ -144,21 +144,51 @@ export default function MySalonPage() {
             const supabase = createBrowserSupabaseClient();
             if (!supabase) throw new Error('Database not configured');
 
+            // Generate slug
+            const slug = salonName.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                + '-' +
+                city.toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+
             // Create salon in database
-            const { error: dbError } = await supabase.from('salons').insert({
+            const { data: salon, error: dbError } = await supabase.from('salons').insert({
                 owner_id: user?.id,
                 name: salonName,
                 phone: phone,
                 address: address,
-                city: city, // This field was missing!
+                city: city,
                 description_sk: description,
                 website: website || null,
                 status: 'pending',
                 tier: 'free',
-                slug: salonName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + city.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            });
+                slug: slug,
+            }).select().single();
 
-            if (dbError) throw dbError;
+            if (dbError) {
+                console.error('DB Error:', dbError);
+                throw new Error(dbError.message);
+            }
+
+            // Get category ID and create salon_categories link
+            if (salon && category) {
+                const { data: categoryData } = await supabase
+                    .from('categories')
+                    .select('id')
+                    .eq('slug', category)
+                    .single();
+
+                if (categoryData) {
+                    await supabase.from('salon_categories').insert({
+                        salon_id: salon.id,
+                        category_id: categoryData.id,
+                    });
+                }
+            }
 
             setSuccess(true);
         } catch (err: unknown) {

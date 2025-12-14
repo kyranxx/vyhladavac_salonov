@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
 import { AuthProvider } from '@/components/providers/AuthProvider';
+import { ToastProvider } from '@/components/ui/Toast';
 
 const inter = Inter({
     subsets: ['latin', 'latin-ext'],
@@ -47,7 +48,6 @@ export const metadata: Metadata = {
     },
     verification: {
         google: 'Uuu_J9NwozI5jZRea28koZyPuqNHhbQYg26Gxdpk0os',
-        // Bing Webmaster - add your verification code here
         other: {
             'msvalidate.01': 'YOUR_BING_VERIFICATION_CODE',
         },
@@ -67,13 +67,15 @@ export default function RootLayout({
                 <meta name="theme-color" content="#C9A86C" />
             </head>
             <body className={inter.className}>
-                {/* Analytics - both components check for env vars before rendering */}
+                {/* Analytics */}
                 <GoogleAnalytics />
                 <MicrosoftClarity />
 
-                <AuthProvider>
-                    {children}
-                </AuthProvider>
+                <ToastProvider>
+                    <AuthProvider>
+                        {children}
+                    </AuthProvider>
+                </ToastProvider>
 
                 {/* Cookie Consent Banner */}
                 <CookieConsent />
