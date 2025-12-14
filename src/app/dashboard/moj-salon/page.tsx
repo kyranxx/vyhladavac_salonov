@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -268,13 +269,10 @@ export default function MySalonPage() {
                             <label htmlFor="phone" className={styles.label}>
                                 Telefón <span className={styles.required}>*</span>
                             </label>
-                            <input
-                                type="tel"
+                            <PhoneInput
                                 id="phone"
-                                className={styles.input}
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="+421 9XX XXX XXX"
+                                onChange={setPhone}
                                 required
                             />
                         </div>

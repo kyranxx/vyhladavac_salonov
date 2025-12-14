@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import styles from './page.module.css';
 
 export default function SettingsPage() {
@@ -132,13 +133,10 @@ export default function SettingsPage() {
 
                         <div className={styles.formGroup}>
                             <label htmlFor="phone" className={styles.label}>Telefón</label>
-                            <input
-                                type="tel"
+                            <PhoneInput
                                 id="phone"
-                                className={styles.input}
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="+421 xxx xxx xxx"
+                                onChange={setPhone}
                             />
                         </div>
 
