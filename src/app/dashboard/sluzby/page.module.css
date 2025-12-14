@@ -256,3 +256,31 @@
     background: #f9fafb;
     border-color: #9ca3af;
 }
+
+/* Inline Edit Form */
+.editForm {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    align-items: center;
+}
+
+.editInput {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    flex: 1;
+    min-width: 80px;
+}
+
+.editInput:focus {
+    outline: none;
+    border-color: #c19a6b;
+}
+
+.editActions {
+    display: flex;
+    gap: 0.5rem;
+}

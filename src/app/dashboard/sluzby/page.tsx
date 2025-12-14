@@ -1,17 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Service {
     id: string;
-    name: string;
-    price: string;
-    duration: string;
+    name_sk: string;
+    price: number | null;
+    duration_minutes: number | null;
+    is_active: boolean;
 }
 
 export default function ServicesPage() {
+    const { user } = useAuth();
     const [services, setServices] = useState<Service[]>([]);
+    const [salonId, setSalonId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -20,32 +27,173 @@ export default function ServicesPage() {
     const [newPrice, setNewPrice] = useState('');
     const [newDuration, setNewDuration] = useState('30');
 
-    const handleAdd = () => {
-        if (!newName || !newPrice) return;
+    // Edit form state
+    const [editName, setEditName] = useState('');
+    const [editPrice, setEditPrice] = useState('');
+    const [editDuration, setEditDuration] = useState('30');
 
-        const newService: Service = {
-            id: Date.now().toString(),
-            name: newName,
-            price: newPrice,
-            duration: newDuration,
-        };
+    useEffect(() => {
+        if (user) {
+            loadServices();
+        }
+    }, [user]);
 
-        setServices([...services, newService]);
-        setNewName('');
-        setNewPrice('');
-        setNewDuration('30');
-        setIsAdding(false);
-    };
+    const loadServices = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase || !user) return;
 
-    const handleDelete = (id: string) => {
-        if (confirm('Naozaj chcete odstrániť túto službu?')) {
-            setServices(services.filter(s => s.id !== id));
+        try {
+            // Get user's salon
+            const { data: salon } = await supabase
+                .from('salons')
+                .select('id')
+                .eq('owner_id', user.id)
+                .single();
+
+            if (salon) {
+                setSalonId(salon.id);
+
+                // Get services for this salon
+                const { data: servicesData } = await supabase
+                    .from('services')
+                    .select('*')
+                    .eq('salon_id', salon.id)
+                    .order('sort_order');
+
+                if (servicesData) {
+                    setServices(servicesData);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading services:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleSave = () => {
-        alert('Služby boli uložené! (V produkcii sa uložia do databázy)');
+    const handleAdd = async () => {
+        if (!newName || !newPrice || !salonId) return;
+
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        setSaving(true);
+        try {
+            const { data, error } = await supabase
+                .from('services')
+                .insert({
+                    salon_id: salonId,
+                    name_sk: newName,
+                    price: parseFloat(newPrice),
+                    duration_minutes: parseInt(newDuration),
+                    is_active: true,
+                    sort_order: services.length,
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setServices([...services, data]);
+            }
+
+            setNewName('');
+            setNewPrice('');
+            setNewDuration('30');
+            setIsAdding(false);
+        } catch (error) {
+            console.error('Error adding service:', error);
+            alert('Chyba pri pridávaní služby.');
+        } finally {
+            setSaving(false);
+        }
     };
+
+    const handleEdit = (service: Service) => {
+        setEditingId(service.id);
+        setEditName(service.name_sk);
+        setEditPrice(service.price?.toString() || '');
+        setEditDuration(service.duration_minutes?.toString() || '30');
+    };
+
+    const handleUpdate = async () => {
+        if (!editingId || !editName) return;
+
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        setSaving(true);
+        try {
+            const { error } = await supabase
+                .from('services')
+                .update({
+                    name_sk: editName,
+                    price: parseFloat(editPrice) || null,
+                    duration_minutes: parseInt(editDuration) || null,
+                })
+                .eq('id', editingId);
+
+            if (error) throw error;
+
+            setServices(services.map(s =>
+                s.id === editingId
+                    ? { ...s, name_sk: editName, price: parseFloat(editPrice) || null, duration_minutes: parseInt(editDuration) || null }
+                    : s
+            ));
+
+            setEditingId(null);
+        } catch (error) {
+            console.error('Error updating service:', error);
+            alert('Chyba pri aktualizácii služby.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Naozaj chcete odstrániť túto službu?')) return;
+
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        try {
+            const { error } = await supabase
+                .from('services')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            setServices(services.filter(s => s.id !== id));
+        } catch (error) {
+            console.error('Error deleting service:', error);
+            alert('Chyba pri mazaní služby.');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className={styles.container}>
+                <p>Načítavam...</p>
+            </div>
+        );
+    }
+
+    if (!salonId) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.emptyState}>
+                    <span className={styles.emptyIcon}>🏪</span>
+                    <h3>Najskôr vytvorte salón</h3>
+                    <p>Pre správu služieb musíte mať zaregistrovaný salón.</p>
+                    <a href="/dashboard/moj-salon" className={styles.primaryButton}>
+                        Vytvoriť salón
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -54,9 +202,6 @@ export default function ServicesPage() {
                     <h1 className={styles.title}>Služby</h1>
                     <p className={styles.subtitle}>Spravujte služby vášho salónu a ceník</p>
                 </div>
-                <button className={styles.saveButton} onClick={handleSave} disabled={services.length === 0}>
-                    Uložiť zmeny
-                </button>
             </div>
 
             <div className={styles.content}>
@@ -74,25 +219,69 @@ export default function ServicesPage() {
                         <div className={styles.servicesList}>
                             {services.map((service) => (
                                 <div key={service.id} className={styles.serviceCard}>
-                                    <div className={styles.serviceInfo}>
-                                        <h3 className={styles.serviceName}>{service.name}</h3>
-                                        <span className={styles.serviceDuration}>{service.duration} min</span>
-                                    </div>
-                                    <div className={styles.servicePrice}>{service.price} €</div>
-                                    <div className={styles.serviceActions}>
-                                        <button
-                                            className={styles.editButton}
-                                            onClick={() => setEditingId(service.id)}
-                                        >
-                                            ✏️
-                                        </button>
-                                        <button
-                                            className={styles.deleteButton}
-                                            onClick={() => handleDelete(service.id)}
-                                        >
-                                            🗑️
-                                        </button>
-                                    </div>
+                                    {editingId === service.id ? (
+                                        <div className={styles.editForm}>
+                                            <input
+                                                type="text"
+                                                value={editName}
+                                                onChange={(e) => setEditName(e.target.value)}
+                                                className={styles.editInput}
+                                            />
+                                            <input
+                                                type="number"
+                                                value={editPrice}
+                                                onChange={(e) => setEditPrice(e.target.value)}
+                                                className={styles.editInput}
+                                                placeholder="Cena"
+                                            />
+                                            <select
+                                                value={editDuration}
+                                                onChange={(e) => setEditDuration(e.target.value)}
+                                                className={styles.editInput}
+                                            >
+                                                <option value="15">15 min</option>
+                                                <option value="30">30 min</option>
+                                                <option value="45">45 min</option>
+                                                <option value="60">60 min</option>
+                                                <option value="90">90 min</option>
+                                                <option value="120">120 min</option>
+                                            </select>
+                                            <div className={styles.editActions}>
+                                                <button onClick={() => setEditingId(null)} className={styles.cancelButton}>
+                                                    Zrušiť
+                                                </button>
+                                                <button onClick={handleUpdate} disabled={saving} className={styles.primaryButton}>
+                                                    {saving ? 'Ukladám...' : 'Uložiť'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className={styles.serviceInfo}>
+                                                <h3 className={styles.serviceName}>{service.name_sk}</h3>
+                                                <span className={styles.serviceDuration}>
+                                                    {service.duration_minutes} min
+                                                </span>
+                                            </div>
+                                            <div className={styles.servicePrice}>
+                                                {service.price} €
+                                            </div>
+                                            <div className={styles.serviceActions}>
+                                                <button
+                                                    className={styles.editButton}
+                                                    onClick={() => handleEdit(service)}
+                                                >
+                                                    ✏️
+                                                </button>
+                                                <button
+                                                    className={styles.deleteButton}
+                                                    onClick={() => handleDelete(service.id)}
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -154,9 +343,9 @@ export default function ServicesPage() {
                             <button
                                 className={styles.primaryButton}
                                 onClick={handleAdd}
-                                disabled={!newName || !newPrice}
+                                disabled={!newName || !newPrice || saving}
                             >
-                                Pridať
+                                {saving ? 'Pridávam...' : 'Pridať'}
                             </button>
                         </div>
                     </div>
