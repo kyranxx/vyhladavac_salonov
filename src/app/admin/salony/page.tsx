@@ -28,20 +28,36 @@ export default function AdminSalonsPage() {
     }, []);
 
     const loadSalons = async () => {
-        if (!supabase) return;
-
-        setLoading(true);
-        const { data, error } = await supabase
-            .from('salons')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            console.error('Error loading salons:', error);
-        } else {
-            setSalons(data || []);
+        if (!supabase) {
+            console.error('Supabase not configured');
+            setLoading(false);
+            return;
         }
-        setLoading(false);
+
+        try {
+            setLoading(true);
+            console.log('Loading salons...');
+
+            const { data, error } = await supabase
+                .from('salons')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            console.log('Salons result:', { data, error });
+
+            if (error) {
+                console.error('Error loading salons:', error);
+                // Try to show anything we can
+                setSalons([]);
+            } else {
+                setSalons(data || []);
+            }
+        } catch (err) {
+            console.error('Exception loading salons:', err);
+            setSalons([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const filteredSalons = filter === 'all'

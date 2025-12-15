@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { getTranslation } from '@/lib/translations';
 import styles from './Header.module.css';
 
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ locale = 'sk' }: HeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { user, loading } = useAuth();
     const t = getTranslation(locale);
 
     // Base path for links (add locale prefix for non-default)
@@ -40,15 +42,30 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                     </Link>
                 </nav>
 
-                {/* Desktop Actions */}
+                {/* Desktop Actions - show different buttons based on login state */}
                 <div className={styles.actions}>
                     <LanguageSwitcher />
-                    <Link href={`${basePath}/prihlasenie`} className={styles.loginButton}>
-                        {t.nav.signIn}
-                    </Link>
-                    <Link href={`${basePath}/registracia`} className={styles.registerButton}>
-                        {t.nav.addSalon}
-                    </Link>
+                    {!loading && (
+                        user ? (
+                            <>
+                                <Link href="/dashboard" className={styles.loginButton}>
+                                    Dashboard
+                                </Link>
+                                <Link href="/dashboard/moj-salon" className={styles.registerButton}>
+                                    Môj salón
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href={`${basePath}/prihlasenie`} className={styles.loginButton}>
+                                    {t.nav.signIn}
+                                </Link>
+                                <Link href={`${basePath}/registracia`} className={styles.registerButton}>
+                                    {t.nav.addSalon}
+                                </Link>
+                            </>
+                        )
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -78,12 +95,25 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                         {t.nav.forOwners}
                     </Link>
                     <div className={styles.mobileActions}>
-                        <Link href={`${basePath}/prihlasenie`} className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
-                            {t.nav.signIn}
-                        </Link>
-                        <Link href={`${basePath}/registracia`} className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
-                            {t.nav.addSalon}
-                        </Link>
+                        {user ? (
+                            <>
+                                <Link href="/dashboard" className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                                    Dashboard
+                                </Link>
+                                <Link href="/dashboard/moj-salon" className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
+                                    Môj salón
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href={`${basePath}/prihlasenie`} className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                                    {t.nav.signIn}
+                                </Link>
+                                <Link href={`${basePath}/registracia`} className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
+                                    {t.nav.addSalon}
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </nav>
             </div>

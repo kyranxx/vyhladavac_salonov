@@ -75,6 +75,9 @@ export default function SubscriptionPage() {
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState<string | null>(null);
     const [currentTier, setCurrentTier] = useState<string>('free');
+    const [salonId, setSalonId] = useState<string | null>(null);
+    const [isVerified, setIsVerified] = useState(false);
+    const [isFeatured, setIsFeatured] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     // Check for success/cancel URL params
@@ -84,6 +87,10 @@ export default function SubscriptionPage() {
                 type: 'success',
                 text: '🎉 Platba bola úspešná! Váš prémiový plán je teraz aktívny.',
             });
+            // Reload subscription status after successful payment
+            if (user) {
+                loadSubscriptionStatus();
+            }
         } else if (searchParams.get('canceled') === 'true') {
             setMessage({
                 type: 'error',
@@ -110,10 +117,18 @@ export default function SubscriptionPage() {
 
             // Also update their salon tier in database if they have one
             try {
-                await supabase
+                const { data: salon } = await supabase
                     .from('salons')
                     .update({ tier: 'premium', is_featured: true, is_verified: true })
-                    .eq('owner_id', user.id);
+                    .eq('owner_id', user.id)
+                    .select('id')
+                    .single();
+
+                if (salon) {
+                    setSalonId(salon.id);
+                    setIsVerified(true);
+                    setIsFeatured(true);
+                }
             } catch {
                 // Ignore if no salon
             }
@@ -124,22 +139,29 @@ export default function SubscriptionPage() {
             // Get user's salon
             const { data: salon } = await supabase
                 .from('salons')
-                .select('tier')
+                .select('id, tier, is_verified, is_featured')
                 .eq('owner_id', user.id)
                 .single();
 
-            if (salon?.tier) {
-                setCurrentTier(salon.tier);
+            if (salon) {
+                setSalonId(salon.id);
+                setCurrentTier(salon.tier || 'free');
+                setIsVerified(salon.is_verified || false);
+                setIsFeatured(salon.is_featured || false);
             }
         } catch {
             // User might not have a salon yet
         }
     };
 
-    const handleSubscribe = async (priceId: string | null, planName: string) => {
+    const handleSubscribe = async (priceId: string | null, planName: string, type?: string) => {
         if (!priceId) return;
         if (!user) {
             alert('Musíte byť prihlásený pre zakúpenie predplatného.');
+            return;
+        }
+        if (!salonId) {
+            alert('Najprv musíte zaregistrovať salón v sekcii "Môj salón".');
             return;
         }
 
@@ -154,6 +176,9 @@ export default function SubscriptionPage() {
                 },
                 body: JSON.stringify({
                     priceId,
+                    salonId,
+                    userId: user.id,
+                    type: type || (planName.includes('premium') ? 'premium' : planName.toLowerCase()),
                     successUrl: `${window.location.origin}/dashboard/predplatne?success=true`,
                     cancelUrl: `${window.location.origin}/dashboard/predplatne?canceled=true`,
                 }),
@@ -227,7 +252,7 @@ export default function SubscriptionPage() {
                                 <button
                                     className={isCurrent ? styles.currentButton : styles.selectButton}
                                     disabled={isCurrent || loading === plan.name || !plan.priceId}
-                                    onClick={() => handleSubscribe(plan.priceId, plan.name)}
+                                    onClick={() => handleSubscribe(plan.priceId, plan.name, 'premium')}
                                 >
                                     {loading === plan.name ? 'Načítavam...' : isCurrent ? 'Aktívny' : plan.priceId ? 'Objednať' : 'Základný plán'}
                                 </button>
@@ -257,7 +282,7 @@ export default function SubscriptionPage() {
                                     </div>
                                     <button
                                         className={styles.addonButton}
-                                        onClick={() => handleSubscribe(addon.priceId, addon.name)}
+                                        onClick={() => handleSubscribe(addon.priceId, addon.name, addon.id)}
                                         disabled={loading === addon.name}
                                     >
                                         {loading === addon.name ? 'Načítavam...' : 'Kúpiť teraz'}
