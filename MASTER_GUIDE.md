@@ -224,6 +224,11 @@ Required: Admin email in users table
 
 ## 🆘 TROUBLESHOOTING
 
+### "salons_owner_id_fkey" Error?
+This means user profile doesn't exist. Fixed automatically now, but if it happens:
+1. Log out and log back in (creates profile automatically)
+2. Or manually add profile in Supabase: `profiles` table with user's ID
+
 ### Payment not working?
 1. Check `STRIPE_WEBHOOK_SECRET` in Vercel
 2. Check webhook endpoint in Stripe dashboard
@@ -233,6 +238,12 @@ Required: Admin email in users table
 1. Check env vars are set in Vercel
 2. Redeploy after adding vars
 3. Wait 24-48 hours for GA data
+
+### Email confirmation redirect?
+To change where users go after clicking email link:
+1. Go to Supabase Dashboard → Authentication → Email Templates
+2. Edit "Confirm signup" template
+3. Change the redirect URL to: `{{ .SiteURL }}/auth/callback?type=signup`
 
 ### Translations missing?
 - Check locale files: `/src/locales/*.json`

@@ -43,6 +43,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setSession(session);
                 setUser(session?.user ?? null);
                 setLoading(false);
+
+                // Create profile if user exists but profile doesn't
+                if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+                    const { data: existingProfile } = await supabase
+                        .from('profiles')
+                        .select('id')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (!existingProfile) {
+                        await supabase.from('profiles').insert({
+                            id: session.user.id,
+                            email: session.user.email,
+                            full_name: session.user.user_metadata?.full_name ||
+                                `${session.user.user_metadata?.first_name || ''} ${session.user.user_metadata?.last_name || ''}`.trim() || null,
+                            avatar_url: session.user.user_metadata?.avatar_url || null,
+                            role: 'user',
+                        });
+                    }
+                }
             }
         );
 
