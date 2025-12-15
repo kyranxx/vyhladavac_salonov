@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './page.module.css';
 
-export default function EmailConfirmedPage() {
+function EmailConfirmedContent() {
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<'success' | 'error' | 'loading'>('loading');
 
     useEffect(() => {
         // Check if there's an error in URL params
         const error = searchParams.get('error');
-        const errorDescription = searchParams.get('error_description');
 
         if (error) {
             setStatus('error');
@@ -87,3 +86,18 @@ export default function EmailConfirmedPage() {
         </div>
     );
 }
+
+export default function EmailConfirmedPage() {
+    return (
+        <Suspense fallback={
+            <div className={styles.container}>
+                <div className={styles.card}>
+                    <div className={styles.loading}>Overujem...</div>
+                </div>
+            </div>
+        }>
+            <EmailConfirmedContent />
+        </Suspense>
+    );
+}
+
