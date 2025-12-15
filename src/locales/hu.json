@@ -139,5 +139,17 @@
         "saturday": "Szombat",
         "sunday": "Vasárnap",
         "closed": "Zárva"
+    },
+    "page": {
+        "categoryResultCount": "{count} szalon található a {category} kategóriában",
+        "noSalonsInCategory": "Nincs szalon",
+        "noSalonsInCategoryDesc": "Ebben a kategóriában még nincsenek szalonok.",
+        "aboutSalon": "Bemutatkozás",
+        "servicesAndPricing": "Szolgáltatások és árak",
+        "galleryComingSoon": "Galéria hamarosan",
+        "descriptionComingSoon": "A szalon leírása hamarosan elérhető lesz.",
+        "onRequest": "Kérésre",
+        "verifiedSalon": "Ellenőrzött szalon",
+        "loadingSalon": "Szalon betöltése..."
     }
 }

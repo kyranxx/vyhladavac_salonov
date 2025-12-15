@@ -65,6 +65,11 @@ export default function RootLayout({
                 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
                 <link rel="icon" href="/favicon.ico" sizes="32x32" />
                 <meta name="theme-color" content="#C9A86C" />
+                {/* Hreflang for international SEO */}
+                <link rel="alternate" hrefLang="sk" href="https://vyhladavac-salonov.vercel.app/" />
+                <link rel="alternate" hrefLang="en" href="https://vyhladavac-salonov.vercel.app/en" />
+                <link rel="alternate" hrefLang="hu" href="https://vyhladavac-salonov.vercel.app/hu" />
+                <link rel="alternate" hrefLang="x-default" href="https://vyhladavac-salonov.vercel.app/" />
             </head>
             <body className={inter.className}>
                 {/* Analytics */}

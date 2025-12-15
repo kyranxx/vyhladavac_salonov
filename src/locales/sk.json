@@ -137,7 +137,18 @@
         "thursday": "Štvrtok",
         "friday": "Piatok",
         "saturday": "Sobota",
-        "sunday": "Nedeľa",
-        "closed": "Zatvorené"
+        "sunday": "Nedeľa"
+    },
+    "page": {
+        "categoryResultCount": "Nájdených {count} salónov v kategórii {category}",
+        "noSalonsInCategory": "Žiadne salóny",
+        "noSalonsInCategoryDesc": "V tejto kategórii zatiaľ nie sú žiadne salóny.",
+        "aboutSalon": "O salóne",
+        "servicesAndPricing": "Služby a cenník",
+        "galleryComingSoon": "Galéria bude čoskoro dostupná",
+        "descriptionComingSoon": "Popis salónu bude čoskoro dostupný.",
+        "onRequest": "Na dopyt",
+        "verifiedSalon": "Overený salón",
+        "loadingSalon": "Načítavam salón..."
     }
 }

@@ -122,5 +122,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
-    return [...staticSitemap, ...categorySitemap, ...citySitemap, ...salonSitemap];
+    // Category + City combination pages (high SEO value!)
+    const topCategories = ['damske-kadernictvo', 'kozmetika', 'manikura', 'masaze', 'barbershop'];
+    const topCities = ['bratislava', 'kosice', 'presov', 'zilina', 'nitra', 'banska-bystrica', 'trnava', 'trencin'];
+
+    const categoryCitySitemap = topCategories.flatMap((category) =>
+        topCities.map((city) => ({
+            url: `${baseUrl}/kategoria/${category}/${city}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.85,
+        }))
+    );
+
+    return [...staticSitemap, ...categorySitemap, ...citySitemap, ...categoryCitySitemap, ...salonSitemap];
 }
