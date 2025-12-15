@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Salon {
@@ -31,20 +30,12 @@ export default function AdminUsersPage() {
     }, []);
 
     const loadUsers = async () => {
-        const supabase = createBrowserSupabaseClient();
-        if (!supabase) {
-            setLoading(false);
-            return;
-        }
-
         try {
-            // Get all salons with owner info - this gives us users who have salons
-            const { data: salons } = await supabase
-                .from('salons')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Use admin API to get salons
+            const response = await fetch('/api/admin/salons');
+            const salons = await response.json();
 
-            if (salons) {
+            if (Array.isArray(salons)) {
                 const usersData: UserWithSalon[] = salons.map((salon: Salon) => ({
                     owner_id: salon.owner_id,
                     salon_name: salon.name,

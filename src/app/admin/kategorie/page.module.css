@@ -152,6 +152,20 @@
     margin-bottom: 1rem;
 }
 
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.formGroup label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
 .input {
     padding: 0.75rem;
     border: 1px solid #d1d5db;

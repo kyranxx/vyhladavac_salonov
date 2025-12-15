@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Ad {
@@ -29,26 +28,18 @@ export default function AdminAdsPage() {
     const [linkUrl, setLinkUrl] = useState('');
     const [expiresAt, setExpiresAt] = useState('');
 
-    const supabase = createBrowserSupabaseClient();
-
     useEffect(() => {
         loadAds();
     }, []);
 
     const loadAds = async () => {
-        if (!supabase) {
-            setLoading(false);
-            return;
-        }
-
         try {
-            const { data, error } = await supabase
-                .from('banner_ads')
-                .select('*')
-                .order('created_at', { ascending: false });
+            const response = await fetch('/api/admin/ads');
+            const data = await response.json();
 
-            if (error) throw error;
-            setAds(data || []);
+            if (Array.isArray(data)) {
+                setAds(data);
+            }
         } catch (error) {
             console.error('Error loading ads:', error);
         } finally {
@@ -58,30 +49,35 @@ export default function AdminAdsPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!supabase) return;
 
         try {
-            const { error } = await supabase.from('banner_ads').insert({
-                name,
-                placement,
-                image_url: imageUrl,
-                link_url: linkUrl,
-                expires_at: expiresAt || null,
-                status: 'active',
-                impressions: 0,
-                clicks: 0,
+            const response = await fetch('/api/admin/ads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    placement,
+                    image_url: imageUrl,
+                    link_url: linkUrl,
+                    expires_at: expiresAt || null,
+                    status: 'active',
+                    impressions: 0,
+                    clicks: 0,
+                }),
             });
 
-            if (error) throw error;
-
-            alert('Reklama bola vytvorená!');
-            setShowForm(false);
-            setName('');
-            setPlacement('sidebar');
-            setImageUrl('');
-            setLinkUrl('');
-            setExpiresAt('');
-            loadAds();
+            if (response.ok) {
+                alert('Reklama bola vytvorená!');
+                setShowForm(false);
+                setName('');
+                setPlacement('sidebar');
+                setImageUrl('');
+                setLinkUrl('');
+                setExpiresAt('');
+                loadAds();
+            } else {
+                throw new Error('Failed to create ad');
+            }
         } catch (error) {
             console.error('Error creating ad:', error);
             alert('Chyba pri vytváraní reklamy.');
@@ -89,29 +85,36 @@ export default function AdminAdsPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!supabase) return;
         if (!confirm('Naozaj chcete odstrániť túto reklamu?')) return;
 
         try {
-            const { error } = await supabase.from('banner_ads').delete().eq('id', id);
-            if (error) throw error;
-            loadAds();
+            const response = await fetch('/api/admin/ads', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+                loadAds();
+            }
         } catch (error) {
             console.error('Error deleting ad:', error);
         }
     };
 
     const toggleStatus = async (id: string, currentStatus: string) => {
-        if (!supabase) return;
         const newStatus = currentStatus === 'active' ? 'paused' : 'active';
 
         try {
-            const { error } = await supabase
-                .from('banner_ads')
-                .update({ status: newStatus })
-                .eq('id', id);
-            if (error) throw error;
-            loadAds();
+            const response = await fetch('/api/admin/ads', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: newStatus }),
+            });
+
+            if (response.ok) {
+                loadAds();
+            }
         } catch (error) {
             console.error('Error updating ad:', error);
         }

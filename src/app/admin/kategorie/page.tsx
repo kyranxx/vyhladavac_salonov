@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Category {
@@ -36,39 +35,44 @@ export default function AdminKategoriesPage() {
     }, []);
 
     const loadCategories = async () => {
-        const supabase = createBrowserSupabaseClient();
-        if (!supabase) return;
+        try {
+            const response = await fetch('/api/admin/categories');
+            const data = await response.json();
 
-        const { data, error } = await supabase
-            .from('categories')
-            .select('*')
-            .order('sort_order');
-
-        if (!error && data) {
-            setCategories(data);
+            if (Array.isArray(data)) {
+                setCategories(data);
+            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleSave = async () => {
-        const supabase = createBrowserSupabaseClient();
-        if (!supabase) return;
+        try {
+            if (editingId) {
+                await fetch('/api/admin/categories', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: editingId, ...formData }),
+                });
+            } else {
+                await fetch('/api/admin/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...formData, is_active: true }),
+                });
+            }
 
-        if (editingId) {
-            await supabase
-                .from('categories')
-                .update(formData)
-                .eq('id', editingId);
-        } else {
-            await supabase
-                .from('categories')
-                .insert(formData);
+            setEditingId(null);
+            setShowAddForm(false);
+            setFormData({ slug: '', name_sk: '', name_en: '', name_hu: '', icon: '', category_type: 'primary', sort_order: 0 });
+            loadCategories();
+        } catch (error) {
+            console.error('Error saving category:', error);
+            alert('Chyba pri ukladaní kategórie.');
         }
-
-        setEditingId(null);
-        setShowAddForm(false);
-        setFormData({ slug: '', name_sk: '', name_en: '', name_hu: '', icon: '', category_type: 'primary', sort_order: 0 });
-        loadCategories();
     };
 
     const handleEdit = (category: Category) => {
@@ -85,25 +89,31 @@ export default function AdminKategoriesPage() {
     };
 
     const handleToggleActive = async (id: number, currentActive: boolean) => {
-        const supabase = createBrowserSupabaseClient();
-        if (!supabase) return;
-
-        await supabase
-            .from('categories')
-            .update({ is_active: !currentActive })
-            .eq('id', id);
-
-        loadCategories();
+        try {
+            await fetch('/api/admin/categories', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, is_active: !currentActive }),
+            });
+            loadCategories();
+        } catch (error) {
+            console.error('Error toggling category:', error);
+        }
     };
 
     const handleDelete = async (id: number) => {
         if (!confirm('Naozaj chcete odstrániť túto kategóriu?')) return;
 
-        const supabase = createBrowserSupabaseClient();
-        if (!supabase) return;
-
-        await supabase.from('categories').delete().eq('id', id);
-        loadCategories();
+        try {
+            await fetch('/api/admin/categories', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
+            loadCategories();
+        } catch (error) {
+            console.error('Error deleting category:', error);
+        }
     };
 
     if (loading) {
@@ -126,56 +136,77 @@ export default function AdminKategoriesPage() {
                 <div className={styles.formCard}>
                     <h3>{editingId ? 'Upraviť kategóriu' : 'Nová kategória'}</h3>
                     <div className={styles.formGrid}>
-                        <input
-                            type="text"
-                            placeholder="Slug (napr. damske-kadernictvo)"
-                            value={formData.slug}
-                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                            className={styles.input}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Ikona (emoji)"
-                            value={formData.icon}
-                            onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                            className={styles.input}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Názov SK"
-                            value={formData.name_sk}
-                            onChange={(e) => setFormData({ ...formData, name_sk: e.target.value })}
-                            className={styles.input}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Názov EN"
-                            value={formData.name_en}
-                            onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
-                            className={styles.input}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Názov HU"
-                            value={formData.name_hu}
-                            onChange={(e) => setFormData({ ...formData, name_hu: e.target.value })}
-                            className={styles.input}
-                        />
-                        <select
-                            value={formData.category_type}
-                            onChange={(e) => setFormData({ ...formData, category_type: e.target.value })}
-                            className={styles.input}
-                        >
-                            <option value="primary">Primárna</option>
-                            <option value="secondary">Sekundárna</option>
-                        </select>
-                        <input
-                            type="number"
-                            placeholder="Poradie"
-                            value={formData.sort_order}
-                            onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                            className={styles.input}
-                        />
+                        <div className={styles.formGroup}>
+                            <label>Slug (URL)</label>
+                            <input
+                                type="text"
+                                placeholder="damske-kadernictvo"
+                                value={formData.slug}
+                                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                className={styles.input}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Ikona (emoji)</label>
+                            <input
+                                type="text"
+                                placeholder="💇"
+                                value={formData.icon}
+                                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                                className={styles.input}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Názov SK</label>
+                            <input
+                                type="text"
+                                placeholder="Dámske kaderníctvo"
+                                value={formData.name_sk}
+                                onChange={(e) => setFormData({ ...formData, name_sk: e.target.value })}
+                                className={styles.input}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Názov EN</label>
+                            <input
+                                type="text"
+                                placeholder="Women's hairdressing"
+                                value={formData.name_en}
+                                onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
+                                className={styles.input}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Názov HU</label>
+                            <input
+                                type="text"
+                                placeholder="Női fodrászat"
+                                value={formData.name_hu}
+                                onChange={(e) => setFormData({ ...formData, name_hu: e.target.value })}
+                                className={styles.input}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Typ kategórie</label>
+                            <select
+                                value={formData.category_type}
+                                onChange={(e) => setFormData({ ...formData, category_type: e.target.value })}
+                                className={styles.input}
+                            >
+                                <option value="primary">Primárna (hlavná)</option>
+                                <option value="secondary">Sekundárna (podkategória)</option>
+                            </select>
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Poradie zobrazenia</label>
+                            <input
+                                type="number"
+                                placeholder="1"
+                                value={formData.sort_order}
+                                onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                                className={styles.input}
+                            />
+                        </div>
                     </div>
                     <div className={styles.formActions}>
                         <button className={styles.cancelButton} onClick={() => { setEditingId(null); setShowAddForm(false); }}>
