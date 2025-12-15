@@ -45,22 +45,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setLoading(false);
 
                 // Create profile if user exists but profile doesn't
-                if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
-                    const { data: existingProfile } = await supabase
-                        .from('profiles')
-                        .select('id')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    if (!existingProfile) {
-                        await supabase.from('profiles').insert({
-                            id: session.user.id,
-                            email: session.user.email,
-                            full_name: session.user.user_metadata?.full_name ||
-                                `${session.user.user_metadata?.first_name || ''} ${session.user.user_metadata?.last_name || ''}`.trim() || null,
-                            avatar_url: session.user.user_metadata?.avatar_url || null,
-                            role: 'user',
+                if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION')) {
+                    try {
+                        // Call API route to create profile (bypasses RLS)
+                        const response = await fetch('/api/profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: session.user.id,
+                                email: session.user.email,
+                                fullName: session.user.user_metadata?.full_name ||
+                                    `${session.user.user_metadata?.first_name || ''} ${session.user.user_metadata?.last_name || ''}`.trim() || null,
+                                avatarUrl: session.user.user_metadata?.avatar_url || null,
+                            }),
                         });
+
+                        if (!response.ok) {
+                            const data = await response.json();
+                            console.error('Profile creation failed:', data.error);
+                        }
+                    } catch (err) {
+                        console.error('Error calling profile API:', err);
                     }
                 }
             }
