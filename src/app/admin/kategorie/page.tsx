@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import styles from './page.module.css';
 
 interface Category {
@@ -20,6 +21,7 @@ export default function AdminKategoriesPage() {
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const toast = useToast();
     const [formData, setFormData] = useState({
         slug: '',
         name_sk: '',
@@ -69,9 +71,10 @@ export default function AdminKategoriesPage() {
             setShowAddForm(false);
             setFormData({ slug: '', name_sk: '', name_en: '', name_hu: '', icon: '', category_type: 'primary', sort_order: 0 });
             loadCategories();
+            toast.success(editingId ? 'Kategória bola aktualizovaná' : 'Kategória bola vytvorená');
         } catch (error) {
             console.error('Error saving category:', error);
-            alert('Chyba pri ukladaní kategórie.');
+            toast.error('Chyba pri ukladaní kategórie');
         }
     };
 
@@ -96,8 +99,10 @@ export default function AdminKategoriesPage() {
                 body: JSON.stringify({ id, is_active: !currentActive }),
             });
             loadCategories();
+            toast.success(currentActive ? 'Kategória deaktivovaná' : 'Kategória aktivovaná');
         } catch (error) {
             console.error('Error toggling category:', error);
+            toast.error('Chyba pri zmene stavu');
         }
     };
 
@@ -111,8 +116,10 @@ export default function AdminKategoriesPage() {
                 body: JSON.stringify({ id }),
             });
             loadCategories();
+            toast.success('Kategória bola odstránená');
         } catch (error) {
             console.error('Error deleting category:', error);
+            toast.error('Chyba pri odstraňovaní');
         }
     };
 

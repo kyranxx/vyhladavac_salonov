@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import styles from './page.module.css';
 
 interface Ad {
@@ -20,6 +21,7 @@ export default function AdminAdsPage() {
     const [showForm, setShowForm] = useState(false);
     const [ads, setAds] = useState<Ad[]>([]);
     const [loading, setLoading] = useState(true);
+    const toast = useToast();
 
     // Form state
     const [name, setName] = useState('');
@@ -67,7 +69,7 @@ export default function AdminAdsPage() {
             });
 
             if (response.ok) {
-                alert('Reklama bola vytvorená!');
+                toast.success('Reklama bola vytvorená!');
                 setShowForm(false);
                 setName('');
                 setPlacement('sidebar');
@@ -80,7 +82,7 @@ export default function AdminAdsPage() {
             }
         } catch (error) {
             console.error('Error creating ad:', error);
-            alert('Chyba pri vytváraní reklamy.');
+            toast.error('Chyba pri vytváraní reklamy');
         }
     };
 
@@ -96,9 +98,11 @@ export default function AdminAdsPage() {
 
             if (response.ok) {
                 loadAds();
+                toast.success('Reklama bola odstránená');
             }
         } catch (error) {
             console.error('Error deleting ad:', error);
+            toast.error('Chyba pri odstraňovaní reklamy');
         }
     };
 
@@ -114,9 +118,11 @@ export default function AdminAdsPage() {
 
             if (response.ok) {
                 loadAds();
+                toast.success(newStatus === 'active' ? 'Reklama aktivovaná' : 'Reklama pozastavená');
             }
         } catch (error) {
             console.error('Error updating ad:', error);
+            toast.error('Chyba pri aktualizácii');
         }
     };
 

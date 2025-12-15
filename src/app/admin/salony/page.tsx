@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import styles from './page.module.css';
 
 interface Salon {
@@ -18,6 +19,7 @@ export default function AdminSalonsPage() {
     const [loading, setLoading] = useState(true);
     const [editingSalon, setEditingSalon] = useState<Salon | null>(null);
     const [viewingSalon, setViewingSalon] = useState<Salon | null>(null);
+    const toast = useToast();
 
     // Load salons from API
     useEffect(() => {
@@ -72,14 +74,14 @@ export default function AdminSalonsPage() {
             });
 
             if (response.ok) {
-                alert('Salón bol schválený.');
+                toast.success('Salón bol schválený');
                 loadSalons();
             } else {
                 const data = await response.json();
-                alert('Chyba pri schvaľovaní: ' + data.error);
+                toast.error('Chyba pri schvaľovaní: ' + data.error);
             }
         } catch (error) {
-            alert('Chyba pri schvaľovaní.');
+            toast.error('Chyba pri schvaľovaní');
         }
     };
 
@@ -95,14 +97,14 @@ export default function AdminSalonsPage() {
             });
 
             if (response.ok) {
-                alert('Salón bol zamietnutý.');
+                toast.success('Salón bol zamietnutý');
                 loadSalons();
             } else {
                 const data = await response.json();
-                alert('Chyba pri zamietnutí: ' + data.error);
+                toast.error('Chyba pri zamietnutí: ' + data.error);
             }
         } catch (error) {
-            alert('Chyba pri zamietnutí.');
+            toast.error('Chyba pri zamietnutí');
         }
     };
 
@@ -130,15 +132,15 @@ export default function AdminSalonsPage() {
             });
 
             if (response.ok) {
-                alert('Zmeny boli uložené.');
+                toast.success('Zmeny boli uložené');
                 setEditingSalon(null);
                 loadSalons();
             } else {
                 const data = await response.json();
-                alert('Chyba pri ukladaní: ' + data.error);
+                toast.error('Chyba pri ukladaní: ' + data.error);
             }
         } catch (error) {
-            alert('Chyba pri ukladaní.');
+            toast.error('Chyba pri ukladaní');
         }
     };
 
