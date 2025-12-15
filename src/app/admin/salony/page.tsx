@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Salon {
@@ -20,37 +19,22 @@ export default function AdminSalonsPage() {
     const [editingSalon, setEditingSalon] = useState<Salon | null>(null);
     const [viewingSalon, setViewingSalon] = useState<Salon | null>(null);
 
-    const supabase = createBrowserSupabaseClient();
-
-    // Load salons from database
+    // Load salons from API
     useEffect(() => {
         loadSalons();
     }, []);
 
     const loadSalons = async () => {
-        if (!supabase) {
-            console.error('Supabase not configured');
-            setLoading(false);
-            return;
-        }
-
         try {
             setLoading(true);
-            console.log('Loading salons...');
+            const response = await fetch('/api/admin/salons');
+            const data = await response.json();
 
-            const { data, error } = await supabase
-                .from('salons')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            console.log('Salons result:', { data, error });
-
-            if (error) {
-                console.error('Error loading salons:', error);
-                // Try to show anything we can
-                setSalons([]);
+            if (Array.isArray(data)) {
+                setSalons(data);
             } else {
-                setSalons(data || []);
+                console.error('Error loading salons:', data.error);
+                setSalons([]);
             }
         } catch (err) {
             console.error('Exception loading salons:', err);
@@ -78,37 +62,47 @@ export default function AdminSalonsPage() {
     };
 
     const handleApprove = async (id: string) => {
-        if (!supabase) return;
         if (!confirm('Naozaj chcete schváliť tento salón?')) return;
 
-        const { error } = await supabase
-            .from('salons')
-            .update({ status: 'approved' })
-            .eq('id', id);
+        try {
+            const response = await fetch('/api/admin/salons', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: 'approved' }),
+            });
 
-        if (error) {
-            alert('Chyba pri schvaľovaní: ' + error.message);
-        } else {
-            alert('Salón bol schválený.');
-            loadSalons(); // Reload from database
+            if (response.ok) {
+                alert('Salón bol schválený.');
+                loadSalons();
+            } else {
+                const data = await response.json();
+                alert('Chyba pri schvaľovaní: ' + data.error);
+            }
+        } catch (error) {
+            alert('Chyba pri schvaľovaní.');
         }
     };
 
     const handleReject = async (id: string) => {
-        if (!supabase) return;
         const reason = prompt('Zadajte dôvod zamietnutia:');
         if (!reason) return;
 
-        const { error } = await supabase
-            .from('salons')
-            .update({ status: 'rejected' })
-            .eq('id', id);
+        try {
+            const response = await fetch('/api/admin/salons', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: 'rejected' }),
+            });
 
-        if (error) {
-            alert('Chyba pri zamietnutí: ' + error.message);
-        } else {
-            alert('Salón bol zamietnutý.');
-            loadSalons();
+            if (response.ok) {
+                alert('Salón bol zamietnutý.');
+                loadSalons();
+            } else {
+                const data = await response.json();
+                alert('Chyba pri zamietnutí: ' + data.error);
+            }
+        } catch (error) {
+            alert('Chyba pri zamietnutí.');
         }
     };
 
@@ -121,23 +115,30 @@ export default function AdminSalonsPage() {
     };
 
     const handleSaveEdit = async () => {
-        if (!editingSalon || !supabase) return;
+        if (!editingSalon) return;
 
-        const { error } = await supabase
-            .from('salons')
-            .update({
-                name: editingSalon.name,
-                city: editingSalon.city,
-                tier: editingSalon.tier,
-            })
-            .eq('id', editingSalon.id);
+        try {
+            const response = await fetch('/api/admin/salons', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: editingSalon.id,
+                    name: editingSalon.name,
+                    city: editingSalon.city,
+                    tier: editingSalon.tier,
+                }),
+            });
 
-        if (error) {
-            alert('Chyba pri ukladaní: ' + error.message);
-        } else {
-            alert('Zmeny boli uložené.');
-            setEditingSalon(null);
-            loadSalons();
+            if (response.ok) {
+                alert('Zmeny boli uložené.');
+                setEditingSalon(null);
+                loadSalons();
+            } else {
+                const data = await response.json();
+                alert('Chyba pri ukladaní: ' + data.error);
+            }
+        } catch (error) {
+            alert('Chyba pri ukladaní.');
         }
     };
 
