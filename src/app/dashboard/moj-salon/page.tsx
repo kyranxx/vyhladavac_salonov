@@ -145,6 +145,23 @@ export default function MySalonPage() {
             const supabase = createBrowserSupabaseClient();
             if (!supabase) throw new Error('Database not configured');
 
+            // Check pending salon limit (max 2 pending salons per user)
+            const { data: existingSalons, error: checkError } = await supabase
+                .from('salons')
+                .select('id, status')
+                .eq('owner_id', user?.id);
+
+            if (checkError) {
+                console.error('Error checking salons:', checkError);
+            } else if (existingSalons) {
+                const pendingSalons = existingSalons.filter(s => s.status === 'pending');
+                if (pendingSalons.length >= 2) {
+                    setError('Máte už 2 salóny čakajúce na schválenie. Pred vytvorením ďalšieho musí byť aspoň jeden schválený.');
+                    setLoading(false);
+                    return;
+                }
+            }
+
             // Generate slug
             const slug = salonName.toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove diacritics
