@@ -103,7 +103,7 @@ export function LanguageSwitcher() {
     };
 
     return (
-        <div className={styles.wrapper} ref={dropdownRef}>
+        <div className={styles.wrapper} ref={dropdownRef} data-testid="language-switcher">
             <button
                 className={styles.trigger}
                 onClick={() => setIsOpen(!isOpen)}

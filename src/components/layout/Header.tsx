@@ -43,10 +43,10 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                 {/* Desktop Actions */}
                 <div className={styles.actions}>
                     <LanguageSwitcher />
-                    <Link href="/prihlasenie" className={styles.loginButton}>
+                    <Link href={`${basePath}/prihlasenie`} className={styles.loginButton}>
                         {t.nav.signIn}
                     </Link>
-                    <Link href="/registracia" className={styles.registerButton}>
+                    <Link href={`${basePath}/registracia`} className={styles.registerButton}>
                         {t.nav.addSalon}
                     </Link>
                 </div>
@@ -78,10 +78,10 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                         {t.nav.forOwners}
                     </Link>
                     <div className={styles.mobileActions}>
-                        <Link href="/prihlasenie" className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                        <Link href={`${basePath}/prihlasenie`} className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
                             {t.nav.signIn}
                         </Link>
-                        <Link href="/registracia" className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
+                        <Link href={`${basePath}/registracia`} className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
                             {t.nav.addSalon}
                         </Link>
                     </div>
