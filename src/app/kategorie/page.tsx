@@ -1,36 +1,72 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
-export const metadata: Metadata = {
-    title: 'Kategórie salónov | Salon Finder SK',
-    description: 'Prehľad všetkých kategórií salónov krásy na Slovensku.',
-};
-
-const categories = [
-    { slug: 'damske-kadernictvo', name: 'Dámske kaderníctvo', icon: '💇‍♀️', count: 234 },
-    { slug: 'panske-kadernictvo', name: 'Pánske kaderníctvo', icon: '💇‍♂️', count: 156 },
-    { slug: 'detske-kadernictvo', name: 'Detské kaderníctvo', icon: '👶', count: 45 },
-    { slug: 'barbershop', name: 'Barbershop', icon: '✂️', count: 89 },
-    { slug: 'kozmetika', name: 'Kozmetika', icon: '💄', count: 312 },
-    { slug: 'manikura', name: 'Manikúra', icon: '💅', count: 287 },
-    { slug: 'pedikura', name: 'Pedikúra', icon: '🦶', count: 198 },
-    { slug: 'nechtovy-dizajn', name: 'Nechtový dizajn', icon: '💎', count: 167 },
-    { slug: 'masaze', name: 'Masáže', icon: '💆', count: 245 },
-    { slug: 'licenie', name: 'Líčenie', icon: '🎨', count: 123 },
-    { slug: 'uces-styling', name: 'Účes & Styling', icon: '💁', count: 178 },
-    { slug: 'farbenie-vlasov', name: 'Farbenie vlasov', icon: '🌈', count: 234 },
-    { slug: 'tetovanie', name: 'Tetovanie', icon: '🎭', count: 67 },
-    { slug: 'piercing', name: 'Piercing', icon: '💠', count: 34 },
-    { slug: 'permanentny-makeup', name: 'Permanentný make-up', icon: '✨', count: 89 },
-    { slug: 'laser-estetika', name: 'Laser & Estetika', icon: '⚡', count: 56 },
-    { slug: 'wellness', name: 'Wellness & Spa', icon: '🧖', count: 145 },
-    { slug: 'solárium', name: 'Solárium', icon: '☀️', count: 78 },
-];
+interface Category {
+    id: number;
+    slug: string;
+    name_sk: string;
+    name_en?: string;
+    name_hu?: string;
+    icon: string;
+    is_active: boolean;
+    sort_order: number;
+}
 
 export default function CategoriesPage() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadCategories();
+    }, []);
+
+    const loadCategories = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('categories')
+                .select('*')
+                .eq('is_active', true)
+                .order('sort_order');
+
+            if (error) throw error;
+            setCategories(data || []);
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <>
+                <Header />
+                <main className={styles.main}>
+                    <div className={styles.container}>
+                        <div className={styles.header}>
+                            <h1 className={styles.title}>Kategórie salónov</h1>
+                            <p className={styles.subtitle}>Načítavam...</p>
+                        </div>
+                    </div>
+                </main>
+                <Footer />
+            </>
+        );
+    }
+
     return (
         <>
             <Header />
@@ -39,20 +75,19 @@ export default function CategoriesPage() {
                     <div className={styles.header}>
                         <h1 className={styles.title}>Kategórie salónov</h1>
                         <p className={styles.subtitle}>
-                            Vyberte si kategóriu služby, ktorú hľadáte
+                            {categories.length} kategórií služieb - vyberte si, čo hľadáte
                         </p>
                     </div>
 
                     <div className={styles.grid}>
                         {categories.map((category) => (
                             <Link
-                                key={category.slug}
+                                key={category.id}
                                 href={`/kategoria/${category.slug}`}
                                 className={styles.card}
                             >
-                                <span className={styles.icon}>{category.icon}</span>
-                                <h2 className={styles.cardTitle}>{category.name}</h2>
-                                <p className={styles.count}>{category.count} salónov</p>
+                                <span className={styles.icon}>{category.icon || '✨'}</span>
+                                <h2 className={styles.cardTitle}>{category.name_sk}</h2>
                             </Link>
                         ))}
                     </div>
