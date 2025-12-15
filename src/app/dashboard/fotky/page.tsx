@@ -75,7 +75,7 @@ export default function PhotosPage() {
                 const fileName = `${salonId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('photos')
+                    .from('salon-images')
                     .upload(fileName, file);
 
                 if (uploadError) {
@@ -85,7 +85,7 @@ export default function PhotosPage() {
 
                 // Get public URL
                 const { data: urlData } = supabase.storage
-                    .from('photos')
+                    .from('salon-images')
                     .getPublicUrl(fileName);
 
                 // Save to photos table
@@ -129,9 +129,9 @@ export default function PhotosPage() {
             await supabase.from('photos').delete().eq('id', id);
 
             // Try to delete from storage (extract path from URL)
-            const urlParts = url.split('/photos/');
+            const urlParts = url.split('/salon-images/');
             if (urlParts[1]) {
-                await supabase.storage.from('photos').remove([urlParts[1]]);
+                await supabase.storage.from('salon-images').remove([urlParts[1]]);
             }
 
             setPhotos(photos.filter(p => p.id !== id));
