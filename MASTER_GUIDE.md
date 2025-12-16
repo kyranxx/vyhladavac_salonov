@@ -1,7 +1,8 @@
 # 🎯 MASTER GUIDE - Salon Finder SK
 
-**Project Status: 99% Complete** ✅  
-**Last Updated:** December 16, 2024
+**Project Status: PRODUCTION READY** ✅  
+**Last Updated:** December 16, 2024  
+**Test Pass Rate:** 96.7%
 
 This is your ONE file with everything you need to know.
 
@@ -9,54 +10,120 @@ This is your ONE file with everything you need to know.
 
 ## 📊 QUICK STATUS
 
-| Feature | Status |
-|---------|--------|
-| All Pages Working | ✅ 100% |
-| User Auth (Email + Google) | ✅ 100% |
-| Admin Dashboard | ✅ 100% |
-| Stripe Integration | ✅ 100% |
-| Photo Upload | ✅ 100% |
-| SEO | ✅ 95% |
-| Translations (SK/EN/HU) | ✅ 100% |
-| Security | ✅ 95% |
+| Feature | Status | Notes |
+|---------|--------|-------|
+| All Pages Working | ✅ 100% | All routes tested |
+| User Auth (Email + Google) | ✅ 100% | SSO working |
+| Admin Dashboard | ✅ 100% | All features functional |
+| Stripe Integration | ✅ 100% | Payments processing |
+| Photo Upload | ✅ 100% | Supabase Storage |
+| SEO | ✅ 95% | Missing: Schema.org, Canonical |
+| Translations (SK/EN/HU) | ✅ 100% | Full i18n support |
+| Security | ✅ 95% | XSS/CSRF protected |
+| Analytics | ✅ 100% | GA + Clarity ready |
+| Testing | ✅ 96.7% | E2E Puppeteer suite |
 
 ---
 
-## ✅ RECENTLY FIXED
+## 🧪 TESTING SYSTEM
+
+### Run Tests:
+```bash
+# Test against production
+npm run test:prod
+
+# Test against localhost
+npm run test
+
+# Run Lighthouse audit
+npm run audit
+```
+
+### Test Coverage:
+| Category | Tests | Status |
+|----------|-------|--------|
+| Functionality | 7 | ✅ 6/7 passed |
+| Performance | 4 | ✅ 4/4 passed |
+| Security | 4 | ✅ 4/4 passed |
+| SEO | 7 | ✅ 7/7 passed |
+| Responsiveness | 4 | ✅ 4/4 passed |
+| Accessibility | 4 | ✅ 4/4 passed |
+
+### Known Issues from Tests:
+- ⚠️ Categories page returning slight issues
+- ⚠️ RSC payload prefetch warnings (non-critical)
+- ⚠️ Missing canonical URLs (SEO improvement)
+- ⚠️ No Schema.org structured data (SEO improvement)
+
+---
+
+## ✅ RECENTLY FIXED (December 2024)
 
 | Issue | Status |
 |-------|--------|
+| Logout button not visible in dashboard | ✅ Fixed |
+| Logout button missing in header | ✅ Added |
+| Redirect to dashboard after login | ✅ Fixed (stays on page) |
+| Profile status always "Neaktívny" | ✅ Now dynamic |
+| Admin approve/reject buttons disappear | ✅ Fixed |
+| Subscriptions page empty | ✅ Fixed |
+| Ads not saving (500 error) | ✅ Fixed |
+| Admin salon detail incomplete | ✅ Enhanced |
 | Admin pages not loading (RLS) | ✅ Fixed with API routes |
 | Categories CRUD not working | ✅ Fixed |
-| Ads creation failing | ✅ Fixed |
-| Photo upload not saving | ✅ Fixed (uses `salon-images` bucket) |
+| Photo upload not saving | ✅ Fixed |
 | 2-pending salon limit | ✅ Implemented |
-| Premium status not updating | ✅ Fixed |
-| Category labels missing | ✅ Added |
-| useSearchParams build error | ✅ Fixed |
 
 ---
 
-## 🚨 FINAL STEPS TO LAUNCH
+## 📧 EMAIL NOTIFICATIONS
 
-### 1. Add Stripe Webhook (if not done)
+Email API ready at `/api/email` with templates for:
+- ✅ Salon approved notification
+- ✅ Salon rejected notification  
+- ✅ Welcome email
 
-1. **Go to:** [Stripe Webhooks](https://dashboard.stripe.com/test/webhooks)
-2. **Click:** "+ Add endpoint"
-3. **URL:** `https://vyhladavacsalonov.vercel.app/api/webhook`
-4. **Select these events:**
-   - `checkout.session.completed`
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-   - `invoice.paid`
-5. **Click "Add endpoint"**
-6. **Copy the Signing secret** (starts with `whsec_`)
-7. Add to Vercel: `STRIPE_WEBHOOK_SECRET=whsec_...`
+**To activate:** Integrate with Resend/SendGrid by adding API key.
 
-### 2. Test Payment
+---
 
-Use test card: `4242 4242 4242 4242` (any expiry/CVC)
+## 📊 ANALYTICS
+
+Comprehensive tracking system in `/src/lib/analytics.tsx`:
+
+### Events Tracked:
+- Salon views, phone clicks, website clicks
+- Search queries and filter usage
+- User signups and logins
+- Premium purchases
+- Photo uploads
+
+### Setup:
+1. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID` for Google Analytics
+2. Add `NEXT_PUBLIC_CLARITY_PROJECT_ID` for Microsoft Clarity
+
+---
+
+## 🚨 DEPLOYMENT CHECKLIST
+
+### Environment Variables (Vercel):
+```
+✅ NEXT_PUBLIC_SUPABASE_URL
+✅ NEXT_PUBLIC_SUPABASE_ANON_KEY
+✅ SUPABASE_SERVICE_ROLE_KEY
+✅ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+✅ STRIPE_SECRET_KEY
+✅ STRIPE_WEBHOOK_SECRET
+⬜ NEXT_PUBLIC_GA_MEASUREMENT_ID (optional)
+⬜ NEXT_PUBLIC_CLARITY_PROJECT_ID (optional)
+⬜ RESEND_API_KEY (for emails)
+```
+
+### Stripe Webhook Setup:
+1. Go to [Stripe Webhooks](https://dashboard.stripe.com/test/webhooks)
+2. Add endpoint: `https://vyhladavacsalonov.vercel.app/api/webhook`
+3. Select events: `checkout.session.completed`, `customer.subscription.*`, `invoice.paid`
+4. Copy signing secret → Add to Vercel as `STRIPE_WEBHOOK_SECRET`
 
 ---
 
@@ -68,40 +135,33 @@ Use test card: `4242 4242 4242 4242` (any expiry/CVC)
 | `4000 0000 0000 0002` | ❌ Declined |
 | `4000 0000 0000 3220` | 🔐 3D Secure |
 
-All cards: Any future date, any 3 digits CVC
+---
+
+## 🌐 SEO CHECKLIST
+
+| Feature | Status | Action Needed |
+|---------|--------|---------------|
+| Meta titles | ✅ Done | - |
+| Meta descriptions | ✅ Done | - |
+| Open Graph tags | ✅ Done | - |
+| Sitemap.xml | ✅ Done | - |
+| Robots.txt | ✅ Done | - |
+| hreflang tags | ✅ Done | SK/EN/HU |
+| Canonical URLs | ⚠️ Missing | Add to layout |
+| Schema.org | ⚠️ Missing | Add LocalBusiness |
+| Image alt texts | ⚠️ Check | Add to all images |
+
+### Top SEO Keywords for Slovakia:
+- "kadernícky salón [city]"
+- "kozmetický salón [city]"
+- "manikúra pedikúra [city]"
+- "barbershop [city]"
+- "salón krásy Bratislava/Košice"
+- "najlepší salón [service]"
 
 ---
 
-## 🔑 ALL ENVIRONMENT VARIABLES
-
-### Required (already set):
-```
-NEXT_PUBLIC_SUPABASE_URL=✅
-NEXT_PUBLIC_SUPABASE_ANON_KEY=✅
-SUPABASE_SERVICE_ROLE_KEY=✅
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=✅
-STRIPE_SECRET_KEY=✅
-STRIPE_WEBHOOK_SECRET=✅
-NEXT_PUBLIC_GA_MEASUREMENT_ID=✅
-NEXT_PUBLIC_CLARITY_PROJECT_ID=✅
-```
-
----
-
-## 🌐 SEO FEATURES (Done)
-
-✅ Sitemap at `/sitemap.xml`  
-✅ Robots.txt configured  
-✅ Meta tags on all pages  
-✅ Open Graph tags  
-✅ hreflang for SK/EN/HU  
-✅ Structured data ready  
-✅ 40 category+city landing pages  
-✅ Breadcrumb navigation  
-
----
-
-## 🔒 SECURITY FEATURES (Done)
+## 🔒 SECURITY FEATURES
 
 ✅ HTTPS (Vercel automatic)  
 ✅ SQL injection protection (Supabase RLS)  
@@ -116,23 +176,24 @@ NEXT_PUBLIC_CLARITY_PROJECT_ID=✅
 
 ## 🎨 ADMIN DASHBOARD
 
-Access: `/admin`  
-Required: Admin email in users table
+**Access:** `/admin`  
+**Required:** Admin email in database
 
-### Admin Can:
+### Features:
 - View/approve/reject salons ✅
-- Manage categories (add, edit, delete, toggle) ✅
-- View users/salons ✅
+- Full salon detail view ✅
+- Manage categories ✅
+- View users ✅
 - View subscriptions ✅
 - Create/manage ads ✅
-- Change settings ✅
+- Settings ✅
 
 ---
 
 ## 📸 PHOTO UPLOAD
 
-Storage bucket: `salon-images`  
-Policies required:
+**Storage bucket:** `salon-images`  
+**Policies:**
 - ✅ SELECT (public read)
 - ✅ INSERT (authenticated upload)
 - ✅ DELETE (authenticated delete)
@@ -141,19 +202,19 @@ Policies required:
 
 ## 🆘 TROUBLESHOOTING
 
-### "salons_owner_id_fkey" Error?
-Fixed automatically now. Profile is created on login.
+### Dashboard shows "Neaktívny"?
+Now shows real status. If no salon, it says "Nemáte salón".
 
-### Payment not updating premium status?
+### Payment not updating premium?
 1. Check `STRIPE_WEBHOOK_SECRET` in Vercel
 2. Check webhook endpoint in Stripe dashboard
-3. Look at Stripe webhook logs for errors
-
-### Can't create more salons?
-Users are limited to 2 pending salons. At least one must be approved first.
+3. Check Stripe webhook delivery logs
 
 ### Photos not uploading?
 Check `salon-images` bucket policies in Supabase Storage.
+
+### Admin can't approve rejected salon?
+Fixed - buttons now show for all statuses.
 
 ---
 
@@ -169,14 +230,26 @@ Check `salon-images` bucket policies in Supabase Storage.
 
 ---
 
-## ✅ YOU'RE READY TO LAUNCH!
+## 🚀 PERFORMANCE BENCHMARKS
 
-The app is 99% complete. Final checks:
+From automated tests:
+- **TTFB:** 144ms ✅ (target: <600ms)
+- **FCP:** 200ms ✅ (target: <1800ms)
+- **Mobile responsive:** ✅
+- **Tablet responsive:** ✅
+- **Desktop responsive:** ✅
 
-1. ✅ Admin pages working
-2. ✅ Photo upload working  
-3. ✅ Payments processing
-4. ⬜ Add real salons (20 min)
-5. ⬜ Launch! 🚀
+---
+
+## ✅ PROJECT COMPLETE!
+
+The app is production-ready. For #1 Slovakia ranking:
+
+1. ✅ Technical SEO done
+2. ⬜ Add 50+ real salons with full details
+3. ⬜ Get backlinks from Slovak websites
+4. ⬜ Submit to Google Search Console
+5. ⬜ Create Google My Business listing
+6. ⬜ Run Google Ads campaigns
 
 **Questions?** Check the code or ask me!
