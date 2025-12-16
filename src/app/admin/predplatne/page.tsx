@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
 interface Subscription {
@@ -26,23 +25,15 @@ export default function AdminSubscriptionsPage() {
     }, []);
 
     const loadSubscriptions = async () => {
-        const supabase = createBrowserSupabaseClient();
-        if (!supabase) {
-            setLoading(false);
-            return;
-        }
-
         try {
-            const { data, error } = await supabase
-                .from('subscriptions')
-                .select(`
-                    *,
-                    salons (name)
-                `)
-                .order('created_at', { ascending: false });
+            const response = await fetch('/api/admin/subscriptions');
+            const data = await response.json();
 
-            if (error) throw error;
-            setSubscriptions(data || []);
+            if (Array.isArray(data)) {
+                setSubscriptions(data);
+            } else {
+                console.error('Error loading subscriptions:', data.error);
+            }
         } catch (error) {
             console.error('Error loading subscriptions:', error);
         } finally {
