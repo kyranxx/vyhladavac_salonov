@@ -5,6 +5,7 @@ import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ToastProvider } from '@/components/ui/Toast';
+import { WebsiteSchema, OrganizationSchema } from '@/components/seo/SchemaOrg';
 
 const inter = Inter({
     subsets: ['latin', 'latin-ext'],
@@ -18,10 +19,22 @@ export const metadata: Metadata = {
         template: '%s | Salon Finder SK',
     },
     description: 'Najväčší katalóg salónov krásy na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby vo vašom meste.',
-    keywords: ['salóny krásy', 'kaderníctvo', 'kozmetika', 'manikúra', 'pedikúra', 'masáže', 'Slovensko', 'Bratislava', 'Košice'],
+    keywords: [
+        'salóny krásy', 'kaderníctvo', 'kozmetika', 'manikúra', 'pedikúra',
+        'masáže', 'Slovensko', 'Bratislava', 'Košice', 'kadernícky salón',
+        'beauty salon', 'nechty', 'mihalnice', 'barbershop', 'wellness'
+    ],
     authors: [{ name: 'Salon Finder SK' }],
     creator: 'Apollo Tech s.r.o.',
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://vyhladavac-salonov.vercel.app'),
+    metadataBase: new URL('https://vyhladavacsalonov.vercel.app'),
+    alternates: {
+        canonical: '/',
+        languages: {
+            'sk': '/',
+            'en': '/en',
+            'hu': '/hu',
+        },
+    },
     openGraph: {
         title: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
         description: 'Najväčší katalóg salónov krásy na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby vo vašom meste.',
@@ -29,6 +42,7 @@ export const metadata: Metadata = {
         locale: 'sk_SK',
         alternateLocale: ['en_US', 'hu_HU'],
         siteName: 'Salon Finder SK',
+        url: 'https://vyhladavacsalonov.vercel.app',
     },
     twitter: {
         card: 'summary_large_image',
@@ -48,9 +62,6 @@ export const metadata: Metadata = {
     },
     verification: {
         google: 'Uuu_J9NwozI5jZRea28koZyPuqNHhbQYg26Gxdpk0os',
-        other: {
-            'msvalidate.01': 'YOUR_BING_VERIFICATION_CODE',
-        },
     },
 };
 
@@ -72,6 +83,10 @@ export default function RootLayout({
                 <link rel="alternate" hrefLang="x-default" href="https://vyhladavac-salonov.vercel.app/" />
             </head>
             <body className={inter.className}>
+                {/* Schema.org Structured Data */}
+                <WebsiteSchema />
+                <OrganizationSchema />
+
                 {/* Analytics */}
                 <GoogleAnalytics />
                 <MicrosoftClarity />
