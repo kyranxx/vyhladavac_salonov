@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import '@/styles/globals.css';
 import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
@@ -11,6 +12,34 @@ const inter = Inter({
     display: 'swap',
     variable: '--font-inter',
 });
+
+// Schema.org structured data
+const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Salon Finder SK',
+    alternateName: 'Vyhľadávač salónov',
+    url: 'https://vyhladavacsalonov.vercel.app',
+    description: 'Najväčší katalóg salónov krásy na Slovensku',
+    inLanguage: ['sk', 'en', 'hu'],
+    potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://vyhladavacsalonov.vercel.app/salony?q={search_term_string}',
+        'query-input': 'required name=search_term_string'
+    }
+};
+
+const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Salon Finder SK',
+    url: 'https://vyhladavacsalonov.vercel.app',
+    description: 'Najväčší katalóg salónov krásy na Slovensku',
+    address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'SK'
+    }
+};
 
 export const metadata: Metadata = {
     title: {
@@ -27,12 +56,18 @@ export const metadata: Metadata = {
     creator: 'Apollo Tech s.r.o.',
     metadataBase: new URL('https://vyhladavacsalonov.vercel.app'),
     alternates: {
-        canonical: '/',
+        canonical: 'https://vyhladavacsalonov.vercel.app/',
         languages: {
-            'sk': '/',
-            'en': '/en',
-            'hu': '/hu',
+            'sk': 'https://vyhladavacsalonov.vercel.app/',
+            'en': 'https://vyhladavacsalonov.vercel.app/en',
+            'hu': 'https://vyhladavacsalonov.vercel.app/hu',
         },
+    },
+    icons: {
+        icon: [
+            { url: '/favicon.svg', type: 'image/svg+xml' },
+            { url: '/favicon.ico', sizes: '32x32' },
+        ],
     },
     openGraph: {
         title: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
@@ -62,6 +97,9 @@ export const metadata: Metadata = {
     verification: {
         google: 'Uuu_J9NwozI5jZRea28koZyPuqNHhbQYg26Gxdpk0os',
     },
+    other: {
+        'theme-color': '#C9A86C',
+    },
 };
 
 export default function RootLayout({
@@ -69,46 +107,9 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    // Schema.org structured data
-    const websiteSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: 'Salon Finder SK',
-        alternateName: 'Vyhľadávač salónov',
-        url: 'https://vyhladavacsalonov.vercel.app',
-        description: 'Najväčší katalóg salónov krásy na Slovensku',
-        inLanguage: ['sk', 'en', 'hu'],
-        potentialAction: {
-            '@type': 'SearchAction',
-            target: 'https://vyhladavacsalonov.vercel.app/salony?q={search_term_string}',
-            'query-input': 'required name=search_term_string'
-        }
-    };
-
-    const organizationSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: 'Salon Finder SK',
-        url: 'https://vyhladavacsalonov.vercel.app',
-        description: 'Najväčší katalóg salónov krásy na Slovensku',
-        address: {
-            '@type': 'PostalAddress',
-            addressCountry: 'SK'
-        }
-    };
-
     return (
         <html lang="sk" className={inter.variable}>
             <head>
-                <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-                <link rel="icon" href="/favicon.ico" sizes="32x32" />
-                <meta name="theme-color" content="#C9A86C" />
-                <link rel="canonical" href="https://vyhladavacsalonov.vercel.app/" />
-                {/* Hreflang for international SEO */}
-                <link rel="alternate" hrefLang="sk" href="https://vyhladavacsalonov.vercel.app/" />
-                <link rel="alternate" hrefLang="en" href="https://vyhladavacsalonov.vercel.app/en" />
-                <link rel="alternate" hrefLang="hu" href="https://vyhladavacsalonov.vercel.app/hu" />
-                <link rel="alternate" hrefLang="x-default" href="https://vyhladavacsalonov.vercel.app/" />
                 {/* Schema.org Structured Data */}
                 <script
                     type="application/ld+json"
@@ -136,4 +137,3 @@ export default function RootLayout({
         </html>
     );
 }
-
