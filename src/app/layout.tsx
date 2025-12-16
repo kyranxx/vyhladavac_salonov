@@ -1,17 +1,21 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import '@/styles/globals.css';
 import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ToastProvider } from '@/components/ui/Toast';
-import { JsonLd, CanonicalLink } from '@/components/seo/JsonLd';
 
 const inter = Inter({
     subsets: ['latin', 'latin-ext'],
     display: 'swap',
     variable: '--font-inter',
 });
+
+export const viewport: Viewport = {
+    themeColor: '#C9A86C',
+};
 
 export const metadata: Metadata = {
     title: {
@@ -69,9 +73,6 @@ export const metadata: Metadata = {
     verification: {
         google: 'Uuu_J9NwozI5jZRea28koZyPuqNHhbQYg26Gxdpk0os',
     },
-    other: {
-        'theme-color': '#C9A86C',
-    },
 };
 
 // Schema.org structured data
@@ -109,13 +110,24 @@ export default function RootLayout({
 }) {
     return (
         <html lang="sk" className={inter.variable}>
+            <head>
+                {/* Explicit canonical link - Next.js alternates may not output this */}
+                <link rel="canonical" href="https://vyhladavacsalonov.vercel.app/" />
+            </head>
             <body className={inter.className}>
-                {/* SEO: Canonical URL */}
-                <CanonicalLink url="https://vyhladavacsalonov.vercel.app/" />
-
-                {/* SEO: Schema.org JSON-LD */}
-                <JsonLd id="schema-website" data={websiteSchema} />
-                <JsonLd id="schema-organization" data={organizationSchema} />
+                {/* Schema.org JSON-LD - using Script with beforeInteractive for initial HTML */}
+                <Script
+                    id="schema-website"
+                    type="application/ld+json"
+                    strategy="beforeInteractive"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+                />
+                <Script
+                    id="schema-organization"
+                    type="application/ld+json"
+                    strategy="beforeInteractive"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+                />
 
                 {/* Analytics */}
                 <GoogleAnalytics />
