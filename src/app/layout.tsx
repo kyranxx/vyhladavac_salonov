@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import Script from 'next/script';
+
 import '@/styles/globals.css';
 import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
@@ -110,22 +110,16 @@ export default function RootLayout({
 }) {
     return (
         <html lang="sk" className={inter.variable}>
-            <head>
-                {/* Explicit canonical link - Next.js alternates may not output this */}
-                <link rel="canonical" href="https://vyhladavacsalonov.vercel.app/" />
-            </head>
             <body className={inter.className}>
-                {/* Schema.org JSON-LD - using Script with beforeInteractive for initial HTML */}
-                <Script
+                {/* Schema.org JSON-LD - using native script tag for better SEO compatibility */}
+                <script
                     id="schema-website"
                     type="application/ld+json"
-                    strategy="beforeInteractive"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
                 />
-                <Script
+                <script
                     id="schema-organization"
                     type="application/ld+json"
-                    strategy="beforeInteractive"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
                 />
 
