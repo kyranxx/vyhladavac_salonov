@@ -6,6 +6,7 @@ import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ToastProvider } from '@/components/ui/Toast';
+import { GoogleOneTap } from '@/components/auth/GoogleOneTap';
 
 const inter = Inter({
     subsets: ['latin', 'latin-ext'],
@@ -130,6 +131,8 @@ export default function RootLayout({
                 <ToastProvider>
                     <AuthProvider>
                         {children}
+                        {/* Google One Tap for quick sign-in */}
+                        <GoogleOneTap />
                     </AuthProvider>
                 </ToastProvider>
 
