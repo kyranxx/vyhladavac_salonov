@@ -1,45 +1,17 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Script from 'next/script';
 import '@/styles/globals.css';
 import { GoogleAnalytics, MicrosoftClarity } from '@/lib/analytics';
 import { CookieConsent } from '@/components/layout/CookieConsent';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ToastProvider } from '@/components/ui/Toast';
+import { JsonLd, CanonicalLink } from '@/components/seo/JsonLd';
 
 const inter = Inter({
     subsets: ['latin', 'latin-ext'],
     display: 'swap',
     variable: '--font-inter',
 });
-
-// Schema.org structured data
-const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Salon Finder SK',
-    alternateName: 'Vyhľadávač salónov',
-    url: 'https://vyhladavacsalonov.vercel.app',
-    description: 'Najväčší katalóg salónov krásy na Slovensku',
-    inLanguage: ['sk', 'en', 'hu'],
-    potentialAction: {
-        '@type': 'SearchAction',
-        target: 'https://vyhladavacsalonov.vercel.app/salony?q={search_term_string}',
-        'query-input': 'required name=search_term_string'
-    }
-};
-
-const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Salon Finder SK',
-    url: 'https://vyhladavacsalonov.vercel.app',
-    description: 'Najväčší katalóg salónov krásy na Slovensku',
-    address: {
-        '@type': 'PostalAddress',
-        addressCountry: 'SK'
-    }
-};
 
 export const metadata: Metadata = {
     title: {
@@ -102,6 +74,34 @@ export const metadata: Metadata = {
     },
 };
 
+// Schema.org structured data
+const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Salon Finder SK',
+    alternateName: 'Vyhľadávač salónov',
+    url: 'https://vyhladavacsalonov.vercel.app',
+    description: 'Najväčší katalóg salónov krásy na Slovensku',
+    inLanguage: ['sk', 'en', 'hu'],
+    potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://vyhladavacsalonov.vercel.app/salony?q={search_term_string}',
+        'query-input': 'required name=search_term_string'
+    }
+};
+
+const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Salon Finder SK',
+    url: 'https://vyhladavacsalonov.vercel.app',
+    description: 'Najväčší katalóg salónov krásy na Slovensku',
+    address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'SK'
+    }
+};
+
 export default function RootLayout({
     children,
 }: {
@@ -109,18 +109,14 @@ export default function RootLayout({
 }) {
     return (
         <html lang="sk" className={inter.variable}>
-            <head>
-                {/* Schema.org Structured Data */}
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-                />
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-                />
-            </head>
             <body className={inter.className}>
+                {/* SEO: Canonical URL */}
+                <CanonicalLink url="https://vyhladavacsalonov.vercel.app/" />
+
+                {/* SEO: Schema.org JSON-LD */}
+                <JsonLd id="schema-website" data={websiteSchema} />
+                <JsonLd id="schema-organization" data={organizationSchema} />
+
                 {/* Analytics */}
                 <GoogleAnalytics />
                 <MicrosoftClarity />
