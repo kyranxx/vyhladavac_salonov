@@ -1,0 +1,113 @@
+
+> salon-finder-sk@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/admin/salony/page.tsx
+89:18  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+112:18  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+148:18  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/dashboard/fotky/page.tsx
+31:8  Warning: React Hook useEffect has missing dependencies: 'loadSalonAndPhotos' and 'supabase'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+77:31  Error: 'uploadData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/dashboard/moj-salon/page.tsx
+41:8  Warning: React Hook useEffect has a missing dependency: 'loadExistingSalons'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/nastavenia/page.tsx
+47:18  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+67:18  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/dashboard/page.tsx
+25:8  Warning: React Hook useEffect has a missing dependency: 'loadUserSalon'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+32:27  Error: 'error' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+43:18  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/dashboard/predplatne/page.tsx
+79:12  Error: 'isVerified' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+80:12  Error: 'isFeatured' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+100:8  Warning: React Hook useEffect has missing dependencies: 'loadSubscriptionStatus' and 'user'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+107:8  Warning: React Hook useEffect has a missing dependency: 'loadSubscriptionStatus'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/sluzby/page.tsx
+39:8  Warning: React Hook useEffect has a missing dependency: 'loadServices'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/en/kategoria/[slug]/page.tsx
+44:8  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/hu/kategoria/[slug]/page.tsx
+44:8  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/kategoria/[slug]/page.tsx
+42:8  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/kategoria/[slug]/[city]/page.tsx
+60:8  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/kategorie/page.tsx
+4:10  Error: 'Metadata' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/ochrana-sukromia/page.tsx
+23:70  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+23:73  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+23:76  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+23:80  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+23:88  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+23:104  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:83  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:90  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+72:58  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+72:78  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/app/registracia/page.tsx
+12:11  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/reset-hesla/page.tsx
+12:11  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/salon/[slug]/page.tsx
+38:7  Error: 'dayNames' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+56:8  Warning: React Hook useEffect has a missing dependency: 'loadSalon'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/salony/page.tsx
+53:8  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/salony/[city]/page.tsx
+74:8  Warning: React Hook useEffect has a missing dependency: 'loadSalons'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/vyhladavanie/page.tsx
+125:50  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+125:81  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/app/[locale]/registracia/page.tsx
+73:11  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/home/CategoryGrid.tsx
+49:8  Warning: React Hook useEffect has a missing dependency: 'loadCategories'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+84:84  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/seo/SchemaOrg.tsx
+3:11  Error: 'SchemaOrgProps' is defined but never used.  @typescript-eslint/no-unused-vars
+95:5  Error: 'category' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/PhoneInput.tsx
+55:12  Error: 'isFocused' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+63:8  Warning: React Hook useEffect has a missing dependency: 'displayValue'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/lib/supabase-server.ts
+18:30  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+25:30  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/middleware.ts
+30:9  Error: 'response' is never reassigned. Use 'const' instead.  prefer-const
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

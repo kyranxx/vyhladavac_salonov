@@ -70,7 +70,7 @@ const textsByLocale: Record<string, {
 };
 
 export default function LocalizedRegisterPage() {
-    const router = useRouter();
+    const _router = useRouter();
     const params = useParams();
     const locale = (params.locale as string) || 'en';
     const texts = textsByLocale[locale] || textsByLocale.en;

@@ -35,15 +35,7 @@ interface Service {
     duration: number;
 }
 
-const dayNames: Record<string, string> = {
-    monday: 'Pondelok',
-    tuesday: 'Utorok',
-    wednesday: 'Streda',
-    thursday: 'Štvrtok',
-    friday: 'Piatok',
-    saturday: 'Sobota',
-    sunday: 'Nedeľa',
-};
+// Day names for future opening hours feature\n// const dayNames: Record<string, string> = {\n//     monday: 'Pondelok',\n//     tuesday: 'Utorok',\n//     wednesday: 'Streda',\n//     thursday: 'Štvrtok',\n//     friday: 'Piatok',\n//     saturday: 'Sobota',\n//     sunday: 'Nedeľa',\n// };
 
 export default function SalonPage({ params }: Props) {
     const [salon, setSalon] = useState<Salon | null>(null);

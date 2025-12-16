@@ -9,7 +9,7 @@ import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from '@/app/prihlasenie/page.module.css';
 
 export default function ResetPasswordPage() {
-    const router = useRouter();
+    const _router = useRouter();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);

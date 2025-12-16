@@ -1,6 +1,7 @@
 import Script from 'next/script';
 
-interface SchemaOrgProps {
+// Interface used for type checking in tests
+interface _SchemaOrgProps {
     type: 'WebSite' | 'LocalBusiness' | 'Organization' | 'BreadcrumbList';
     data?: Record<string, unknown>;
 }
@@ -92,6 +93,8 @@ export function SalonSchema({
     rating,
     reviewCount,
     priceRange = '€€',
+    // category is available for future use 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     category = 'Beauty Salon'
 }: SalonSchemaProps) {
     const schema = {

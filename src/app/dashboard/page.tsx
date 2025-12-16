@@ -29,7 +29,7 @@ export default function DashboardPage() {
         if (!supabase || !user) return;
 
         try {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('salons')
                 .select('id, name, status, tier')
                 .eq('owner_id', user.id)
@@ -40,7 +40,7 @@ export default function DashboardPage() {
             if (data) {
                 setSalon(data);
             }
-        } catch (err) {
+        } catch (_err) {
             // No salon found is not an error
         } finally {
             setLoadingSalon(false);

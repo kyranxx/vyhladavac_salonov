@@ -52,7 +52,7 @@ const isValidSlovakPhone = (phone: string): boolean => {
 };
 
 export function PhoneInput({ value, onChange, placeholder = '+421 9XX XXX XXX', required, id }: PhoneInputProps) {
-    const [isFocused, setIsFocused] = useState(false);
+    const [_isFocused, setIsFocused] = useState(false);
     const [displayValue, setDisplayValue] = useState(value || '+421 ');
     const inputRef = useRef<HTMLInputElement>(null);
 

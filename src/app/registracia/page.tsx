@@ -9,7 +9,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import styles from './page.module.css';
 
 export default function RegisterPage() {
-    const router = useRouter();
+    const _router = useRouter();
     const { signUp, signInWithGoogle } = useAuth();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');

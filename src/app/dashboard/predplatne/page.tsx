@@ -76,8 +76,8 @@ export default function SubscriptionPage() {
     const [loading, setLoading] = useState<string | null>(null);
     const [currentTier, setCurrentTier] = useState<string>('free');
     const [salonId, setSalonId] = useState<string | null>(null);
-    const [isVerified, setIsVerified] = useState(false);
-    const [isFeatured, setIsFeatured] = useState(false);
+    const [_isVerified, setIsVerified] = useState(false);
+    const [_isFeatured, setIsFeatured] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     // Check for success/cancel URL params

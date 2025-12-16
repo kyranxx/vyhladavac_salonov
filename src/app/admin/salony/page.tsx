@@ -86,7 +86,7 @@ export default function AdminSalonsPage() {
                 const data = await response.json();
                 toast.error('Chyba pri schvaľovaní: ' + data.error);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Chyba pri schvaľovaní');
         }
     };
@@ -109,7 +109,7 @@ export default function AdminSalonsPage() {
                 const data = await response.json();
                 toast.error('Chyba pri zamietnutí: ' + data.error);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Chyba pri zamietnutí');
         }
     };
@@ -145,7 +145,7 @@ export default function AdminSalonsPage() {
                 const data = await response.json();
                 toast.error('Chyba pri ukladaní: ' + data.error);
             }
-        } catch (error) {
+        } catch (_error) {
             toast.error('Chyba pri ukladaní');
         }
     };

@@ -44,7 +44,7 @@ export default function SettingsPage() {
 
             if (error) throw error;
             setSuccess(true);
-        } catch (err) {
+        } catch (_err) {
             setError('Nepodarilo sa uložiť zmeny. Skúste to znova.');
         } finally {
             setLoading(false);
@@ -64,7 +64,7 @@ export default function SettingsPage() {
 
             if (error) throw error;
             alert('Odkaz na zmenu hesla bol odoslaný na váš e-mail.');
-        } catch (err) {
+        } catch (_err) {
             alert('Nepodarilo sa odoslať e-mail. Skúste to znova.');
         }
     };
