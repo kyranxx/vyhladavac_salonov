@@ -220,23 +220,23 @@ export default function AdminSalonsPage() {
                                 >
                                     ✏️
                                 </button>
-                                {salon.status === 'pending' && (
-                                    <>
-                                        <button
-                                            className={styles.approveBtn}
-                                            title="Schváliť"
-                                            onClick={() => handleApprove(salon.id)}
-                                        >
-                                            ✓
-                                        </button>
-                                        <button
-                                            className={styles.rejectBtn}
-                                            title="Zamietnuť"
-                                            onClick={() => handleReject(salon.id)}
-                                        >
-                                            ✗
-                                        </button>
-                                    </>
+                                {salon.status !== 'approved' && (
+                                    <button
+                                        className={styles.approveBtn}
+                                        title="Schváliť"
+                                        onClick={() => handleApprove(salon.id)}
+                                    >
+                                        ✓
+                                    </button>
+                                )}
+                                {salon.status !== 'rejected' && (
+                                    <button
+                                        className={styles.rejectBtn}
+                                        title="Zamietnuť"
+                                        onClick={() => handleReject(salon.id)}
+                                    >
+                                        ✗
+                                    </button>
                                 )}
                             </span>
                         </div>
