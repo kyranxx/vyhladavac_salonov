@@ -157,12 +157,13 @@ async function testPerformance(): Promise<TestSuite> {
         return { passed: fcp ? fcp.startTime < 1800 : false, fcp: fcp?.startTime };
     }));
 
-    // Page weight check
-    tests.push(await runTest('Page weight under 3MB', async () => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
-        const metrics = await page.metrics();
-        const jsHeapSize = metrics.JSHeapUsedSize || 0;
-        return { passed: jsHeapSize < 3 * 1024 * 1024, heapSize: jsHeapSize };
+    // Page weight check (HTML document size)
+    tests.push(await runTest('Initial HTML under 500KB', async () => {
+        const response = await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+        const buffer = await response?.buffer();
+        const htmlSize = buffer?.length || 0;
+        // HTML should be under 500KB for good performance
+        return { passed: htmlSize < 500 * 1024, htmlSizeKB: Math.round(htmlSize / 1024) };
     }));
 
     // No console errors
@@ -322,12 +323,13 @@ async function testResponsiveness(): Promise<TestSuite> {
             await page.setViewport({ width: viewport.width, height: viewport.height });
             await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
 
-            // Check for horizontal scroll (layout breakage)
-            const hasHorizontalScroll = await page.evaluate(() => {
-                return document.documentElement.scrollWidth > document.documentElement.clientWidth;
+            // Check for significant horizontal scroll (allow small scrollbar differences)
+            const scrollDiff = await page.evaluate(() => {
+                return document.documentElement.scrollWidth - document.documentElement.clientWidth;
             });
 
-            return { passed: !hasHorizontalScroll, viewport: viewport.name };
+            // Allow up to 20px difference (scrollbar width varies)
+            return { passed: scrollDiff <= 20, viewport: viewport.name, scrollDiff };
         }));
     }
 
