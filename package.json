@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "npx ts-node tests/e2e-comprehensive.ts",
+    "test:prod": "TEST_URL=https://vyhladavacsalonov.vercel.app npx ts-node tests/e2e-comprehensive.ts",
+    "audit": "npx lighthouse https://vyhladavacsalonov.vercel.app --output=html --output-path=./lighthouse-report.html"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.5.3",

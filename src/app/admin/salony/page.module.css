@@ -268,6 +268,72 @@
     margin-right: 0.5rem;
 }
 
+/* Detail Grid */
+.detailGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.detailRow {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detailRow:last-child {
+    border-bottom: none;
+}
+
+.detailLabel {
+    min-width: 100px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+}
+
+.detailRow a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.detailRow a:hover {
+    text-decoration: underline;
+}
+
+.detailDescription {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.detailDescription p {
+    margin: 0.5rem 0 0 0;
+    line-height: 1.6;
+    color: var(--color-text);
+}
+
+/* Loading & Empty */
+.loading {
+    padding: 3rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
 /* Detail Grid in Modal */
 .detailGrid {
     display: grid;

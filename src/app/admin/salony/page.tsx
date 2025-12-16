@@ -8,6 +8,12 @@ interface Salon {
     id: string;
     name: string;
     city: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    description_sk?: string;
+    category?: string;
     status: string;
     tier: string;
     created_at: string;
@@ -250,13 +256,66 @@ export default function AdminSalonsPage() {
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <h2>Detail salónu</h2>
                         <div className={styles.modalBody}>
-                            <p><strong>Názov:</strong> {viewingSalon.name}</p>
-                            <p><strong>Mesto:</strong> {viewingSalon.city || '—'}</p>
-                            <p><strong>Stav:</strong> {viewingSalon.status}</p>
-                            <p><strong>Tier:</strong> {viewingSalon.tier}</p>
-                            <p><strong>Vytvorený:</strong> {formatDate(viewingSalon.created_at)}</p>
+                            <div className={styles.detailGrid}>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Názov:</span>
+                                    <span>{viewingSalon.name}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Kategória:</span>
+                                    <span>{viewingSalon.category || '—'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Mesto:</span>
+                                    <span>{viewingSalon.city || '—'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Adresa:</span>
+                                    <span>{viewingSalon.address || '—'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Telefón:</span>
+                                    <span>{viewingSalon.phone ? <a href={`tel:${viewingSalon.phone}`}>{viewingSalon.phone}</a> : '—'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Email:</span>
+                                    <span>{viewingSalon.email ? <a href={`mailto:${viewingSalon.email}`}>{viewingSalon.email}</a> : '—'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Web:</span>
+                                    <span>{viewingSalon.website ? <a href={viewingSalon.website} target="_blank" rel="noopener noreferrer">{viewingSalon.website}</a> : '—'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Stav:</span>
+                                    <span>{getStatusBadge(viewingSalon.status)}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Tier:</span>
+                                    <span>{viewingSalon.tier === 'premium' ? '⭐ Premium' : 'Free'}</span>
+                                </div>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>Vytvorený:</span>
+                                    <span>{formatDate(viewingSalon.created_at)}</span>
+                                </div>
+                            </div>
+                            {viewingSalon.description_sk && (
+                                <div className={styles.detailDescription}>
+                                    <span className={styles.detailLabel}>Popis:</span>
+                                    <p>{viewingSalon.description_sk}</p>
+                                </div>
+                            )}
                         </div>
                         <div className={styles.modalActions}>
+                            {viewingSalon.status !== 'approved' && (
+                                <button className={styles.approveBtn} onClick={() => { handleApprove(viewingSalon.id); setViewingSalon(null); }}>
+                                    ✓ Schváliť
+                                </button>
+                            )}
+                            {viewingSalon.status !== 'rejected' && (
+                                <button className={styles.rejectBtn} onClick={() => { handleReject(viewingSalon.id); setViewingSalon(null); }}>
+                                    ✗ Zamietnuť
+                                </button>
+                            )}
                             <button onClick={() => setViewingSalon(null)}>Zavrieť</button>
                         </div>
                     </div>
