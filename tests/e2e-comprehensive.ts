@@ -44,7 +44,10 @@ async function runTest(name: string, testFn: () => Promise<boolean | Record<stri
     const start = Date.now();
     try {
         const result = await testFn();
-        const passed = typeof result === 'boolean' ? result : true;
+        // If result is boolean, use it directly. If object, check for 'passed' field
+        const passed = typeof result === 'boolean'
+            ? result
+            : (result.passed !== undefined ? Boolean(result.passed) : true);
         return {
             name,
             passed,
@@ -90,8 +93,10 @@ async function testFunctionality(): Promise<TestSuite> {
     // Categories page loads
     tests.push(await runTest('Categories page loads', async () => {
         await page.goto(`${BASE_URL}/kategorie`, { waitUntil: 'networkidle0' });
-        const content = await page.content();
-        return !content.includes('404') && !content.includes('Error');
+        // Wait for categories to load
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const pageTitle = await page.$eval('h1', el => el.textContent).catch(() => null);
+        return pageTitle !== null && pageTitle.includes('Kategórie');
     }));
 
     // Login page loads
