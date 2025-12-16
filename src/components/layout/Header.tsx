@@ -13,7 +13,7 @@ interface HeaderProps {
 
 export function Header({ locale = 'sk' }: HeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { user, loading } = useAuth();
+    const { user, loading, signOut } = useAuth();
     const t = getTranslation(locale);
 
     // Base path for links (add locale prefix for non-default)
@@ -51,9 +51,12 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                                 <Link href="/dashboard" className={styles.loginButton}>
                                     Dashboard
                                 </Link>
-                                <Link href="/dashboard/moj-salon" className={styles.registerButton}>
-                                    Môj salón
-                                </Link>
+                                <button
+                                    onClick={() => signOut()}
+                                    className={styles.logoutButton}
+                                >
+                                    Odhlásiť
+                                </button>
                             </>
                         ) : (
                             <>

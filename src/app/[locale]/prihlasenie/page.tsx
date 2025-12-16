@@ -76,7 +76,8 @@ export default function LocalizedLoginPage() {
             if (isAdmin) {
                 router.push('/admin');
             } else {
-                router.push('/dashboard');
+                // Redirect to same locale home page
+                router.push(basePath || '/');
             }
         }
     };

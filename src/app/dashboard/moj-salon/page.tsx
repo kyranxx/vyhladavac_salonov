@@ -1,17 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import Link from 'next/link';
 import styles from './page.module.css';
 
+interface ExistingSalon {
+    id: string;
+    name: string;
+    city: string;
+    status: string;
+    tier: string;
+    created_at: string;
+}
+
 export default function MySalonPage() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
+    const [existingSalons, setExistingSalons] = useState<ExistingSalon[]>([]);
+    const [loadingSalons, setLoadingSalons] = useState(true);
 
     // Form state
     const [salonName, setSalonName] = useState('');
@@ -21,6 +32,42 @@ export default function MySalonPage() {
     const [description, setDescription] = useState('');
     const [website, setWebsite] = useState('');
     const [category, setCategory] = useState('');
+
+    // Load user's existing salons
+    useEffect(() => {
+        if (user) {
+            loadExistingSalons();
+        }
+    }, [user]);
+
+    const loadExistingSalons = async () => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase || !user) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('salons')
+                .select('id, name, city, status, tier, created_at')
+                .eq('owner_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setExistingSalons(data || []);
+        } catch (err) {
+            console.error('Error loading salons:', err);
+        } finally {
+            setLoadingSalons(false);
+        }
+    };
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'approved': return { text: 'Schválený', class: styles.statusApproved };
+            case 'pending': return { text: 'Čaká na schválenie', class: styles.statusPending };
+            case 'rejected': return { text: 'Zamietnutý', class: styles.statusRejected };
+            default: return { text: status, class: '' };
+        }
+    };
 
     const categories = [
         { value: '', label: 'Vyberte kategóriu...' },
@@ -238,148 +285,183 @@ export default function MySalonPage() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Môj salón</h1>
-                <p className={styles.subtitle}>Zaregistrujte váš salón a začnite získavať zákazníkov</p>
+                <p className={styles.subtitle}>Spravujte svoje salóny a pridajte nový</p>
             </div>
 
             <div className={styles.content}>
+                {/* Existing Salons Section */}
+                {!loadingSalons && existingSalons.length > 0 && (
+                    <div className={styles.existingSalons}>
+                        <h2 className={styles.sectionTitle}>Vaše salóny ({existingSalons.length})</h2>
+                        <div className={styles.salonsList}>
+                            {existingSalons.map((salon) => {
+                                const badge = getStatusBadge(salon.status);
+                                return (
+                                    <div key={salon.id} className={styles.salonCard}>
+                                        <div className={styles.salonInfo}>
+                                            <h3 className={styles.salonName}>{salon.name}</h3>
+                                            <p className={styles.salonCity}>{salon.city}</p>
+                                        </div>
+                                        <div className={styles.salonMeta}>
+                                            <span className={`${styles.statusBadge} ${badge.class}`}>
+                                                {badge.text}
+                                            </span>
+                                            {salon.tier === 'premium' && (
+                                                <span className={styles.premiumBadge}>⭐ Premium</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {error && <div className={styles.error}>{error}</div>}
 
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Základné údaje</h2>
+                {/* New Salon Form */}
+                <div className={styles.newSalonSection}>
+                    <h2 className={styles.sectionTitle}>
+                        {existingSalons.length > 0 ? 'Pridať ďalší salón' : 'Zaregistrovať nový salón'}
+                    </h2>
 
-                        <div className={styles.formGroup}>
-                            <label htmlFor="salonName" className={styles.label}>
-                                Názov salónu <span className={styles.required}>*</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="salonName"
-                                className={styles.input}
-                                value={salonName}
-                                onChange={(e) => setSalonName(e.target.value)}
-                                placeholder="Napr. Beauty Salon Milano"
-                                required
-                            />
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <div className={styles.section}>
+                            <h2 className={styles.sectionTitle}>Základné údaje</h2>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="salonName" className={styles.label}>
+                                    Názov salónu <span className={styles.required}>*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="salonName"
+                                    className={styles.input}
+                                    value={salonName}
+                                    onChange={(e) => setSalonName(e.target.value)}
+                                    placeholder="Napr. Beauty Salon Milano"
+                                    required
+                                />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="category" className={styles.label}>
+                                    Hlavná kategória <span className={styles.required}>*</span>
+                                </label>
+                                <select
+                                    id="category"
+                                    className={styles.select}
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    required
+                                >
+                                    {categories.map((cat) => (
+                                        <option key={cat.value} value={cat.value}>
+                                            {cat.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="phone" className={styles.label}>
+                                    Telefón <span className={styles.required}>*</span>
+                                </label>
+                                <PhoneInput
+                                    id="phone"
+                                    value={phone}
+                                    onChange={setPhone}
+                                    required
+                                />
+                            </div>
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <label htmlFor="category" className={styles.label}>
-                                Hlavná kategória <span className={styles.required}>*</span>
-                            </label>
-                            <select
-                                id="category"
-                                className={styles.select}
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                required
+                        <div className={styles.section}>
+                            <h2 className={styles.sectionTitle}>Adresa</h2>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="address" className={styles.label}>
+                                    Ulica a číslo <span className={styles.required}>*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="address"
+                                    className={styles.input}
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    placeholder="Napr. Hlavná 25"
+                                    required
+                                />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="city" className={styles.label}>
+                                    Mesto <span className={styles.required}>*</span>
+                                </label>
+                                <select
+                                    id="city"
+                                    className={styles.select}
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    required
+                                >
+                                    {cities.map((c) => (
+                                        <option key={c.value} value={c.value}>
+                                            {c.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className={styles.section}>
+                            <h2 className={styles.sectionTitle}>Voliteľné údaje</h2>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="description" className={styles.label}>
+                                    Popis salónu
+                                </label>
+                                <textarea
+                                    id="description"
+                                    className={styles.textarea}
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Popíšte váš salón, služby, špeciality..."
+                                    rows={4}
+                                />
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="website" className={styles.label}>
+                                    Webová stránka
+                                </label>
+                                <input
+                                    type="url"
+                                    id="website"
+                                    className={styles.input}
+                                    value={website}
+                                    onChange={(e) => setWebsite(e.target.value)}
+                                    placeholder="https://www.vasa-stranka.sk"
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.actions}>
+                            <button
+                                type="submit"
+                                className={styles.submitButton}
+                                disabled={loading}
                             >
-                                {categories.map((cat) => (
-                                    <option key={cat.value} value={cat.value}>
-                                        {cat.label}
-                                    </option>
-                                ))}
-                            </select>
+                                {loading ? 'Odosielam...' : 'Zaregistrovať salón'}
+                            </button>
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <label htmlFor="phone" className={styles.label}>
-                                Telefón <span className={styles.required}>*</span>
-                            </label>
-                            <PhoneInput
-                                id="phone"
-                                value={phone}
-                                onChange={setPhone}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Adresa</h2>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="address" className={styles.label}>
-                                Ulica a číslo <span className={styles.required}>*</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="address"
-                                className={styles.input}
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                                placeholder="Napr. Hlavná 25"
-                                required
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="city" className={styles.label}>
-                                Mesto <span className={styles.required}>*</span>
-                            </label>
-                            <select
-                                id="city"
-                                className={styles.select}
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                required
-                            >
-                                {cities.map((c) => (
-                                    <option key={c.value} value={c.value}>
-                                        {c.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Voliteľné údaje</h2>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="description" className={styles.label}>
-                                Popis salónu
-                            </label>
-                            <textarea
-                                id="description"
-                                className={styles.textarea}
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Popíšte váš salón, služby, špeciality..."
-                                rows={4}
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="website" className={styles.label}>
-                                Webová stránka
-                            </label>
-                            <input
-                                type="url"
-                                id="website"
-                                className={styles.input}
-                                value={website}
-                                onChange={(e) => setWebsite(e.target.value)}
-                                placeholder="https://www.vasa-stranka.sk"
-                            />
-                        </div>
-                    </div>
-
-                    <div className={styles.actions}>
-                        <button
-                            type="submit"
-                            className={styles.submitButton}
-                            disabled={loading}
-                        >
-                            {loading ? 'Odosielam...' : 'Zaregistrovať salón'}
-                        </button>
-                    </div>
-
-                    <p className={styles.note}>
-                        * Po odoslaní bude váš salón skontrolovaný administrátorom.
-                        Schválenie zvyčajne trvá do 24 hodín.
-                    </p>
-                </form>
+                        <p className={styles.note}>
+                            * Po odoslaní bude váš salón skontrolovaný administrátorom.
+                            Schválenie zvyčajne trvá do 24 hodín.
+                        </p>
+                    </form>
+                </div>
             </div>
         </div>
     );

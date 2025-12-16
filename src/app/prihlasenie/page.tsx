@@ -30,11 +30,11 @@ export default function LoginPage() {
             setError('Nesprávny e-mail alebo heslo');
             setLoading(false);
         } else {
-            // Redirect admins to admin panel, others to dashboard
+            // Redirect admins to admin panel, others to home page
             if (ADMIN_EMAILS.includes(email.toLowerCase())) {
                 router.push('/admin');
             } else {
-                router.push('/dashboard');
+                router.push('/');
             }
         }
     };
