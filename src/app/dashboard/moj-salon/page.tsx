@@ -1,62 +1,285 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
-import { PhoneInput } from '@/components/ui/PhoneInput';
 import Link from 'next/link';
 import styles from './page.module.css';
 
-interface ExistingSalon {
+interface Salon {
     id: string;
     name: string;
+    slug: string;
+    phone: string;
+    address: string;
     city: string;
+    description_sk: string | null;
+    website: string | null;
     status: string;
     tier: string;
+    is_featured: boolean;
+    is_verified: boolean;
+    logo_url: string | null;
     created_at: string;
 }
 
-export default function MySalonPage() {
+interface SalonPhoto {
+    id: string;
+    url: string;
+    is_primary: boolean;
+}
+
+interface Service {
+    id: string;
+    name_sk: string;
+    price: number | null;
+    duration_minutes: number | null;
+    is_active: boolean;
+}
+
+export default function MySalonsPage() {
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState('');
-    const [existingSalons, setExistingSalons] = useState<ExistingSalon[]>([]);
+    const [salons, setSalons] = useState<Salon[]>([]);
     const [loadingSalons, setLoadingSalons] = useState(true);
+    const [editingSalon, setEditingSalon] = useState<Salon | null>(null);
+    const [photos, setPhotos] = useState<SalonPhoto[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
+    const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState<'info' | 'photos' | 'services'>('info');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Form state
-    const [salonName, setSalonName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [address, setAddress] = useState('');
-    const [city, setCity] = useState('');
-    const [description, setDescription] = useState('');
-    const [website, setWebsite] = useState('');
-    const [category, setCategory] = useState('');
+    // Edit form state
+    const [editForm, setEditForm] = useState({
+        name: '',
+        phone: '',
+        address: '',
+        city: '',
+        description_sk: '',
+        website: '',
+    });
 
-    // Load user's existing salons
+    // New service form
+    const [newService, setNewService] = useState({ name: '', price: '', duration: '30' });
+    const [addingService, setAddingService] = useState(false);
+
     useEffect(() => {
         if (user) {
-            loadExistingSalons();
+            loadSalons();
         }
     }, [user]);
 
-    const loadExistingSalons = async () => {
+    const loadSalons = async () => {
         const supabase = createBrowserSupabaseClient();
         if (!supabase || !user) return;
 
         try {
             const { data, error } = await supabase
                 .from('salons')
-                .select('id, name, city, status, tier, created_at')
+                .select('*')
                 .eq('owner_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setExistingSalons(data || []);
+            setSalons(data || []);
         } catch (err) {
             console.error('Error loading salons:', err);
         } finally {
             setLoadingSalons(false);
+        }
+    };
+
+    const loadSalonDetails = async (salon: Salon) => {
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        // Load photos
+        const { data: photosData } = await supabase
+            .from('photos')
+            .select('id, url, is_primary')
+            .eq('salon_id', salon.id)
+            .order('is_primary', { ascending: false });
+
+        setPhotos(photosData || []);
+
+        // Load services
+        const { data: servicesData } = await supabase
+            .from('services')
+            .select('*')
+            .eq('salon_id', salon.id)
+            .order('sort_order');
+
+        setServices(servicesData || []);
+    };
+
+    const handleEditSalon = (salon: Salon) => {
+        setEditingSalon(salon);
+        setEditForm({
+            name: salon.name,
+            phone: salon.phone || '',
+            address: salon.address || '',
+            city: salon.city || '',
+            description_sk: salon.description_sk || '',
+            website: salon.website || '',
+        });
+        setActiveTab('info');
+        loadSalonDetails(salon);
+    };
+
+    const handleSaveInfo = async () => {
+        if (!editingSalon) return;
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        setSaving(true);
+        try {
+            const { error } = await supabase
+                .from('salons')
+                .update({
+                    name: editForm.name,
+                    phone: editForm.phone,
+                    address: editForm.address,
+                    city: editForm.city,
+                    description_sk: editForm.description_sk,
+                    website: editForm.website || null,
+                })
+                .eq('id', editingSalon.id);
+
+            if (error) throw error;
+
+            // Update local state
+            setSalons(salons.map(s =>
+                s.id === editingSalon.id
+                    ? { ...s, ...editForm }
+                    : s
+            ));
+            setEditingSalon({ ...editingSalon, ...editForm });
+            alert('Zmeny boli uložené!');
+        } catch (err) {
+            console.error('Error saving salon:', err);
+            alert('Chyba pri ukladaní.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length || !editingSalon) return;
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        const file = e.target.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${editingSalon.id}/${Date.now()}.${fileExt}`;
+
+        setSaving(true);
+        try {
+            // Upload to storage
+            const { error: uploadError } = await supabase.storage
+                .from('salon-images')
+                .upload(fileName, file);
+
+            if (uploadError) throw uploadError;
+
+            // Get public URL
+            const { data: urlData } = supabase.storage
+                .from('salon-images')
+                .getPublicUrl(fileName);
+
+            // Save to photos table
+            const { data: photoData, error: dbError } = await supabase
+                .from('photos')
+                .insert({
+                    salon_id: editingSalon.id,
+                    url: urlData.publicUrl,
+                    is_primary: photos.length === 0,
+                })
+                .select()
+                .single();
+
+            if (dbError) throw dbError;
+
+            if (photoData) {
+                setPhotos([...photos, photoData]);
+            }
+        } catch (err) {
+            console.error('Error uploading photo:', err);
+            alert('Chyba pri nahrávaní fotografie.');
+        } finally {
+            setSaving(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleDeletePhoto = async (photoId: string) => {
+        if (!confirm('Naozaj chcete odstrániť túto fotografiu?')) return;
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        try {
+            const { error } = await supabase
+                .from('photos')
+                .delete()
+                .eq('id', photoId);
+
+            if (error) throw error;
+            setPhotos(photos.filter(p => p.id !== photoId));
+        } catch (err) {
+            console.error('Error deleting photo:', err);
+        }
+    };
+
+    const handleAddService = async () => {
+        if (!newService.name || !newService.price || !editingSalon) return;
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        setSaving(true);
+        try {
+            const { data, error } = await supabase
+                .from('services')
+                .insert({
+                    salon_id: editingSalon.id,
+                    name_sk: newService.name,
+                    price: parseFloat(newService.price),
+                    duration_minutes: parseInt(newService.duration),
+                    is_active: true,
+                    sort_order: services.length,
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setServices([...services, data]);
+            }
+            setNewService({ name: '', price: '', duration: '30' });
+            setAddingService(false);
+        } catch (err) {
+            console.error('Error adding service:', err);
+            alert('Chyba pri pridávaní služby.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteService = async (serviceId: string) => {
+        if (!confirm('Naozaj chcete odstrániť túto službu?')) return;
+        const supabase = createBrowserSupabaseClient();
+        if (!supabase) return;
+
+        try {
+            const { error } = await supabase
+                .from('services')
+                .delete()
+                .eq('id', serviceId);
+
+            if (error) throw error;
+            setServices(services.filter(s => s.id !== serviceId));
+        } catch (err) {
+            console.error('Error deleting service:', err);
         }
     };
 
@@ -69,232 +292,276 @@ export default function MySalonPage() {
         }
     };
 
-    const categories = [
-        { value: '', label: 'Vyberte kategóriu...' },
-        { value: 'damske-kadernictvo', label: 'Dámske kaderníctvo' },
-        { value: 'panske-kadernictvo', label: 'Pánske kaderníctvo' },
-        { value: 'barbershop', label: 'Barbershop' },
-        { value: 'kozmetika', label: 'Kozmetika' },
-        { value: 'manikura', label: 'Manikúra' },
-        { value: 'pedikura', label: 'Pedikúra' },
-        { value: 'masaze', label: 'Masáže' },
-        { value: 'wellness', label: 'Wellness & Spa' },
-        { value: 'tetovacie-studio', label: 'Tetovacie štúdio' },
-        { value: 'solarium', label: 'Solárium' },
-        { value: 'permanentny-makeup', label: 'Permanentný make-up' },
-        { value: 'mihalnice', label: 'Mihalnice' },
-        { value: 'obočie', label: 'Obočie' },
-    ];
-
-    // All Slovak cities and major towns
-    const cities = [
-        { value: '', label: 'Vyberte mesto...' },
-        // Major cities
-        { value: 'Bratislava', label: 'Bratislava' },
-        { value: 'Košice', label: 'Košice' },
-        { value: 'Prešov', label: 'Prešov' },
-        { value: 'Žilina', label: 'Žilina' },
-        { value: 'Nitra', label: 'Nitra' },
-        { value: 'Banská Bystrica', label: 'Banská Bystrica' },
-        { value: 'Trnava', label: 'Trnava' },
-        { value: 'Trenčín', label: 'Trenčín' },
-        // Other cities
-        { value: 'Martin', label: 'Martin' },
-        { value: 'Poprad', label: 'Poprad' },
-        { value: 'Prievidza', label: 'Prievidza' },
-        { value: 'Zvolen', label: 'Zvolen' },
-        { value: 'Považská Bystrica', label: 'Považská Bystrica' },
-        { value: 'Michalovce', label: 'Michalovce' },
-        { value: 'Nové Zámky', label: 'Nové Zámky' },
-        { value: 'Spišská Nová Ves', label: 'Spišská Nová Ves' },
-        { value: 'Komárno', label: 'Komárno' },
-        { value: 'Levice', label: 'Levice' },
-        { value: 'Humenné', label: 'Humenné' },
-        { value: 'Bardejov', label: 'Bardejov' },
-        { value: 'Liptovský Mikuláš', label: 'Liptovský Mikuláš' },
-        { value: 'Ružomberok', label: 'Ružomberok' },
-        { value: 'Piešťany', label: 'Piešťany' },
-        { value: 'Lučenec', label: 'Lučenec' },
-        { value: 'Topoľčany', label: 'Topoľčany' },
-        { value: 'Partizánske', label: 'Partizánske' },
-        { value: 'Dunajská Streda', label: 'Dunajská Streda' },
-        { value: 'Čadca', label: 'Čadca' },
-        { value: 'Dolný Kubín', label: 'Dolný Kubín' },
-        { value: 'Pezinok', label: 'Pezinok' },
-        { value: 'Hlohovec', label: 'Hlohovec' },
-        { value: 'Senica', label: 'Senica' },
-        { value: 'Šaľa', label: 'Šaľa' },
-        { value: 'Galanta', label: 'Galanta' },
-        { value: 'Snina', label: 'Snina' },
-        { value: 'Trebišov', label: 'Trebišov' },
-        { value: 'Vranov nad Topľou', label: 'Vranov nad Topľou' },
-        { value: 'Brezno', label: 'Brezno' },
-        { value: 'Detva', label: 'Detva' },
-        { value: 'Rimavská Sobota', label: 'Rimavská Sobota' },
-        { value: 'Revúca', label: 'Revúca' },
-        { value: 'Kežmarok', label: 'Kežmarok' },
-        { value: 'Stará Ľubovňa', label: 'Stará Ľubovňa' },
-        { value: 'Svidník', label: 'Svidník' },
-        { value: 'Medzilaborce', label: 'Medzilaborce' },
-        { value: 'Sabinov', label: 'Sabinov' },
-        { value: 'Stropkov', label: 'Stropkov' },
-        { value: 'Rožňava', label: 'Rožňava' },
-        { value: 'Moldava nad Bodvou', label: 'Moldava nad Bodvou' },
-        { value: 'Gelnica', label: 'Gelnica' },
-        { value: 'Sobrance', label: 'Sobrance' },
-        { value: 'Malacky', label: 'Malacky' },
-        { value: 'Senec', label: 'Senec' },
-        { value: 'Stupava', label: 'Stupava' },
-        { value: 'Skalica', label: 'Skalica' },
-        { value: 'Myjava', label: 'Myjava' },
-        { value: 'Nové Mesto nad Váhom', label: 'Nové Mesto nad Váhom' },
-        { value: 'Púchov', label: 'Púchov' },
-        { value: 'Dubnica nad Váhom', label: 'Dubnica nad Váhom' },
-        { value: 'Ilava', label: 'Ilava' },
-        { value: 'Bánovce nad Bebravou', label: 'Bánovce nad Bebravou' },
-        { value: 'Bojnice', label: 'Bojnice' },
-        { value: 'Handlová', label: 'Handlová' },
-        { value: 'Žiar nad Hronom', label: 'Žiar nad Hronom' },
-        { value: 'Banská Štiavnica', label: 'Banská Štiavnica' },
-        { value: 'Kremnica', label: 'Kremnica' },
-        { value: 'Fiľakovo', label: 'Fiľakovo' },
-        { value: 'Veľký Krtíš', label: 'Veľký Krtíš' },
-        { value: 'Kysucké Nové Mesto', label: 'Kysucké Nové Mesto' },
-        { value: 'Námestovo', label: 'Námestovo' },
-        { value: 'Tvrdošín', label: 'Tvrdošín' },
-        { value: 'Turčianske Teplice', label: 'Turčianske Teplice' },
-        { value: 'Bytča', label: 'Bytča' },
-        { value: 'Svit', label: 'Svit' },
-        { value: 'Vysoké Tatry', label: 'Vysoké Tatry' },
-        { value: 'Štúrovo', label: 'Štúrovo' },
-        { value: 'Hurbanovo', label: 'Hurbanovo' },
-        { value: 'Kolárovo', label: 'Kolárovo' },
-        { value: 'Veľký Meder', label: 'Veľký Meder' },
-        { value: 'Šamorín', label: 'Šamorín' },
-        { value: 'Želiezovce', label: 'Želiezovce' },
-        { value: 'Vráble', label: 'Vráble' },
-        { value: 'Zlaté Moravce', label: 'Zlaté Moravce' },
-        { value: 'Iné', label: 'Iné mesto...' },
-    ];
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
-
-        if (!salonName || !phone || !address || !city || !category) {
-            setError('Vyplňte všetky povinné polia.');
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const supabase = createBrowserSupabaseClient();
-            if (!supabase) throw new Error('Database not configured');
-
-            // Check pending salon limit (max 2 pending salons per user)
-            const { data: existingSalons, error: checkError } = await supabase
-                .from('salons')
-                .select('id, status')
-                .eq('owner_id', user?.id);
-
-            if (checkError) {
-                console.error('Error checking salons:', checkError);
-            } else if (existingSalons) {
-                const pendingSalons = existingSalons.filter(s => s.status === 'pending');
-                if (pendingSalons.length >= 2) {
-                    setError('Máte už 2 salóny čakajúce na schválenie. Pred vytvorením ďalšieho musí byť aspoň jeden schválený.');
-                    setLoading(false);
-                    return;
-                }
-            }
-
-            // Generate slug
-            const slug = salonName.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-                .replace(/\s+/g, '-')
-                .replace(/[^a-z0-9-]/g, '')
-                + '-' +
-                city.toLowerCase()
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                    .replace(/\s+/g, '-')
-                    .replace(/[^a-z0-9-]/g, '');
-
-            // Create salon in database
-            const { data: salon, error: dbError } = await supabase.from('salons').insert({
-                owner_id: user?.id,
-                name: salonName,
-                phone: phone,
-                address: address,
-                city: city,
-                description_sk: description,
-                website: website || null,
-                status: 'pending',
-                tier: 'free',
-                slug: slug,
-            }).select().single();
-
-            if (dbError) {
-                console.error('DB Error:', dbError);
-                throw new Error(dbError.message);
-            }
-
-            // Get category ID and create salon_categories link
-            if (salon && category) {
-                const { data: categoryData } = await supabase
-                    .from('categories')
-                    .select('id')
-                    .eq('slug', category)
-                    .single();
-
-                if (categoryData) {
-                    await supabase.from('salon_categories').insert({
-                        salon_id: salon.id,
-                        category_id: categoryData.id,
-                    });
-                }
-            }
-
-            setSuccess(true);
-        } catch (err: unknown) {
-            console.error('Error creating salon:', err);
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-            setError('Nepodarilo sa vytvoriť salón: ' + errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (success) {
+    // Show salon editor if editing
+    if (editingSalon) {
         return (
             <div className={styles.container}>
-                <div className={styles.successMessage}>
-                    <span className={styles.successIcon}>✅</span>
-                    <h2>Salón bol úspešne zaregistrovaný!</h2>
-                    <p>Váš salón čaká na schválenie administrátorom. Zvyčajne to trvá do 24 hodín.</p>
-                    <p>Po schválení vám príde e-mail a váš salón bude viditeľný vo vyhľadávaní.</p>
-                    <Link href="/dashboard" className={styles.backButton}>
-                        Späť na prehľad
-                    </Link>
+                <div className={styles.editorHeader}>
+                    <button onClick={() => setEditingSalon(null)} className={styles.backButton}>
+                        ← Späť na zoznam
+                    </button>
+                    <h1 className={styles.title}>Upraviť: {editingSalon.name}</h1>
+                </div>
+
+                {/* Tabs */}
+                <div className={styles.tabs}>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'info' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('info')}
+                    >
+                        📝 Základné údaje
+                    </button>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'photos' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('photos')}
+                    >
+                        📷 Fotografie ({photos.length})
+                    </button>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'services' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('services')}
+                    >
+                        📋 Služby ({services.length})
+                    </button>
+                </div>
+
+                {/* Tab Content */}
+                <div className={styles.tabContent}>
+                    {activeTab === 'info' && (
+                        <div className={styles.infoForm}>
+                            <div className={styles.formGroup}>
+                                <label>Názov salónu</label>
+                                <input
+                                    type="text"
+                                    value={editForm.name}
+                                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                />
+                            </div>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label>Telefón</label>
+                                    <input
+                                        type="tel"
+                                        value={editForm.phone}
+                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Webová stránka</label>
+                                    <input
+                                        type="url"
+                                        value={editForm.website}
+                                        onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+                                        placeholder="https://"
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label>Ulica a číslo</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.address}
+                                        onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Mesto</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.city}
+                                        onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Popis salónu</label>
+                                <textarea
+                                    value={editForm.description_sk}
+                                    onChange={(e) => setEditForm({ ...editForm, description_sk: e.target.value })}
+                                    rows={5}
+                                />
+                            </div>
+                            <button
+                                className={styles.saveButton}
+                                onClick={handleSaveInfo}
+                                disabled={saving}
+                            >
+                                {saving ? 'Ukladám...' : '💾 Uložiť zmeny'}
+                            </button>
+                        </div>
+                    )}
+
+                    {activeTab === 'photos' && (
+                        <div className={styles.photosSection}>
+                            <div className={styles.uploadArea}>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handlePhotoUpload}
+                                    style={{ display: 'none' }}
+                                />
+                                <button
+                                    className={styles.uploadButton}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={saving}
+                                >
+                                    {saving ? 'Nahrávam...' : '📷 Pridať fotografiu'}
+                                </button>
+                                <p className={styles.uploadHint}>JPG, PNG, max 5MB</p>
+                            </div>
+
+                            <div className={styles.photosGrid}>
+                                {photos.map((photo) => (
+                                    <div key={photo.id} className={styles.photoCard}>
+                                        <img src={photo.url} alt="Salon photo" />
+                                        {photo.is_primary && (
+                                            <span className={styles.primaryBadge}>Hlavná</span>
+                                        )}
+                                        <button
+                                            className={styles.deletePhotoBtn}
+                                            onClick={() => handleDeletePhoto(photo.id)}
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                ))}
+                                {photos.length === 0 && (
+                                    <p className={styles.emptyText}>Zatiaľ žiadne fotografie</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'services' && (
+                        <div className={styles.servicesSection}>
+                            <div className={styles.servicesList}>
+                                {services.map((service) => (
+                                    <div key={service.id} className={styles.serviceItem}>
+                                        <div className={styles.serviceInfo}>
+                                            <span className={styles.serviceName}>{service.name_sk}</span>
+                                            <span className={styles.serviceMeta}>
+                                                {service.duration_minutes} min
+                                            </span>
+                                        </div>
+                                        <div className={styles.servicePrice}>{service.price}€</div>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleDeleteService(service.id)}
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {addingService ? (
+                                <div className={styles.addServiceForm}>
+                                    <input
+                                        type="text"
+                                        placeholder="Názov služby"
+                                        value={newService.name}
+                                        onChange={(e) => setNewService({ ...newService, name: e.target.value })}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Cena €"
+                                        value={newService.price}
+                                        onChange={(e) => setNewService({ ...newService, price: e.target.value })}
+                                    />
+                                    <select
+                                        value={newService.duration}
+                                        onChange={(e) => setNewService({ ...newService, duration: e.target.value })}
+                                    >
+                                        <option value="15">15 min</option>
+                                        <option value="30">30 min</option>
+                                        <option value="45">45 min</option>
+                                        <option value="60">60 min</option>
+                                        <option value="90">90 min</option>
+                                        <option value="120">120 min</option>
+                                    </select>
+                                    <div className={styles.formActions}>
+                                        <button onClick={() => setAddingService(false)}>Zrušiť</button>
+                                        <button
+                                            onClick={handleAddService}
+                                            disabled={saving || !newService.name || !newService.price}
+                                            className={styles.primaryBtn}
+                                        >
+                                            {saving ? 'Pridávam...' : 'Pridať'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    className={styles.addServiceBtn}
+                                    onClick={() => setAddingService(true)}
+                                >
+                                    + Pridať službu
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Premium Features */}
+                <div className={styles.premiumSection}>
+                    <h2>🌟 Prémiové funkcie</h2>
+                    <div className={styles.premiumCards}>
+                        <div className={styles.premiumCard}>
+                            <div className={styles.premiumIcon}>⭐</div>
+                            <h3>Zvýraznený salón</h3>
+                            <p>Váš salón bude zobrazený na vrchu výsledkov vyhľadávania</p>
+                            {editingSalon.is_featured ? (
+                                <span className={styles.activeBadge}>✅ Aktívne</span>
+                            ) : (
+                                <Link href="/dashboard/predplatne" className={styles.upgradeBtn}>
+                                    Aktivovať
+                                </Link>
+                            )}
+                        </div>
+                        <div className={styles.premiumCard}>
+                            <div className={styles.premiumIcon}>✓</div>
+                            <h3>Overený salón</h3>
+                            <p>Získajte odznaku overenia a zvýšte dôveru zákazníkov</p>
+                            {editingSalon.is_verified ? (
+                                <span className={styles.activeBadge}>✅ Aktívne</span>
+                            ) : (
+                                <Link href="/dashboard/predplatne" className={styles.upgradeBtn}>
+                                    Aktivovať
+                                </Link>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
 
+    // List of salons
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Môj salón</h1>
+                <h1 className={styles.title}>Moje salóny</h1>
                 <p className={styles.subtitle}>Spravujte svoje salóny a pridajte nový</p>
             </div>
 
             <div className={styles.content}>
-                {/* Existing Salons Section */}
-                {!loadingSalons && existingSalons.length > 0 && (
-                    <div className={styles.existingSalons}>
-                        <h2 className={styles.sectionTitle}>Vaše salóny ({existingSalons.length})</h2>
+                {loadingSalons ? (
+                    <p>Načítavam...</p>
+                ) : salons.length === 0 ? (
+                    <div className={styles.emptyState}>
+                        <span className={styles.emptyIcon}>🏪</span>
+                        <h3>Zatiaľ nemáte žiadny salón</h3>
+                        <p>Zaregistrujte svoj salón a získajte nových zákazníkov.</p>
+                        <Link href="/dashboard/moj-salon/new" className={styles.primaryButton}>
+                            + Pridať prvý salón
+                        </Link>
+                    </div>
+                ) : (
+                    <>
                         <div className={styles.salonsList}>
-                            {existingSalons.map((salon) => {
+                            {salons.map((salon) => {
                                 const badge = getStatusBadge(salon.status);
                                 return (
                                     <div key={salon.id} className={styles.salonCard}>
@@ -309,159 +576,26 @@ export default function MySalonPage() {
                                             {salon.tier === 'premium' && (
                                                 <span className={styles.premiumBadge}>⭐ Premium</span>
                                             )}
+                                            {salon.is_verified && (
+                                                <span className={styles.verifiedBadge}>✓ Overený</span>
+                                            )}
                                         </div>
+                                        <button
+                                            className={styles.editButton}
+                                            onClick={() => handleEditSalon(salon)}
+                                        >
+                                            ✏️ Upraviť
+                                        </button>
                                     </div>
                                 );
                             })}
                         </div>
-                    </div>
+
+                        <Link href="/dashboard/moj-salon/new" className={styles.addButton}>
+                            + Pridať ďalší salón
+                        </Link>
+                    </>
                 )}
-
-                {error && <div className={styles.error}>{error}</div>}
-
-                {/* New Salon Form */}
-                <div className={styles.newSalonSection}>
-                    <h2 className={styles.sectionTitle}>
-                        {existingSalons.length > 0 ? 'Pridať ďalší salón' : 'Zaregistrovať nový salón'}
-                    </h2>
-
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        <div className={styles.section}>
-                            <h2 className={styles.sectionTitle}>Základné údaje</h2>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="salonName" className={styles.label}>
-                                    Názov salónu <span className={styles.required}>*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="salonName"
-                                    className={styles.input}
-                                    value={salonName}
-                                    onChange={(e) => setSalonName(e.target.value)}
-                                    placeholder="Napr. Beauty Salon Milano"
-                                    required
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="category" className={styles.label}>
-                                    Hlavná kategória <span className={styles.required}>*</span>
-                                </label>
-                                <select
-                                    id="category"
-                                    className={styles.select}
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    required
-                                >
-                                    {categories.map((cat) => (
-                                        <option key={cat.value} value={cat.value}>
-                                            {cat.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="phone" className={styles.label}>
-                                    Telefón <span className={styles.required}>*</span>
-                                </label>
-                                <PhoneInput
-                                    id="phone"
-                                    value={phone}
-                                    onChange={setPhone}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className={styles.section}>
-                            <h2 className={styles.sectionTitle}>Adresa</h2>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="address" className={styles.label}>
-                                    Ulica a číslo <span className={styles.required}>*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="address"
-                                    className={styles.input}
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    placeholder="Napr. Hlavná 25"
-                                    required
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="city" className={styles.label}>
-                                    Mesto <span className={styles.required}>*</span>
-                                </label>
-                                <select
-                                    id="city"
-                                    className={styles.select}
-                                    value={city}
-                                    onChange={(e) => setCity(e.target.value)}
-                                    required
-                                >
-                                    {cities.map((c) => (
-                                        <option key={c.value} value={c.value}>
-                                            {c.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className={styles.section}>
-                            <h2 className={styles.sectionTitle}>Voliteľné údaje</h2>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="description" className={styles.label}>
-                                    Popis salónu
-                                </label>
-                                <textarea
-                                    id="description"
-                                    className={styles.textarea}
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="Popíšte váš salón, služby, špeciality..."
-                                    rows={4}
-                                />
-                            </div>
-
-                            <div className={styles.formGroup}>
-                                <label htmlFor="website" className={styles.label}>
-                                    Webová stránka
-                                </label>
-                                <input
-                                    type="url"
-                                    id="website"
-                                    className={styles.input}
-                                    value={website}
-                                    onChange={(e) => setWebsite(e.target.value)}
-                                    placeholder="https://www.vasa-stranka.sk"
-                                />
-                            </div>
-                        </div>
-
-                        <div className={styles.actions}>
-                            <button
-                                type="submit"
-                                className={styles.submitButton}
-                                disabled={loading}
-                            >
-                                {loading ? 'Odosielam...' : 'Zaregistrovať salón'}
-                            </button>
-                        </div>
-
-                        <p className={styles.note}>
-                            * Po odoslaní bude váš salón skontrolovaný administrátorom.
-                            Schválenie zvyčajne trvá do 24 hodín.
-                        </p>
-                    </form>
-                </div>
             </div>
         </div>
     );

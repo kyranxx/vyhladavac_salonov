@@ -8,9 +8,7 @@ import styles from './layout.module.css';
 
 const sidebarItems = [
     { path: '/dashboard', label: 'Prehľad', icon: '🏠' },
-    { path: '/dashboard/moj-salon', label: 'Môj salón', icon: '💇' },
-    { path: '/dashboard/sluzby', label: 'Služby', icon: '📋' },
-    { path: '/dashboard/fotky', label: 'Fotografie', icon: '📷' },
+    { path: '/dashboard/moj-salon', label: 'Moje salóny', icon: '💇' },
     { path: '/dashboard/statistiky', label: 'Štatistiky', icon: '📊' },
     { path: '/dashboard/predplatne', label: 'Predplatné', icon: '⭐' },
     { path: '/dashboard/nastavenia', label: 'Nastavenia', icon: '⚙️' },
