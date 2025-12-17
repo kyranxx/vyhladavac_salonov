@@ -48,8 +48,19 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                     {!loading && (
                         user ? (
                             <>
-                                <Link href="/dashboard" className={styles.loginButton}>
-                                    Dashboard
+                                <Link href="/dashboard" className={styles.userButton}>
+                                    {user.user_metadata?.avatar_url ? (
+                                        <img 
+                                            src={user.user_metadata.avatar_url} 
+                                            alt="Avatar"
+                                            className={styles.userAvatar}
+                                        />
+                                    ) : (
+                                        <span className={styles.userInitial}>
+                                            {user.email?.charAt(0).toUpperCase() || 'U'}
+                                        </span>
+                                    )}
+                                    <span className={styles.userName}>Dashboard</span>
                                 </Link>
                                 <button
                                     onClick={() => signOut()}

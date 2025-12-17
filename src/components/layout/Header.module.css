@@ -147,6 +147,55 @@
     color: #ef4444;
 }
 
+/* User Button with Avatar */
+.userButton {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-decoration: none;
+    padding: 6px 12px 6px 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-background-alt);
+    transition: var(--transition-fast);
+}
+
+.userButton:hover {
+    background: var(--color-primary);
+}
+
+.userButton:hover .userName {
+    color: white;
+}
+
+.userAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: var(--shadow-sm);
+}
+
+.userInitial {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+.userName {
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    transition: var(--transition-fast);
+}
+
 /* Mobile Menu Button */
 .mobileMenuButton {
     display: flex;

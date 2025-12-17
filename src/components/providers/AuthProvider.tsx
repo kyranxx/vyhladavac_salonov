@@ -115,6 +115,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signInWithGoogle = async () => {
         if (!supabase) return;
+
+        // Set cookie with current page to redirect back after login
+        document.cookie = `auth_redirect=${window.location.pathname}; path=/; max-age=300; SameSite=Lax`;
+
         await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {

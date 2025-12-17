@@ -7,6 +7,9 @@ export async function GET(request: NextRequest) {
     const code = requestUrl.searchParams.get('code');
     const type = requestUrl.searchParams.get('type'); // 'signup', 'recovery', 'magiclink', etc.
 
+    // Get the redirect URL from cookie (set before OAuth redirect)
+    const redirectTo = request.cookies.get('auth_redirect')?.value || '/';
+
     if (code) {
         const supabase = createServerSupabaseClient();
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -43,10 +46,14 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    // Redirect to confirmation page for email confirmations, dashboard for OAuth
+    // Redirect to confirmation page for email confirmations
     if (type === 'signup' || type === 'email') {
         return NextResponse.redirect(new URL('/auth/email-confirmed', request.url));
     }
 
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    // Create response and clear the redirect cookie
+    const response = NextResponse.redirect(new URL(redirectTo, request.url));
+    response.cookies.delete('auth_redirect');
+
+    return response;
 }
