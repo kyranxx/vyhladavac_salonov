@@ -4,7 +4,7 @@ import { Footer } from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-    title: 'Kontakt | Salon Finder SK',
+    title: 'Kontakt | Register salónov',
     description: 'Kontaktujte nás s akýmikoľvek otázkami alebo pripomienkami.',
 };
 

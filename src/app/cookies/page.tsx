@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/Footer';
 import styles from '../ochrana-sukromia/page.module.css';
 
 export const metadata: Metadata = {
-    title: 'Cookies | Salon Finder SK',
-    description: 'Informácie o používaní cookies na stránke Salon Finder SK.',
+    title: 'Cookies | Register salónov',
+    description: 'Informácie o používaní cookies na stránke Register salónov.',
 };
 
 export default function CookiesPage() {

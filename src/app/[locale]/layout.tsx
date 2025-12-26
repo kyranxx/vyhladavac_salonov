@@ -16,8 +16,8 @@ export async function generateMetadata({
     const { locale } = await params;
 
     const titles: Record<string, string> = {
-        en: 'Salon Finder SK - Beauty Salons in Slovakia',
-        hu: 'Salon Finder SK - Szépségszalonok Szlovákiában',
+        en: 'Register salónov - Beauty Salons in Slovakia',
+        hu: 'Register salónov - Szépségszalonok Szlovákiában',
     };
 
     const descriptions: Record<string, string> = {

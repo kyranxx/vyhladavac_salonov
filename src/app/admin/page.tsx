@@ -4,7 +4,7 @@ export default function AdminDashboardPage() {
     return (
         <div className={styles.dashboard}>
             <h1 className={styles.title}>Admin Dashboard</h1>
-            <p className={styles.subtitle}>Prehľad platformy Salon Finder SK</p>
+            <p className={styles.subtitle}>Prehľad platformy Register salónov</p>
 
             {/* Stats Grid */}
             <div className={styles.statsGrid}>

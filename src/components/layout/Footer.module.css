@@ -63,6 +63,12 @@
     color: var(--color-text);
 }
 
+.logoImage {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+}
+
 .description {
     color: var(--color-text-secondary);
     font-size: var(--font-size-sm);

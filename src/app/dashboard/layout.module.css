@@ -32,6 +32,12 @@
     gap: var(--spacing-sm);
 }
 
+.logoImage {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+}
+
 /* Navigation */
 .nav {
     flex: 1;

@@ -11,7 +11,7 @@ export function WebsiteSchema() {
     const schema = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'Salon Finder SK',
+        name: 'Register salónov',
         alternateName: 'Vyhľadávač salónov',
         url: 'https://vyhladavacsalonov.vercel.app',
         description: 'Najväčší katalóg salónov krásy na Slovensku',
@@ -40,9 +40,9 @@ export function OrganizationSchema() {
     const schema = {
         '@context': 'https://schema.org',
         '@type': 'Organization',
-        name: 'Salon Finder SK',
+        name: 'Register salónov',
         url: 'https://vyhladavacsalonov.vercel.app',
-        logo: 'https://vyhladavacsalonov.vercel.app/logo.png',
+        logo: 'https://vyhladavacsalonov.vercel.app/logo_register_salonov.png',
         description: 'Najväčší katalóg salónov krásy na Slovensku',
         address: {
             '@type': 'PostalAddress',
@@ -190,7 +190,7 @@ export function FAQSchema({ items }: { items: FAQItem[] }) {
 export function ServiceSchema({
     name,
     description,
-    provider = 'Salon Finder SK'
+    provider = 'Register salónov'
 }: {
     name: string;
     description: string;

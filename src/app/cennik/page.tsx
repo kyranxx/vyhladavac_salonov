@@ -5,7 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-    title: 'Cenník | Salon Finder SK',
+    title: 'Cenník | Register salónov',
     description: 'Prehľad cien a balíčkov pre salóny. Základný profil zadarmo, Premium od 3€/mesiac.',
 };
 

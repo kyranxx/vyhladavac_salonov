@@ -53,7 +53,11 @@ export default function DashboardLayout({
             <aside className={styles.sidebar}>
                 <div className={styles.sidebarHeader}>
                     <Link href="/" className={styles.logo}>
-                        💇 Salon Finder
+                        <img
+                            src="/logo_register_salonov.png"
+                            alt="Register salónov"
+                            className={styles.logoImage}
+                        />
                     </Link>
                 </div>
 

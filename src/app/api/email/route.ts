@@ -12,7 +12,7 @@ interface EmailPayload {
 
 const emailTemplates = {
     salon_approved: {
-        subject: '✅ Váš salón bol schválený - Salon Finder SK',
+        subject: '✅ Váš salón bol schválený - Register salónov',
         html: (salonName: string) => `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #166534;">✅ Gratulujeme!</h1>
@@ -30,7 +30,7 @@ const emailTemplates = {
         `
     },
     salon_rejected: {
-        subject: '❌ Váš salón nebol schválený - Salon Finder SK',
+        subject: '❌ Váš salón nebol schválený - Register salónov',
         html: (salonName: string) => `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #dc2626;">Salón nebol schválený</h1>
@@ -50,11 +50,11 @@ const emailTemplates = {
         `
     },
     welcome: {
-        subject: '👋 Vitajte na Salon Finder SK!',
+        subject: '👋 Vitajte na Register salónov!',
         html: (userName: string) => `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #c19a6b;">Vitajte, ${userName}!</h1>
-                <p>Ďakujeme za registráciu na Salon Finder SK.</p>
+                <p>Ďakujeme za registráciu na Register salónov.</p>
                 <p>Teraz môžete:</p>
                 <ul>
                     <li>Zaregistrovať váš salón</li>

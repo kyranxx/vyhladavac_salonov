@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/Footer';
 import styles from '../ochrana-sukromia/page.module.css';
 
 export const metadata: Metadata = {
-    title: 'Obchodné podmienky | Salon Finder SK',
-    description: 'Obchodné podmienky používania služby Salon Finder SK.',
+    title: 'Obchodné podmienky | Register salónov',
+    description: 'Obchodné podmienky používania služby Register salónov.',
 };
 
 export default function TermsPage() {
@@ -21,14 +21,14 @@ export default function TermsPage() {
                         <h2>1. Úvodné ustanovenia</h2>
                         <p>
                             Tieto obchodné podmienky upravujú práva a povinnosti medzi prevádzkovateľom
-                            služby Salon Finder SK (Apollo Tech s.r.o.) a používateľmi služby.
+                            služby Register salónov (Apollo Tech s.r.o.) a používateľmi služby.
                         </p>
                     </section>
 
                     <section className={styles.section}>
                         <h2>2. Definície</h2>
                         <ul>
-                            <li><strong>Služba:</strong> Webová stránka Salon Finder SK</li>
+                            <li><strong>Služba:</strong> Webová stránka Register salónov</li>
                             <li><strong>Používateľ:</strong> Každá osoba, ktorá využíva službu</li>
                             <li><strong>Majiteľ salónu:</strong> Registrovaný používateľ s profilom salónu</li>
                             <li><strong>Prémiové služby:</strong> Platené funkcie a predplatné</li>

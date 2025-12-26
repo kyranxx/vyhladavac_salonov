@@ -1,5 +1,5 @@
 /**
- * Custom React Hooks for Salon Finder SK
+ * Custom React Hooks for Register salónov
  * Re-export all hooks from a single location
  */
 

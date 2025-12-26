@@ -13,7 +13,7 @@ interface Settings {
 }
 
 const defaultSettings: Settings = {
-    site_name: 'Salon Finder SK',
+    site_name: 'Register salónov',
     site_description: 'Nájdite najlepšie salóny krásy na Slovensku',
     contact_email: 'info@salonfinder.sk',
     auto_approve: false,

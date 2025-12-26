@@ -3,8 +3,8 @@ import { Footer } from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 export const metadata = {
-    title: 'Ako to funguje | Salon Finder SK',
-    description: 'Zistite, ako nájsť perfektný salón krásy cez Salon Finder SK v 4 jednoduchých krokoch.',
+    title: 'Ako to funguje | Register salónov',
+    description: 'Zistite, ako nájsť perfektný salón krásy cez Register salónov v 4 jednoduchých krokoch.',
 };
 
 const steps = [

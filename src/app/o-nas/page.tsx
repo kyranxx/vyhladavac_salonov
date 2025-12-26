@@ -3,8 +3,8 @@ import { Footer } from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 export const metadata = {
-    title: 'O nás | Salon Finder SK',
-    description: 'Spoznajte Salon Finder SK - najväčší online katalóg salónov krásy na Slovensku.',
+    title: 'O nás | Register salónov',
+    description: 'Spoznajte Register salónov - najväčší online katalóg salónov krásy na Slovensku.',
 };
 
 export default function AboutPage() {
@@ -24,7 +24,7 @@ export default function AboutPage() {
                         <section className={styles.section}>
                             <h2>Naša misia</h2>
                             <p>
-                                Salon Finder SK vznikol s jednoduchým cieľom - zjednodušiť ľuďom
+                                Register salónov vznikol s jednoduchým cieľom - zjednodušiť ľuďom
                                 hľadanie salónov krásy na Slovensku. Veríme, že každý si zaslúži
                                 ľahký prístup ku kvalitným službám v oblasti krásy a wellness.
                             </p>
@@ -60,7 +60,7 @@ export default function AboutPage() {
                             <h2>Pre majiteľov salónov</h2>
                             <p>
                                 Ste majiteľom salónu? Pridajte sa k stovkám salónov, ktoré už využívajú
-                                Salon Finder SK na získavanie nových zákazníkov. Registrácia je zadarmo
+                                Register salónov na získavanie nových zákazníkov. Registrácia je zadarmo
                                 a trvá len 2 minúty.
                             </p>
                             <a href="/registracia" className={styles.ctaButton}>

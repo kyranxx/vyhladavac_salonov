@@ -20,8 +20,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     title: {
-        default: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
-        template: '%s | Salon Finder SK',
+        default: 'Register salónov | Nájdite salóny krásy na Slovensku',
+        template: '%s | Register salónov',
     },
     description: 'Najväčší katalóg salónov krásy na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby vo vašom meste.',
     keywords: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
         'masáže', 'Slovensko', 'Bratislava', 'Košice', 'kadernícky salón',
         'beauty salon', 'nechty', 'mihalnice', 'barbershop', 'wellness'
     ],
-    authors: [{ name: 'Salon Finder SK' }],
+    authors: [{ name: 'Register salónov' }],
     creator: 'Apollo Tech s.r.o.',
     metadataBase: new URL('https://vyhladavacsalonov.vercel.app'),
     alternates: {
@@ -47,17 +47,17 @@ export const metadata: Metadata = {
         ],
     },
     openGraph: {
-        title: 'Salon Finder SK | Nájdite salóny krásy na Slovensku',
+        title: 'Register salónov | Nájdite salóny krásy na Slovensku',
         description: 'Najväčší katalóg salónov krásy na Slovensku. Kaderníctva, kozmetika, manikúra, masáže a ďalšie služby vo vašom meste.',
         type: 'website',
         locale: 'sk_SK',
         alternateLocale: ['en_US', 'hu_HU'],
-        siteName: 'Salon Finder SK',
+        siteName: 'Register salónov',
         url: 'https://vyhladavacsalonov.vercel.app',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Salon Finder SK',
+        title: 'Register salónov',
         description: 'Nájdite najlepšie salóny krásy vo vašom meste',
     },
     robots: {
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
 const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Salon Finder SK',
+    name: 'Register salónov',
     alternateName: 'Vyhľadávač salónov',
     url: 'https://vyhladavacsalonov.vercel.app',
     description: 'Najväčší katalóg salónov krásy na Slovensku',
@@ -95,7 +95,7 @@ const websiteSchema = {
 const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Salon Finder SK',
+    name: 'Register salónov',
     url: 'https://vyhladavacsalonov.vercel.app',
     description: 'Najväčší katalóg salónov krásy na Slovensku',
     address: {

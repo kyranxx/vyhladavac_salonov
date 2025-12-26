@@ -1,5 +1,5 @@
 /**
- * Utility functions for Salon Finder SK
+ * Utility functions for Register salónov
  * Common helper functions used across the application
  */
 

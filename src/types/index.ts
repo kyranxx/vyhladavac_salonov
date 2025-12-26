@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for the Salon Finder SK application
+ * Shared TypeScript types for the Register salónov application
  * Centralized type definitions to avoid duplication across pages
  */
 

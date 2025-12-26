@@ -5,7 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-    title: 'Pre majiteľov salónov | Salon Finder SK',
+    title: 'Pre majiteľov salónov | Register salónov',
     description: 'Pridajte svoj salón zadarmo a získajte nových zákazníkov. Zvýšte viditeľnosť vášho salónu na najväčšom katalógu krásy na Slovensku.',
 };
 

@@ -24,9 +24,11 @@ export function Header({ locale = 'sk' }: HeaderProps) {
             <div className={styles.container}>
                 {/* Logo */}
                 <Link href={basePath || '/'} className={styles.logo}>
-                    <span className={styles.logoIcon}>💇</span>
-                    <span className={styles.logoText}>Salon Finder</span>
-                    <span className={styles.logoBadge}>SK</span>
+                    <img
+                        src="/logo_register_salonov.png"
+                        alt="Register salónov"
+                        className={styles.logoImage}
+                    />
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -50,8 +52,8 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                             <>
                                 <Link href="/dashboard" className={styles.userButton}>
                                     {user.user_metadata?.avatar_url ? (
-                                        <img 
-                                            src={user.user_metadata.avatar_url} 
+                                        <img
+                                            src={user.user_metadata.avatar_url}
                                             alt="Avatar"
                                             className={styles.userAvatar}
                                         />

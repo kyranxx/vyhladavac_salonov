@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-    title: 'Ochrana súkromia | Salon Finder SK',
-    description: 'Informácie o spracovaní osobných údajov na stránke Salon Finder SK.',
+    title: 'Ochrana súkromia | Register salónov',
+    description: 'Informácie o spracovaní osobných údajov na stránke Register salónov.',
 };
 
 export default function PrivacyPage() {
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
                         <h2>1. Úvod</h2>
                         <p>
                             Spoločnosť Apollo Tech s.r.o. (ďalej len "my", "nás" alebo "naša spoločnosť")
-                            prevádzkuje webovú stránku Salon Finder SK (ďalej len "služba"). Táto stránka
+                            prevádzkuje webovú stránku Register salónov (ďalej len "služba"). Táto stránka
                             vás informuje o našich pravidlách týkajúcich sa zhromažďovania, používania a
                             zverejňovania osobných údajov pri používaní našej služby.
                         </p>

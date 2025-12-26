@@ -19,8 +19,11 @@ export function Footer({ locale = 'sk', translations: t }: FooterProps) {
                     {/* Brand Column */}
                     <div className={styles.brandColumn}>
                         <Link href={basePath || '/'} className={styles.logo}>
-                            <span className={styles.logoIcon}>💇</span>
-                            <span className={styles.logoText}>Salon Finder SK</span>
+                            <img
+                                src="/logo_register_salonov.png"
+                                alt="Register salónov"
+                                className={styles.logoImage}
+                            />
                         </Link>
                         <p className={styles.description}>
                             {t?.footer.description || 'Najväčší katalóg salónov krásy na Slovensku. Nájdite kaderníctva, kozmetické salóny, manikúru a ďalšie služby vo vašom meste.'}
@@ -99,7 +102,7 @@ export function Footer({ locale = 'sk', translations: t }: FooterProps) {
                 {/* Bottom Bar */}
                 <div className={styles.bottom}>
                     <p className={styles.copyright}>
-                        © {currentYear} Salon Finder SK. {t?.footer.allRightsReserved || 'Všetky práva vyhradené.'}
+                        © {currentYear} Register salónov. {t?.footer.allRightsReserved || 'Všetky práva vyhradené.'}
                     </p>
                     <p className={styles.company}>
                         {locale === 'en' ? 'Created by' : locale === 'hu' ? 'Készítette' : 'Vytvoril'}{' '}
