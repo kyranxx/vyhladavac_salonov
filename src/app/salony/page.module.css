@@ -1,76 +1,80 @@
 /* =============================================
-   SALONS LIST PAGE - MOBILE FIRST DESIGN
+   SALONS LIST PAGE - Premium Mobile First Design
    ============================================= */
 
 .main {
     min-height: 100vh;
-    background: #f8fafc;
-    padding-bottom: 2rem;
+    background: var(--color-background);
+    padding-bottom: var(--spacing-3xl);
 }
 
 .container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 1rem;
+    padding: var(--spacing-lg);
 }
 
 /* =============================================
    PAGE HEADER
    ============================================= */
 .pageHeader {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--spacing-xl);
 }
 
 .title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 0.25rem;
+    color: var(--color-text);
+    margin: 0 0 0.375rem;
+    letter-spacing: -0.02em;
 }
 
 .subtitle {
-    color: #6b7280;
-    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
     margin: 0;
 }
 
 /* =============================================
-   LAYOUT - Single column on mobile
+   LAYOUT
    ============================================= */
 .layout {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--spacing-xl);
 }
 
 /* =============================================
-   SIDEBAR - Hidden on mobile by default
+   SIDEBAR
    ============================================= */
 .sidebar {
     display: none;
 }
 
 .filterSection {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
 }
 
 .filterTitle {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .filterList {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    max-height: 200px;
+    gap: 2px;
+    max-height: 220px;
     overflow-y: auto;
 }
 
@@ -79,32 +83,38 @@
    ============================================= */
 .searchInput {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     font-size: 1rem;
-    transition: all 0.2s;
-    min-height: 48px;
+    transition: all var(--transition-fast);
+    min-height: 52px;
+    background: var(--color-surface);
+}
+
+.searchInput:hover {
+    border-color: var(--color-text-muted);
 }
 
 .searchInput:focus {
     outline: none;
-    border-color: #c19a6b;
-    box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.15);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px var(--color-primary-light);
 }
 
 .citySearchInput {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.8125rem;
-    margin-bottom: 0.5rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-sm);
+    background: var(--color-background);
 }
 
 .citySearchInput:focus {
     outline: none;
-    border-color: #c19a6b;
+    border-color: var(--color-primary);
 }
 
 /* =============================================
@@ -113,32 +123,32 @@
 .filterButton {
     display: block;
     width: 100%;
-    padding: 0.625rem 0.75rem;
+    padding: var(--spacing-sm) var(--spacing-md);
     background: transparent;
     border: none;
-    color: #6b7280;
+    color: var(--color-text-secondary);
     text-align: left;
-    font-size: 0.875rem;
-    border-radius: 6px;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     min-height: 40px;
 }
 
 .filterButton:hover {
-    background: #f3f4f6;
-    color: #1f2937;
+    background: var(--color-background-alt);
+    color: var(--color-text);
 }
 
 .filterButtonActive {
-    background: rgba(193, 154, 107, 0.1);
-    color: #c19a6b;
-    font-weight: 500;
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
 .majorCity {
     font-weight: 600;
-    color: #1f2937;
+    color: var(--color-text);
 }
 
 /* =============================================
@@ -146,21 +156,22 @@
    ============================================= */
 .clearButton {
     width: 100%;
-    padding: 0.625rem 1rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    color: #6b7280;
-    font-size: 0.875rem;
-    border-radius: 8px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     min-height: 44px;
 }
 
 .clearButton:hover {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #dc2626;
+    background: var(--color-error-light);
+    border-color: var(--color-error);
+    color: var(--color-error);
 }
 
 /* =============================================
@@ -169,19 +180,20 @@
 .activeFilters {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
 }
 
 .filterChip {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.625rem;
-    background: rgba(193, 154, 107, 0.1);
-    color: #c19a6b;
-    font-size: 0.75rem;
-    border-radius: 9999px;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-full);
 }
 
 .filterChip button {
@@ -190,25 +202,26 @@
     justify-content: center;
     width: 18px;
     height: 18px;
-    background: #c19a6b;
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     line-height: 1;
+    transition: background var(--transition-fast);
 }
 
 .filterChip button:hover {
-    background: #a67c4a;
+    background: var(--color-primary-dark);
 }
 
 /* =============================================
-   GRID - 1 column on mobile
+   GRID
    ============================================= */
 .grid {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--spacing-md);
     grid-template-columns: 1fr;
 }
 
@@ -217,28 +230,28 @@
    ============================================= */
 .noResults {
     text-align: center;
-    padding: 2rem 1rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
+    padding: var(--spacing-3xl) var(--spacing-lg);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
 }
 
 .noResultsIcon {
-    font-size: 2.5rem;
+    font-size: 3rem;
     display: block;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--spacing-md);
 }
 
 .noResults h3 {
-    font-size: 1.125rem;
-    color: #1f2937;
-    margin: 0 0 0.5rem 0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
+    margin: 0 0 var(--spacing-sm) 0;
 }
 
 .noResults p {
-    color: #6b7280;
-    margin: 0 0 1rem 0;
-    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--spacing-lg) 0;
+    font-size: 1rem;
 }
 
 .noResults .clearButton {
@@ -253,29 +266,31 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e5e7eb;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
 }
 
 .pageButton {
-    padding: 0.75rem 1.5rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    color: #1f2937;
-    font-weight: 500;
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     min-height: 48px;
-    min-width: 120px;
+    min-width: 140px;
 }
 
 .pageButton:hover:not(:disabled) {
-    background: #c19a6b;
+    background: var(--gradient-primary);
     color: white;
-    border-color: #c19a6b;
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(183, 110, 121, 0.25);
 }
 
 .pageButton:disabled {
@@ -284,8 +299,8 @@
 }
 
 .pageInfo {
-    color: #6b7280;
-    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
 }
 
 /* =============================================
@@ -293,21 +308,21 @@
    ============================================= */
 @media (min-width: 640px) {
     .container {
-        padding: 1.5rem;
+        padding: var(--spacing-xl);
     }
 
     .title {
-        font-size: 1.75rem;
+        font-size: 2rem;
     }
 
     .grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+        gap: var(--spacing-lg);
     }
 
     .pagination {
         flex-direction: row;
-        gap: 1.5rem;
+        gap: var(--spacing-xl);
     }
 }
 
@@ -317,23 +332,26 @@
 @media (min-width: 1024px) {
     .container {
         max-width: 1280px;
-        padding: 2rem 1.5rem;
+        padding: var(--spacing-2xl) var(--spacing-xl);
     }
 
     .title {
-        font-size: 2rem;
+        font-size: 2.25rem;
     }
 
     .layout {
         display: grid;
         grid-template-columns: 280px 1fr;
-        gap: 2rem;
+        gap: var(--spacing-2xl);
     }
 
     .sidebar {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: var(--spacing-lg);
+        position: sticky;
+        top: calc(65px + var(--spacing-lg));
+        height: fit-content;
     }
 
     .grid {

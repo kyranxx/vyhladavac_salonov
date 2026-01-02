@@ -1,6 +1,10 @@
+/* =============================================
+   POPULAR CITIES SECTION
+   ============================================= */
 .section {
-    padding: var(--spacing-3xl) 0;
+    padding: var(--spacing-4xl) 0;
     background: var(--color-background-alt);
+    position: relative;
 }
 
 .container {
@@ -11,21 +15,27 @@
 
 .header {
     text-align: center;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-3xl);
 }
 
 .title {
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
     font-weight: 700;
     color: var(--color-text);
     margin-bottom: var(--spacing-sm);
+    letter-spacing: -0.02em;
 }
 
 .subtitle {
     color: var(--color-text-secondary);
     font-size: var(--font-size-lg);
+    max-width: 500px;
+    margin: 0 auto;
 }
 
+/* =============================================
+   GRID LAYOUT
+   ============================================= */
 .grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
@@ -49,37 +59,78 @@
     }
 }
 
+/* =============================================
+   CITY CARDS
+   ============================================= */
 .card {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-lg);
-    background: white;
-    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
     text-decoration: none;
-    transition: var(--transition-base);
+    transition: all var(--transition-base);
     border: 1px solid var(--color-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
 }
 
 .card:hover {
     border-color: var(--color-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
 }
 
+.card:hover::before {
+    opacity: 0.02;
+}
+
+/* =============================================
+   FEATURED CARD
+   ============================================= */
 .featured {
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-end;
-    min-height: 200px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    min-height: 240px;
+    background: var(--gradient-primary);
     border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.featured::before {
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    opacity: 1;
+}
+
+.featured::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
 }
 
 .featured .cardContent {
     width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
+.featured .pin,
 .featured .cityName,
 .featured .region,
 .featured .count {
@@ -87,11 +138,16 @@
 }
 
 .featured .pin {
-    font-size: 2rem;
+    font-size: 2.5rem;
 }
 
 .featured .cityName {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+}
+
+.featured .count {
+    opacity: 0.9;
 }
 
 .featured .arrow {
@@ -99,10 +155,13 @@
 }
 
 .featured:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-2xl), 0 12px 40px rgba(183, 110, 121, 0.3);
 }
 
+/* =============================================
+   CARD CONTENT
+   ============================================= */
 .cardContent {
     display: flex;
     flex-direction: column;
@@ -110,13 +169,19 @@
 }
 
 .pin {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-xs);
 }
 
 .cityName {
     font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--color-text);
+    transition: color var(--transition-fast);
+}
+
+.card:hover .cityName {
+    color: var(--color-primary);
 }
 
 .region {
@@ -127,24 +192,27 @@
 .count {
     font-size: var(--font-size-sm);
     color: var(--color-primary);
-    font-weight: 500;
+    font-weight: 600;
     margin-top: var(--spacing-xs);
 }
 
 .arrow {
     font-size: var(--font-size-xl);
     color: var(--color-text-muted);
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
 }
 
 .card:hover .arrow {
     color: var(--color-primary);
-    transform: translateX(4px);
+    transform: translateX(6px);
 }
 
+/* =============================================
+   FOOTER & VIEW ALL BUTTON
+   ============================================= */
 .footer {
     text-align: center;
-    margin-top: var(--spacing-2xl);
+    margin-top: var(--spacing-3xl);
 }
 
 .viewAllButton {
@@ -154,15 +222,19 @@
     color: var(--color-primary);
     text-decoration: none;
     font-weight: 600;
-    padding: var(--spacing-sm) var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-xl);
     border: 2px solid var(--color-primary);
     border-radius: var(--radius-full);
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
+    background: transparent;
 }
 
 .viewAllButton:hover {
-    background: var(--color-primary);
+    background: var(--gradient-primary);
+    border-color: var(--color-primary);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(183, 110, 121, 0.25);
 }
 
 .arrowIcon {
@@ -173,12 +245,15 @@
     transform: translateX(4px);
 }
 
+/* =============================================
+   SKELETON LOADING
+   ============================================= */
 .cardSkeleton {
-    height: 100px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    height: 110px;
+    background: var(--gradient-shimmer);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
 }
 
 @keyframes shimmer {

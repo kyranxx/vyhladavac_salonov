@@ -1,86 +1,139 @@
+/* =============================================
+   FOR OWNERS CTA SECTION
+   ============================================= */
 .section {
-    padding: var(--spacing-3xl) 0;
-    background: linear-gradient(135deg, #2D2A26 0%, #1A1918 100%);
+    padding: var(--spacing-4xl) 0;
+    background: var(--gradient-dark);
     color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60%;
+    height: 100%;
+    background: radial-gradient(circle at 100% 0%, rgba(183, 110, 121, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    height: 80%;
+    background: radial-gradient(circle at 0% 100%, rgba(201, 166, 107, 0.1) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 .container {
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
+    position: relative;
+    z-index: 1;
 }
 
 .content {
     display: grid;
-    gap: var(--spacing-2xl);
+    gap: var(--spacing-3xl);
     align-items: center;
 }
 
 @media (min-width: 1024px) {
     .content {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: var(--spacing-4xl);
     }
 }
 
+/* =============================================
+   BADGE
+   ============================================= */
 .badge {
-    display: inline-block;
-    background: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background: var(--gradient-primary);
     color: white;
     font-size: var(--font-size-sm);
     font-weight: 600;
-    padding: var(--spacing-xs) var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-full);
     margin-bottom: var(--spacing-lg);
+    box-shadow: 0 4px 16px rgba(183, 110, 121, 0.3);
 }
 
+/* =============================================
+   TYPOGRAPHY
+   ============================================= */
 .title {
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-size: clamp(2rem, 5vw, 2.75rem);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
     margin-bottom: var(--spacing-md);
+    letter-spacing: -0.02em;
 }
 
 .highlight {
-    color: var(--color-primary);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .subtitle {
     font-size: var(--font-size-lg);
     color: rgba(255, 255, 255, 0.7);
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: var(--spacing-xl);
+    max-width: 500px;
 }
 
+/* =============================================
+   BENEFITS GRID
+   ============================================= */
 .benefits {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
 }
 
 .benefit {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
     align-items: flex-start;
 }
 
 .benefitIcon {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .benefit strong {
     display: block;
-    font-size: var(--font-size-sm);
-    margin-bottom: 2px;
+    font-size: var(--font-size-base);
+    margin-bottom: 4px;
+    font-weight: 600;
 }
 
 .benefit p {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.6);
     margin: 0;
+    line-height: 1.5;
 }
 
+/* =============================================
+   ACTION BUTTONS
+   ============================================= */
 .actions {
     display: flex;
     flex-wrap: wrap;
@@ -88,50 +141,73 @@
 }
 
 .primaryButton {
-    background: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--gradient-primary);
     color: white;
     text-decoration: none;
     font-weight: 600;
     padding: var(--spacing-md) var(--spacing-xl);
     border-radius: var(--radius-full);
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 16px rgba(183, 110, 121, 0.3);
 }
 
 .primaryButton:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(183, 110, 121, 0.4);
 }
 
 .secondaryButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
     background: transparent;
     color: white;
     text-decoration: none;
     font-weight: 600;
     padding: var(--spacing-md) var(--spacing-xl);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.25);
     border-radius: var(--radius-full);
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
 }
 
 .secondaryButton:hover {
-    border-color: white;
-    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
 }
 
-/* Visual Card */
+/* =============================================
+   VISUAL CARD
+   ============================================= */
 .visual {
     display: flex;
     justify-content: center;
 }
 
 .card {
-    background: white;
-    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    border-radius: var(--radius-2xl);
     padding: var(--spacing-xl);
     color: var(--color-text);
     width: 100%;
-    max-width: 400px;
-    box-shadow: var(--shadow-xl);
+    max-width: 420px;
+    box-shadow: var(--shadow-2xl), 0 0 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
 }
 
 .cardHeader {
@@ -146,14 +222,16 @@
 .cardLogo {
     font-size: 2.5rem;
     background: var(--color-primary-light);
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
 }
 
 .cardName {
     font-size: var(--font-size-lg);
-    font-weight: 600;
+    font-weight: 700;
     margin: 0 0 var(--spacing-xs);
+    color: var(--color-text);
 }
 
 .cardRating {
@@ -163,12 +241,15 @@
 
 .verifiedBadge {
     margin-left: auto;
-    background: #E8F5E9;
-    color: #2E7D32;
+    background: var(--color-success-light);
+    color: var(--color-success);
     font-size: var(--font-size-xs);
     font-weight: 600;
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .cardStats {
@@ -180,18 +261,50 @@
 .cardStat {
     text-align: center;
     padding: var(--spacing-md);
-    background: var(--color-background-alt);
-    border-radius: var(--radius-md);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
+    transition: all var(--transition-fast);
+}
+
+.cardStat:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-sm);
 }
 
 .cardStatNumber {
     display: block;
     font-size: var(--font-size-2xl);
     font-weight: 700;
-    color: var(--color-primary);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .cardStatLabel {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* =============================================
+   MOBILE ADJUSTMENTS
+   ============================================= */
+@media (max-width: 640px) {
+    .benefits {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        width: 100%;
+        justify-content: center;
+    }
 }

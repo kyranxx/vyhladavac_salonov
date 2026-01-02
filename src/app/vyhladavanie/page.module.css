@@ -1,37 +1,39 @@
 /* =============================================
-   SEARCH PAGE - MOBILE FIRST DESIGN
+   SEARCH PAGE - Premium Mobile First Design
    ============================================= */
 
 .main {
     min-height: 100vh;
-    background: #f8fafc;
-    padding-bottom: 2rem;
+    background: var(--color-background);
+    padding-bottom: var(--spacing-3xl);
 }
 
 .loading {
     text-align: center;
-    padding: 2rem 1rem;
-    color: #9ca3af;
+    padding: var(--spacing-3xl) var(--spacing-lg);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
 }
 
 .container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 1rem;
+    padding: var(--spacing-lg);
 }
 
 /* =============================================
    SEARCH HEADER
    ============================================= */
 .searchHeader {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--spacing-xl);
 }
 
 .title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 1rem;
+    color: var(--color-text);
+    margin: 0 0 var(--spacing-lg);
+    letter-spacing: -0.02em;
 }
 
 /* =============================================
@@ -40,28 +42,37 @@
 .searchForm {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    background: white;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
+    gap: var(--spacing-md);
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
 }
 
 .searchInputWrapper {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: #f9fafb;
-    border-radius: 8px;
-    min-height: 48px;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
+    min-height: 52px;
+    transition: all var(--transition-fast);
+}
+
+.searchInputWrapper:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .searchIcon {
     font-size: 1.25rem;
     opacity: 0.5;
     flex-shrink: 0;
+    color: var(--color-text-muted);
 }
 
 .searchInput {
@@ -69,49 +80,56 @@
     border: none;
     background: transparent;
     font-size: 1rem;
-    color: #1f2937;
+    color: var(--color-text);
     outline: none;
-    padding: 0.5rem 0;
+    padding: var(--spacing-sm) 0;
     min-width: 0;
 }
 
 .searchInput::placeholder {
-    color: #9ca3af;
+    color: var(--color-text-muted);
 }
 
 .filterSelect {
     width: 100%;
-    padding: 0.875rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: white;
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
     font-size: 1rem;
-    color: #1f2937;
+    color: var(--color-text);
     cursor: pointer;
-    min-height: 48px;
+    min-height: 52px;
+    transition: all var(--transition-fast);
+}
+
+.filterSelect:hover {
+    border-color: var(--color-text-muted);
 }
 
 .filterSelect:focus {
     outline: none;
-    border-color: #c19a6b;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 /* =============================================
    RESULTS
    ============================================= */
 .results {
-    margin-top: 1.5rem;
+    margin-top: var(--spacing-xl);
 }
 
 .resultCount {
-    color: #6b7280;
+    color: var(--color-text-secondary);
     font-size: 0.9375rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-lg);
+    font-weight: 500;
 }
 
 .grid {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--spacing-md);
     grid-template-columns: 1fr;
 }
 
@@ -120,29 +138,29 @@
    ============================================= */
 .noResults {
     text-align: center;
-    padding: 2rem 1rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
+    padding: var(--spacing-3xl) var(--spacing-lg);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
 }
 
 .noResultsIcon {
-    font-size: 2.5rem;
+    font-size: 3rem;
     display: block;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--spacing-md);
     opacity: 0.5;
 }
 
 .noResults h2 {
-    font-size: 1.125rem;
-    color: #1f2937;
-    margin: 0 0 0.5rem 0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
+    margin: 0 0 var(--spacing-sm) 0;
 }
 
 .noResults p {
-    color: #9ca3af;
+    color: var(--color-text-muted);
     margin: 0;
-    font-size: 0.9375rem;
+    font-size: 1rem;
 }
 
 /* =============================================
@@ -150,16 +168,16 @@
    ============================================= */
 @media (min-width: 640px) {
     .container {
-        padding: 1.5rem;
+        padding: var(--spacing-xl);
     }
 
     .title {
-        font-size: 1.75rem;
+        font-size: 2rem;
     }
 
     .grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+        gap: var(--spacing-lg);
     }
 }
 
@@ -188,11 +206,11 @@
 @media (min-width: 1024px) {
     .container {
         max-width: 1280px;
-        padding: 2rem 1.5rem;
+        padding: var(--spacing-2xl) var(--spacing-xl);
     }
 
     .title {
-        font-size: 2rem;
+        font-size: 2.25rem;
     }
 
     .grid {

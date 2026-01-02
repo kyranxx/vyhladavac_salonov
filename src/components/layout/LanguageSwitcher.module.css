@@ -1,3 +1,6 @@
+/* =============================================
+   LANGUAGE SWITCHER - Premium Design
+   ============================================= */
 .wrapper {
     position: relative;
 }
@@ -5,36 +8,46 @@
 .trigger {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: var(--spacing-sm);
+    padding: 8px 12px;
     background: transparent;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
     font-size: var(--font-size-sm);
 }
 
 .trigger:hover {
     background: var(--color-background-alt);
+    border-color: var(--color-text-muted);
 }
 
 .flagIcon {
-    width: 20px;
-    height: 15px;
-    border-radius: 2px;
+    width: 22px;
+    height: 16px;
+    border-radius: 3px;
     flex-shrink: 0;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
 }
 
 .code {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-text);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
 }
 
 .arrow {
     font-size: 0.6rem;
     color: var(--color-text-muted);
+    transition: transform var(--transition-fast);
+}
+
+.trigger:hover .arrow {
+    transform: translateY(1px);
 }
 
 .dropdown {
@@ -42,13 +55,26 @@
     top: 100%;
     right: 0;
     margin-top: var(--spacing-xs);
-    background: white;
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    min-width: 160px;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    min-width: 180px;
     z-index: 100;
     overflow: hidden;
+    animation: dropdownIn 0.2s ease-out;
+}
+
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .option {
@@ -61,7 +87,7 @@
     border: none;
     cursor: pointer;
     text-align: left;
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
 }
 
 .option:hover {
@@ -69,7 +95,12 @@
 }
 
 .option.active {
-    background: var(--color-primary-light);
+    background: var(--color-primary-lighter);
+}
+
+.option.active .name {
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
 .name {
@@ -81,4 +112,5 @@
 .check {
     color: var(--color-primary);
     font-weight: bold;
+    font-size: 1rem;
 }
