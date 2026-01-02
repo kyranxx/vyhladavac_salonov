@@ -1,62 +1,113 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import styles from './page.module.css';
 
-interface Salon {
+interface SalonInfo {
     id: string;
-    owner_id: string;
     name: string;
     status: string;
     tier: string;
-    created_at: string;
+    city: string;
 }
 
-interface UserWithSalon {
-    owner_id: string;
-    salon_name: string | null;
-    salon_status: string | null;
-    tier: string | null;
+interface User {
+    id: string;
+    email: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string;
     created_at: string;
+    salon_count: number;
+    salons: SalonInfo[];
 }
+
+interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+type SortField = 'full_name' | 'email' | 'created_at' | 'salon_count';
+type SortOrder = 'asc' | 'desc';
 
 export default function AdminUsersPage() {
-    const [users, setUsers] = useState<UserWithSalon[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ total: 0, withSalon: 0, premium: 0 });
+    const [pagination, setPagination] = useState<Pagination>({
+        page: 1,
+        limit: 50,
+        total: 0,
+        totalPages: 0
+    });
 
+    // Filtering
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    // Sorting
+    const [sortBy, setSortBy] = useState<SortField>('created_at');
+    const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+
+    // Delete modal
+    const [deleteModal, setDeleteModal] = useState<{
+        isOpen: boolean;
+        user: User | null;
+        step: 'confirm' | 'options';
+        deleteSalons: boolean;
+    }>({
+        isOpen: false,
+        user: null,
+        step: 'confirm',
+        deleteSalons: true
+    });
+
+    // Expanded rows (to show salon details)
+    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+    // Debounce search
     useEffect(() => {
-        loadUsers();
-    }, []);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
-    const loadUsers = async () => {
+    const loadUsers = useCallback(async () => {
+        setLoading(true);
         try {
-            // Use admin API to get salons
-            const response = await fetch('/api/admin/salons');
-            const salons = await response.json();
+            const params = new URLSearchParams({
+                page: pagination.page.toString(),
+                limit: pagination.limit.toString(),
+                sortBy,
+                sortOrder,
+                ...(debouncedSearch && { search: debouncedSearch })
+            });
 
-            if (Array.isArray(salons)) {
-                const usersData: UserWithSalon[] = salons.map((salon: Salon) => ({
-                    owner_id: salon.owner_id,
-                    salon_name: salon.name,
-                    salon_status: salon.status,
-                    tier: salon.tier,
-                    created_at: salon.created_at,
-                }));
+            const response = await fetch(`/api/admin/users?${params}`);
+            const data = await response.json();
 
-                setUsers(usersData);
-                setStats({
-                    total: usersData.length,
-                    withSalon: usersData.filter(u => u.salon_name).length,
-                    premium: usersData.filter(u => u.tier === 'premium').length,
-                });
+            if (data.users) {
+                setUsers(data.users);
+                setPagination(prev => ({ ...prev, ...data.pagination }));
             }
         } catch (error) {
             console.error('Error loading users:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [pagination.page, pagination.limit, sortBy, sortOrder, debouncedSearch]);
+
+    useEffect(() => {
+        loadUsers();
+    }, [loadUsers]);
+
+    // Reset to first page when search changes
+    useEffect(() => {
+        setPagination(prev => ({ ...prev, page: 1 }));
+    }, [debouncedSearch]);
 
     const formatDate = (dateStr: string | null) => {
         if (!dateStr) return '—';
@@ -67,7 +118,117 @@ export default function AdminUsersPage() {
         });
     };
 
-    const getStatusBadge = (status: string | null) => {
+    const handleSort = (field: SortField) => {
+        if (sortBy === field) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(field);
+            setSortOrder('desc');
+        }
+    };
+
+    const getSortIcon = (field: SortField) => {
+        if (sortBy !== field) return '↕️';
+        return sortOrder === 'asc' ? '↑' : '↓';
+    };
+
+    const toggleExpandRow = (userId: string) => {
+        setExpandedRows(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(userId)) {
+                newSet.delete(userId);
+            } else {
+                newSet.add(userId);
+            }
+            return newSet;
+        });
+    };
+
+    const handleDeleteClick = (user: User) => {
+        setDeleteModal({
+            isOpen: true,
+            user,
+            step: 'confirm',
+            deleteSalons: true
+        });
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!deleteModal.user) return;
+
+        if (deleteModal.step === 'confirm') {
+            setDeleteModal(prev => ({ ...prev, step: 'options' }));
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/users', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: deleteModal.user.id,
+                    deleteSalons: deleteModal.deleteSalons
+                })
+            });
+
+            if (response.ok) {
+                loadUsers();
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        } finally {
+            setDeleteModal({ isOpen: false, user: null, step: 'confirm', deleteSalons: true });
+        }
+    };
+
+    const renderPagination = () => {
+        const { page, totalPages, total } = pagination;
+        const startItem = (page - 1) * pagination.limit + 1;
+        const endItem = Math.min(page * pagination.limit, total);
+
+        return (
+            <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                    Zobrazujem {startItem}–{endItem} z {total} používateľov
+                </div>
+                <div className={styles.paginationControls}>
+                    <button
+                        className={styles.paginationButton}
+                        onClick={() => setPagination(prev => ({ ...prev, page: 1 }))}
+                        disabled={page === 1}
+                    >
+                        ««
+                    </button>
+                    <button
+                        className={styles.paginationButton}
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                        disabled={page === 1}
+                    >
+                        «
+                    </button>
+                    <span className={styles.pageIndicator}>
+                        Strana {page} z {totalPages}
+                    </span>
+                    <button
+                        className={styles.paginationButton}
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                        disabled={page === totalPages}
+                    >
+                        »
+                    </button>
+                    <button
+                        className={styles.paginationButton}
+                        onClick={() => setPagination(prev => ({ ...prev, page: totalPages }))}
+                        disabled={page === totalPages}
+                    >
+                        »»
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    const getStatusBadge = (status: string) => {
         switch (status) {
             case 'approved':
                 return <span className={styles.badgeGreen}>Schválený</span>;
@@ -80,17 +241,20 @@ export default function AdminUsersPage() {
         }
     };
 
-    const getTierBadge = (tier: string | null) => {
+    const getTierBadge = (tier: string) => {
         if (tier === 'premium') {
             return <span className={styles.badgePremium}>⭐ Premium</span>;
         }
         return <span className={styles.badgeGray}>Free</span>;
     };
 
-    if (loading) {
+    if (loading && users.length === 0) {
         return (
             <div className={styles.container}>
-                <div className={styles.loading}>Načítavam používateľov...</div>
+                <div className={styles.loading}>
+                    <div className={styles.spinner}></div>
+                    Načítavam používateľov...
+                </div>
             </div>
         );
     }
@@ -98,63 +262,301 @@ export default function AdminUsersPage() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Používatelia</h1>
-                    <p className={styles.subtitle}>Správa registrovaných používateľov a ich salónov</p>
+                <h1 className={styles.title}>Používatelia</h1>
+            </div>
+
+            {/* Search and filter bar */}
+            <div className={styles.filterBar}>
+                <div className={styles.searchWrapper}>
+                    <span className={styles.searchIcon}>🔍</span>
+                    <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Hľadať podľa mena, emailu, telefónu alebo názvu salónu..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    {searchQuery && (
+                        <button
+                            className={styles.clearSearch}
+                            onClick={() => setSearchQuery('')}
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+                <div className={styles.filterInfo}>
+                    {loading && <span className={styles.loadingDot}>●</span>}
+                    <span className={styles.resultCount}>{pagination.total} používateľov</span>
                 </div>
             </div>
 
-            <div className={styles.statsGrid}>
-                <div className={styles.statCard}>
-                    <span className={styles.statNumber}>{stats.total}</span>
-                    <span className={styles.statLabel}>Celkom salónov</span>
-                </div>
-                <div className={styles.statCard}>
-                    <span className={styles.statNumber}>{stats.withSalon}</span>
-                    <span className={styles.statLabel}>Aktívnych</span>
-                </div>
-                <div className={styles.statCard}>
-                    <span className={styles.statNumber}>{stats.premium}</span>
-                    <span className={styles.statLabel}>Premium</span>
-                </div>
-            </div>
-
+            {/* Users table */}
             <div className={styles.content}>
-                <div className={styles.infoBox}>
-                    <p>ℹ️ Pre kompletnú správu používateľov použite <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer">Supabase Dashboard</a> → Authentication → Users</p>
-                </div>
-
                 {users.length > 0 ? (
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Salón</th>
-                                    <th>Stav</th>
-                                    <th>Plán</th>
-                                    <th>Vytvorený</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user, index) => (
-                                    <tr key={index}>
-                                        <td className={styles.salonName}>{user.salon_name || '—'}</td>
-                                        <td>{getStatusBadge(user.salon_status)}</td>
-                                        <td>{getTierBadge(user.tier)}</td>
-                                        <td>{formatDate(user.created_at)}</td>
+                    <>
+                        {/* Mobile Card Layout */}
+                        <div className={styles.cardList}>
+                            {users.map((user) => (
+                                <div key={user.id} className={styles.userCard}>
+                                    <div className={styles.userInfo}>
+                                        <div className={styles.avatar}>
+                                            {user.avatar_url ? (
+                                                <img src={user.avatar_url} alt="" />
+                                            ) : (
+                                                <span>{(user.full_name || user.email || '?')[0].toUpperCase()}</span>
+                                            )}
+                                        </div>
+                                        <div className={styles.userDetails}>
+                                            <span className={styles.userName}>
+                                                {user.full_name || <em className={styles.noName}>Bez mena</em>}
+                                            </span>
+                                            <span className={styles.userEmail}>{user.email}</span>
+                                        </div>
+                                        <button
+                                            className={styles.deleteButton}
+                                            onClick={() => handleDeleteClick(user)}
+                                            title="Odstrániť"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                    <div className={styles.cardMeta}>
+                                        <span className={styles.cardMetaItem}>
+                                            📅 {formatDate(user.created_at)}
+                                        </span>
+                                        {user.salon_count > 0 && (
+                                            <span className={styles.cardMetaItem}>
+                                                💇 {user.salon_count} salón{user.salon_count > 1 ? 'y' : ''}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {user.salon_count > 0 && (
+                                        <>
+                                            <button
+                                                className={styles.salonCountButton}
+                                                onClick={() => toggleExpandRow(user.id)}
+                                                style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+                                            >
+                                                <span className={styles.salonCount}>
+                                                    {expandedRows.has(user.id) ? 'Skryť salóny' : 'Zobraziť salóny'}
+                                                </span>
+                                                <span className={styles.expandIcon}>
+                                                    {expandedRows.has(user.id) ? '▲' : '▼'}
+                                                </span>
+                                            </button>
+                                            {expandedRows.has(user.id) && (
+                                                <div className={styles.salonsExpanded}>
+                                                    <div className={styles.salonsListHeader}>Salóny:</div>
+                                                    {user.salons.map(salon => (
+                                                        <Link
+                                                            key={salon.id}
+                                                            href={`/admin/salony/${salon.id}`}
+                                                            className={styles.salonItem}
+                                                        >
+                                                            <span className={styles.salonName}>{salon.name}</span>
+                                                            <span className={styles.salonCity}>{salon.city}</span>
+                                                            {getStatusBadge(salon.status)}
+                                                            {getTierBadge(salon.tier)}
+                                                            <span className={styles.salonArrow}>→</span>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop Table Layout */}
+                        <div className={styles.tableWrapper}>
+                            <table className={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th
+                                            className={styles.sortableHeader}
+                                            onClick={() => handleSort('full_name')}
+                                        >
+                                            Meno / Email {getSortIcon('full_name')}
+                                        </th>
+                                        <th
+                                            className={styles.sortableHeader}
+                                            onClick={() => handleSort('salon_count')}
+                                        >
+                                            Počet salónov {getSortIcon('salon_count')}
+                                        </th>
+                                        <th
+                                            className={styles.sortableHeader}
+                                            onClick={() => handleSort('created_at')}
+                                        >
+                                            Registrácia {getSortIcon('created_at')}
+                                        </th>
+                                        <th>Akcie</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {users.map((user) => (
+                                        <React.Fragment key={user.id}>
+                                            <tr className={expandedRows.has(user.id) ? styles.expandedRow : ''}>
+                                                <td>
+                                                    <div className={styles.userInfo}>
+                                                        <div className={styles.avatar}>
+                                                            {user.avatar_url ? (
+                                                                <img src={user.avatar_url} alt="" />
+                                                            ) : (
+                                                                <span>{(user.full_name || user.email || '?')[0].toUpperCase()}</span>
+                                                            )}
+                                                        </div>
+                                                        <div className={styles.userDetails}>
+                                                            <span className={styles.userName}>
+                                                                {user.full_name || <em className={styles.noName}>Bez mena</em>}
+                                                            </span>
+                                                            <span className={styles.userEmail}>{user.email}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {user.salon_count > 0 ? (
+                                                        <button
+                                                            className={styles.salonCountButton}
+                                                            onClick={() => toggleExpandRow(user.id)}
+                                                        >
+                                                            <span className={styles.salonCount}>{user.salon_count}</span>
+                                                            <span className={styles.expandIcon}>
+                                                                {expandedRows.has(user.id) ? '▼' : '▶'}
+                                                            </span>
+                                                        </button>
+                                                    ) : (
+                                                        <span className={styles.noSalons}>0</span>
+                                                    )}
+                                                </td>
+                                                <td>{formatDate(user.created_at)}</td>
+                                                <td>
+                                                    <div className={styles.actions}>
+                                                        <button
+                                                            className={styles.deleteButton}
+                                                            onClick={() => handleDeleteClick(user)}
+                                                            title="Odstrániť používateľa"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {/* Expanded row with salon details */}
+                                            {expandedRows.has(user.id) && user.salons.length > 0 && (
+                                                <tr className={styles.salonDetailsRow}>
+                                                    <td colSpan={4}>
+                                                        <div className={styles.salonsList}>
+                                                            <div className={styles.salonsListHeader}>
+                                                                Salóny používateľa:
+                                                            </div>
+                                                            {user.salons.map(salon => (
+                                                                <Link
+                                                                    key={salon.id}
+                                                                    href={`/admin/salony/${salon.id}`}
+                                                                    className={styles.salonItem}
+                                                                >
+                                                                    <span className={styles.salonName}>{salon.name}</span>
+                                                                    <span className={styles.salonCity}>{salon.city}</span>
+                                                                    {getStatusBadge(salon.status)}
+                                                                    {getTierBadge(salon.tier)}
+                                                                    <span className={styles.salonArrow}>→</span>
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        {renderPagination()}
+                    </>
                 ) : (
                     <div className={styles.emptyState}>
                         <span className={styles.emptyIcon}>👥</span>
-                        <h3>Žiadni používatelia</h3>
-                        <p>Zatiaľ sa nezaregistroval žiadny používateľ so salónom.</p>
+                        <h3>{searchQuery ? 'Žiadne výsledky' : 'Žiadni používatelia'}</h3>
+                        <p>
+                            {searchQuery
+                                ? 'Skúste zmeniť vyhľadávací výraz.'
+                                : 'Zatiaľ sa nezaregistroval žiadny používateľ.'}
+                        </p>
                     </div>
                 )}
             </div>
+
+            {/* Delete confirmation modal */}
+            {deleteModal.isOpen && deleteModal.user && (
+                <div className={styles.modalOverlay} onClick={() => setDeleteModal({ isOpen: false, user: null, step: 'confirm', deleteSalons: true })}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h3>⚠️ Odstrániť používateľa</h3>
+                            <button
+                                className={styles.modalClose}
+                                onClick={() => setDeleteModal({ isOpen: false, user: null, step: 'confirm', deleteSalons: true })}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className={styles.modalContent}>
+                            {deleteModal.step === 'confirm' ? (
+                                <>
+                                    <p>Naozaj chcete odstrániť používateľa?</p>
+                                    <div className={styles.userToDelete}>
+                                        <strong>{deleteModal.user.full_name || 'Bez mena'}</strong>
+                                        <span>{deleteModal.user.email}</span>
+                                    </div>
+                                    {deleteModal.user.salon_count > 0 && (
+                                        <p className={styles.warning}>
+                                            ⚠️ Tento používateľ má {deleteModal.user.salon_count} salón(ov).
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <p><strong>Potvrdenie odstránenia</strong></p>
+                                    {deleteModal.user.salon_count > 0 && (
+                                        <div className={styles.optionGroup}>
+                                            <label className={styles.checkboxLabel}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={deleteModal.deleteSalons}
+                                                    onChange={(e) => setDeleteModal(prev => ({
+                                                        ...prev,
+                                                        deleteSalons: e.target.checked
+                                                    }))}
+                                                />
+                                                Odstrániť aj všetky salóny používateľa ({deleteModal.user.salon_count})
+                                            </label>
+                                        </div>
+                                    )}
+                                    <p className={styles.finalWarning}>
+                                        Táto akcia je <strong>nevratná</strong>. Ste si istí?
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                        <div className={styles.modalActions}>
+                            <button
+                                className={styles.cancelButton}
+                                onClick={() => setDeleteModal({ isOpen: false, user: null, step: 'confirm', deleteSalons: true })}
+                            >
+                                Zrušiť
+                            </button>
+                            <button
+                                className={styles.confirmDeleteButton}
+                                onClick={handleDeleteConfirm}
+                            >
+                                {deleteModal.step === 'confirm' ? 'Pokračovať' : 'Odstrániť'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

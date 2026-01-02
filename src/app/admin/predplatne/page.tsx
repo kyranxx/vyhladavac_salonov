@@ -85,34 +85,57 @@ export default function AdminSubscriptionsPage() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Predplatné</h1>
-                    <p className={styles.subtitle}>Správa aktívnych predplatných</p>
-                </div>
+                <h1 className={styles.title}>Predplatné</h1>
+                <p className={styles.subtitle}>Správa aktívnych predplatných ({subscriptions.length})</p>
             </div>
 
             <div className={styles.content}>
                 {subscriptions.length > 0 ? (
-                    <div className={styles.table}>
-                        <div className={styles.tableHeader}>
-                            <span>Salón</span>
-                            <span>Plán</span>
-                            <span>Stav</span>
-                            <span>Obdobie od</span>
-                            <span>Obdobie do</span>
+                    <>
+                        {/* Mobile Card Layout */}
+                        <div className={styles.cardList}>
+                            {subscriptions.map((sub) => (
+                                <div key={sub.id} className={styles.subCard}>
+                                    <div className={styles.subCardHeader}>
+                                        <span className={styles.subCardName}>
+                                            {sub.salons?.name || 'Neznámy salón'}
+                                        </span>
+                                        {getStatusBadge(sub.status)}
+                                    </div>
+                                    <div className={styles.subCardMeta}>
+                                        <span className={styles.planBadge}>{getPlanName(sub.plan_type)}</span>
+                                        <span>{formatDate(sub.current_period_start)} – {formatDate(sub.current_period_end)}</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        {subscriptions.map((sub) => (
-                            <div key={sub.id} className={styles.tableRow}>
-                                <span className={styles.salonName}>
-                                    {sub.salons?.name || 'Neznámy salón'}
-                                </span>
-                                <span>{getPlanName(sub.plan_type)}</span>
-                                <span>{getStatusBadge(sub.status)}</span>
-                                <span>{formatDate(sub.current_period_start)}</span>
-                                <span>{formatDate(sub.current_period_end)}</span>
-                            </div>
-                        ))}
-                    </div>
+
+                        {/* Desktop Table Layout */}
+                        <div className={styles.tableWrapper}>
+                            <table className={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th>Salón</th>
+                                        <th>Plán</th>
+                                        <th>Stav</th>
+                                        <th>Obdobie od</th>
+                                        <th>Obdobie do</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {subscriptions.map((sub) => (
+                                        <tr key={sub.id}>
+                                            <td>{sub.salons?.name || 'Neznámy salón'}</td>
+                                            <td>{getPlanName(sub.plan_type)}</td>
+                                            <td>{getStatusBadge(sub.status)}</td>
+                                            <td>{formatDate(sub.current_period_start)}</td>
+                                            <td>{formatDate(sub.current_period_end)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
                 ) : (
                     <div className={styles.emptyState}>
                         <span className={styles.emptyIcon}>💳</span>

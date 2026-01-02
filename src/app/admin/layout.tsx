@@ -28,6 +28,7 @@ export default function AdminLayout({
     const router = useRouter();
     const { user, loading, signOut } = useAuth();
     const [isAdmin, setIsAdmin] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         if (!loading) {
@@ -41,6 +42,22 @@ export default function AdminLayout({
         }
     }, [user, loading, router]);
 
+    // Close sidebar when route changes (mobile)
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [pathname]);
+
+    // Close sidebar when clicking outside
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setSidebarOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const handleSignOut = async () => {
         await signOut();
         router.push('/');
@@ -49,7 +66,7 @@ export default function AdminLayout({
     if (loading || !isAdmin) {
         return (
             <div className={styles.loading}>
-                <span className={styles.spinner}>⏳</span>
+                <div className={styles.spinner}></div>
                 <p>Načítavam...</p>
             </div>
         );
@@ -57,12 +74,46 @@ export default function AdminLayout({
 
     return (
         <div className={styles.wrapper}>
+            {/* Mobile Header */}
+            <header className={styles.mobileHeader}>
+                <button
+                    className={styles.menuButton}
+                    onClick={() => setSidebarOpen(true)}
+                    aria-label="Otvoriť menu"
+                >
+                    <span className={styles.menuIcon}>☰</span>
+                </button>
+                <Link href="/admin" className={styles.mobileTitle}>
+                    Admin Panel
+                </Link>
+                <div className={styles.mobileHeaderRight}>
+                    <Link href="/" className={styles.mobileBackLink}>
+                        ↩️
+                    </Link>
+                </div>
+            </header>
+
+            {/* Overlay for mobile */}
+            {sidebarOpen && (
+                <div
+                    className={styles.overlay}
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={styles.sidebar}>
+            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.sidebarHeader}>
                     <Link href="/admin" className={styles.logo}>
                         🔧 Admin Panel
                     </Link>
+                    <button
+                        className={styles.closeButton}
+                        onClick={() => setSidebarOpen(false)}
+                        aria-label="Zavrieť menu"
+                    >
+                        ✕
+                    </button>
                 </div>
 
                 <nav className={styles.nav}>
@@ -70,11 +121,10 @@ export default function AdminLayout({
                         <Link
                             key={item.path}
                             href={item.path}
-                            className={`${styles.navItem} ${pathname === item.path ? styles.active : ''
-                                }`}
+                            className={`${styles.navItem} ${pathname === item.path ? styles.active : ''}`}
                         >
                             <span className={styles.navIcon}>{item.icon}</span>
-                            {item.label}
+                            <span className={styles.navLabel}>{item.label}</span>
                         </Link>
                     ))}
                 </nav>

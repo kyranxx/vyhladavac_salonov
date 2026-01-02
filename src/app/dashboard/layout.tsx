@@ -3,16 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useDashboardTranslations } from '@/hooks/useTranslations';
 import styles from './layout.module.css';
-
-const sidebarItems = [
-    { path: '/dashboard', label: 'Prehľad', icon: '🏠' },
-    { path: '/dashboard/moj-salon', label: 'Moje salóny', icon: '💇' },
-    { path: '/dashboard/statistiky', label: 'Štatistiky', icon: '📊' },
-    { path: '/dashboard/predplatne', label: 'Predplatné', icon: '⭐' },
-    { path: '/dashboard/nastavenia', label: 'Nastavenia', icon: '⚙️' },
-];
 
 export default function DashboardLayout({
     children,
@@ -22,12 +15,28 @@ export default function DashboardLayout({
     const pathname = usePathname();
     const router = useRouter();
     const { user, loading, signOut } = useAuth();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const t = useDashboardTranslations();
+
+    // Dynamic sidebar items based on translations
+    const sidebarItems = [
+        { path: '/dashboard', label: t.title, icon: '🏠' },
+        { path: '/dashboard/moj-salon', label: t.mySalons, icon: '💇' },
+        { path: '/dashboard/statistiky', label: t.statistics, icon: '📊' },
+        { path: '/dashboard/predplatne', label: t.subscription, icon: '⭐' },
+        { path: '/dashboard/nastavenia', label: t.settings, icon: '⚙️' },
+    ];
 
     useEffect(() => {
         if (!loading && !user) {
             router.push('/prihlasenie');
         }
     }, [user, loading, router]);
+
+    // Close sidebar on route change
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [pathname]);
 
     const handleSignOut = async () => {
         await signOut();
@@ -37,8 +46,8 @@ export default function DashboardLayout({
     if (loading) {
         return (
             <div className={styles.loading}>
-                <span className={styles.spinner}>⏳</span>
-                <p>Načítavam...</p>
+                <div className={styles.spinner}></div>
+                <p>{t.title}...</p>
             </div>
         );
     }
@@ -49,8 +58,33 @@ export default function DashboardLayout({
 
     return (
         <div className={styles.wrapper}>
+            {/* Mobile Header */}
+            <header className={styles.mobileHeader}>
+                <button
+                    className={styles.menuButton}
+                    onClick={() => setSidebarOpen(true)}
+                    aria-label="Open menu"
+                >
+                    <span className={styles.menuIcon}>☰</span>
+                </button>
+                <Link href="/dashboard" className={styles.mobileTitle}>
+                    {t.title}
+                </Link>
+                <Link href="/" className={styles.mobileBackLink}>
+                    ↩️
+                </Link>
+            </header>
+
+            {/* Overlay */}
+            {sidebarOpen && (
+                <div
+                    className={styles.overlay}
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={styles.sidebar}>
+            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.sidebarHeader}>
                     <Link href="/" className={styles.logo}>
                         <img
@@ -59,6 +93,13 @@ export default function DashboardLayout({
                             className={styles.logoImage}
                         />
                     </Link>
+                    <button
+                        className={styles.closeButton}
+                        onClick={() => setSidebarOpen(false)}
+                        aria-label="Close menu"
+                    >
+                        ✕
+                    </button>
                 </div>
 
                 <nav className={styles.nav}>
@@ -66,11 +107,10 @@ export default function DashboardLayout({
                         <Link
                             key={item.path}
                             href={item.path}
-                            className={`${styles.navItem} ${pathname === item.path ? styles.active : ''
-                                }`}
+                            className={`${styles.navItem} ${pathname === item.path ? styles.active : ''}`}
                         >
                             <span className={styles.navIcon}>{item.icon}</span>
-                            {item.label}
+                            <span className={styles.navLabel}>{item.label}</span>
                         </Link>
                     ))}
                 </nav>
@@ -83,7 +123,7 @@ export default function DashboardLayout({
                         </span>
                     </div>
                     <button onClick={handleSignOut} className={styles.signOutButton}>
-                        Odhlásiť sa
+                        {t.signOut}
                     </button>
                 </div>
             </aside>

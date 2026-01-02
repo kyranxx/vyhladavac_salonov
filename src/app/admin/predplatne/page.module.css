@@ -1,64 +1,110 @@
+/* =============================================
+   SUBSCRIPTIONS PAGE - MOBILE FIRST DESIGN
+   ============================================= */
+
 .container {
-    padding: 2rem;
+    padding: 1rem;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .header {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary, #1f2937);
-    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
 }
 
 .subtitle {
-    color: var(--text-secondary, #6b7280);
+    color: #6b7280;
     margin: 0;
+    font-size: 0.875rem;
 }
 
 .content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-}
-
-.statCard {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.statValue {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #c19a6b;
-    margin-bottom: 0.25rem;
-}
-
-.statLabel {
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.tableContainer {
     background: white;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+}
+
+/* =============================================
+   MOBILE CARD LIST
+   ============================================= */
+.cardList {
+    display: flex;
+    flex-direction: column;
+}
+
+.subCard {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.subCard:last-child {
+    border-bottom: none;
+}
+
+.subCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.subCardName {
+    font-weight: 600;
+    color: #1f2937;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subCardMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    color: #6b7280;
+}
+
+.planBadge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    width: fit-content;
+}
+
+/* =============================================
+   TABLE - Hidden on mobile
+   ============================================= */
+.tableWrapper {
+    display: none;
+    overflow-x: auto;
+}
+
 .table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 500px;
 }
 
 .table th,
@@ -71,8 +117,9 @@
 .table th {
     background: #f9fafb;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: #6b7280;
+    white-space: nowrap;
 }
 
 .table td {
@@ -80,20 +127,115 @@
     color: #1f2937;
 }
 
+/* =============================================
+   BADGES
+   ============================================= */
 .badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
+    background: #f3f4f6;
+    color: #6b7280;
 }
 
 .badgeActive {
-    background: #dcfce7;
-    color: #166534;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    background: #d1fae5;
+    color: #065f46;
 }
 
+.badgeCanceled,
 .badgeExpired {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
     background: #fee2e2;
-    color: #dc2626;
+    color: #991b1b;
+}
+
+.badgePastDue,
+.badgePending {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* =============================================
+   EMPTY STATE
+   ============================================= */
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.emptyIcon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.emptyState h3 {
+    margin: 0 0 0.5rem;
+    color: #1f2937;
+    font-size: 1.125rem;
+}
+
+.emptyState p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9375rem;
+}
+
+/* =============================================
+   TABLET BREAKPOINT (640px+)
+   ============================================= */
+@media (min-width: 640px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .subCardMeta {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+}
+
+/* =============================================
+   DESKTOP BREAKPOINT (1024px+)
+   ============================================= */
+@media (min-width: 1024px) {
+    .container {
+        padding: 0;
+        max-width: 1000px;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .header {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Hide mobile cards, show table */
+    .cardList {
+        display: none;
+    }
+
+    .tableWrapper {
+        display: block;
+    }
 }

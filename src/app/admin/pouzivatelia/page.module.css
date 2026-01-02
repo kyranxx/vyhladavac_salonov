@@ -1,90 +1,161 @@
+/* =============================================
+   USERS PAGE - MOBILE FIRST DESIGN
+   Base styles = mobile, then scale up
+   ============================================= */
+
 .container {
-    padding: 2rem;
+    padding: 1rem;
+    max-width: 100%;
 }
 
 .header {
-    margin-bottom: 2rem;
-}
-
-.headerContent h1 {
-    margin: 0;
-    font-size: 1.75rem;
-    color: #1f2937;
+    margin-bottom: 1rem;
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1f2937;
     margin: 0;
 }
 
-.subtitle {
-    color: #6b7280;
-    margin: 0.25rem 0 0 0;
-}
-
+/* =============================================
+   LOADING STATE
+   ============================================= */
 .loading {
-    text-align: center;
-    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
     color: #6b7280;
+    gap: 0.75rem;
 }
 
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #c19a6b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
-.statCard {
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =============================================
+   FILTER BAR
+   ============================================= */
+.filterBar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.searchWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    opacity: 0.5;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.875rem 2.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
     background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-height: 48px;
 }
 
-.statNumber {
-    display: block;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #c19a6b;
+.searchInput:focus {
+    outline: none;
+    border-color: #c19a6b;
+    box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.15);
 }
 
-.statLabel {
+.searchInput::placeholder {
+    color: #9ca3af;
     font-size: 0.875rem;
-    color: #6b7280;
 }
 
+.clearSearch {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 8px;
+    font-size: 1rem;
+    border-radius: 4px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filterInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.loadingDot {
+    color: #c19a6b;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.resultCount {
+    font-weight: 500;
+}
+
+/* =============================================
+   CONTENT WRAPPER
+   ============================================= */
 .content {
     background: white;
     border-radius: 12px;
-    padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-.infoBox {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.infoBox p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #1e40af;
-}
-
-.infoBox a {
-    color: #c19a6b;
-    font-weight: 600;
-}
-
+/* =============================================
+   TABLE - Hidden on mobile, shown on tablet+
+   ============================================= */
 .tableWrapper {
-    overflow-x: auto;
+    display: none;
 }
 
 .table {
@@ -103,92 +174,684 @@
     background: #f9fafb;
     font-weight: 600;
     color: #374151;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
 }
 
-.table td {
-    font-size: 0.875rem;
-    color: #4b5563;
+.sortableHeader {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
 }
 
-.salonName {
+.sortableHeader:hover {
+    background: #f3f4f6;
+}
+
+.table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.expandedRow {
+    background: #fefbf7 !important;
+}
+
+/* =============================================
+   MOBILE CARD LIST
+   ============================================= */
+.cardList {
+    display: flex;
+    flex-direction: column;
+}
+
+.userCard {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.userCard:last-child {
+    border-bottom: none;
+}
+
+/* =============================================
+   USER INFO (shared between card and table)
+   ============================================= */
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c19a6b 0%, #a67c4a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar span {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.userDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.userName {
     font-weight: 600;
     color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+.noName {
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+.userEmail {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =============================================
+   CARD SPECIFIC STYLES
+   ============================================= */
+.cardMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: #6b7280;
+}
+
+.cardMetaItem {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.cardActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* =============================================
+   SALON COUNT & EXPAND
+   ============================================= */
+.salonCountButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    min-height: 40px;
+}
+
+.salonCountButton:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.salonCount {
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.expandIcon {
+    font-size: 0.625rem;
+    color: #6b7280;
+    transition: transform 0.2s;
+}
+
+.noSalons {
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+/* =============================================
+   SALON DETAILS (expanded)
+   ============================================= */
+.salonDetailsRow {
+    background: #fefbf7 !important;
+}
+
+.salonDetailsRow td {
+    padding: 0 !important;
+    border-bottom: 2px solid #c19a6b;
+}
+
+.salonsExpanded {
+    padding: 0.75rem 1rem;
+    background: #fefbf7;
+    border-top: 1px solid #e5e7eb;
+}
+
+.salonsList {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.salonsListHeader {
+    font-size: 0.6875rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.salonItem {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 80px 24px;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.salonItem:hover {
+    background: #f9fafb;
+    border-color: #c19a6b;
+}
+
+.salonItem .salonName {
+    font-weight: 600;
+    color: #1f2937;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.salonCity {
+    color: #6b7280;
+    font-size: 0.8125rem;
+    text-align: right;
+}
+
+.salonArrow {
+    color: #c19a6b;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* =============================================
+   ACTIONS
+   ============================================= */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.deleteButton:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+/* =============================================
+   BADGES
+   ============================================= */
 .badgeGreen {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     background: #d1fae5;
     color: #065f46;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
 }
 
 .badgeYellow {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     background: #fef3c7;
     color: #92400e;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
 }
 
 .badgeRed {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     background: #fee2e2;
     color: #991b1b;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
 }
 
 .badgeGray {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     background: #f3f4f6;
     color: #6b7280;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
 }
 
 .badgePremium {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.625rem;
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
     color: #92400e;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
 }
 
+/* =============================================
+   PAGINATION
+   ============================================= */
+.pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.paginationInfo {
+    color: #6b7280;
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+.paginationControls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.paginationButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    color: #374151;
+}
+
+.paginationButton:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.paginationButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pageIndicator {
+    padding: 0 0.5rem;
+    color: #6b7280;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+/* =============================================
+   EMPTY STATE
+   ============================================= */
 .emptyState {
     text-align: center;
-    padding: 3rem;
+    padding: 3rem 1rem;
 }
 
 .emptyIcon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     display: block;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .emptyState h3 {
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.5rem;
     color: #1f2937;
+    font-size: 1.125rem;
 }
 
 .emptyState p {
     margin: 0;
     color: #6b7280;
+    font-size: 0.9375rem;
 }
 
-@media (max-width: 768px) {
-    .statsGrid {
-        grid-template-columns: 1fr;
+/* =============================================
+   MODAL - Bottom sheet on mobile
+   ============================================= */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background: white;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 16px 16px 0 0;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.modalHeader h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #1f2937;
+}
+
+.modalClose {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.modalClose:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.modalContent {
+    padding: 1rem;
+}
+
+.modalContent p {
+    margin: 0 0 1rem;
+    color: #4b5563;
+    font-size: 0.9375rem;
+}
+
+.userToDelete {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.userToDelete strong {
+    color: #1f2937;
+}
+
+.userToDelete span {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.warning {
+    color: #d97706 !important;
+    background: #fffbeb;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    margin-bottom: 0 !important;
+}
+
+.optionGroup {
+    margin-bottom: 1rem;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    color: #374151;
+    padding: 0.5rem 0;
+}
+
+.checkboxLabel input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #c19a6b;
+}
+
+.finalWarning {
+    color: #dc2626 !important;
+    font-size: 0.875rem;
+}
+
+.modalActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.cancelButton,
+.confirmDeleteButton {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 48px;
+}
+
+.cancelButton {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    order: 2;
+}
+
+.cancelButton:hover {
+    background: #f9fafb;
+}
+
+.confirmDeleteButton {
+    background: #dc2626;
+    border: none;
+    color: white;
+    order: 1;
+}
+
+.confirmDeleteButton:hover {
+    background: #b91c1c;
+}
+
+/* =============================================
+   TABLET BREAKPOINT (640px+)
+   ============================================= */
+@media (min-width: 640px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .filterBar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .searchWrapper {
+        max-width: 400px;
+    }
+
+    .pagination {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .modalOverlay {
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .modal {
+        max-width: 420px;
+        border-radius: 12px;
+        animation: scaleIn 0.2s ease-out;
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .modalActions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .cancelButton,
+    .confirmDeleteButton {
+        width: auto;
+        min-width: 100px;
+        order: 0;
+    }
+}
+
+/* =============================================
+   DESKTOP BREAKPOINT (1024px+) - Show table
+   ============================================= */
+@media (min-width: 1024px) {
+    .container {
+        padding: 0;
+        max-width: 1200px;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .searchWrapper {
+        max-width: 500px;
+    }
+
+    /* Hide mobile cards, show table */
+    .cardList {
+        display: none;
+    }
+
+    .tableWrapper {
+        display: block;
+        overflow-x: auto;
+        margin-bottom: 0;
+    }
+
+    .content {
+        padding: 0;
     }
 }

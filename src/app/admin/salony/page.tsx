@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useToast } from '@/components/ui/Toast';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { RejectionModal } from '@/components/admin/RejectionModal';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import styles from './page.module.css';
 
 interface Salon {
@@ -27,7 +31,20 @@ export default function AdminSalonsPage() {
     const [viewingSalon, setViewingSalon] = useState<Salon | null>(null);
     const toast = useToast();
 
-    // Load salons from API
+    // Modal States
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => Promise<void>;
+    }>({ isOpen: false, title: '', message: '', onConfirm: async () => { } });
+
+    const [rejectModal, setRejectModal] = useState<{
+        isOpen: boolean;
+        salonId: string;
+        salonName: string;
+    }>({ isOpen: false, salonId: '', salonName: '' });
+
     useEffect(() => {
         loadSalons();
     }, []);
@@ -56,55 +73,59 @@ export default function AdminSalonsPage() {
         ? salons
         : salons.filter(s => s.status === filter);
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'approved':
-                return <span className={styles.badgeApproved}>Schválený</span>;
-            case 'pending':
-                return <span className={styles.badgePending}>Čakajúci</span>;
-            case 'rejected':
-                return <span className={styles.badgeRejected}>Zamietnutý</span>;
-            default:
-                return null;
-        }
-    };
+    const handleApproveClick = (salon: Salon) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Schváliť salón?',
+            message: `Naozaj chcete schváliť salón "${salon.name}"? Bude verejne viditeľný.`,
+            onConfirm: async () => {
+                try {
+                    const response = await fetch('/api/admin/salons', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: salon.id, status: 'approved' }),
+                    });
 
-    const handleApprove = async (id: string) => {
-        if (!confirm('Naozaj chcete schváliť tento salón?')) return;
-
-        try {
-            const response = await fetch('/api/admin/salons', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, status: 'approved' }),
-            });
-
-            if (response.ok) {
-                toast.success('Salón bol schválený');
-                loadSalons();
-            } else {
-                const data = await response.json();
-                toast.error('Chyba pri schvaľovaní: ' + data.error);
+                    if (response.ok) {
+                        toast.success('Salón bol schválený');
+                        loadSalons();
+                        if (viewingSalon?.id === salon.id) setViewingSalon(null);
+                    } else {
+                        const data = await response.json();
+                        toast.error('Chyba pri schvaľovaní: ' + data.error);
+                    }
+                } catch (_error) {
+                    toast.error('Chyba pri schvaľovaní');
+                }
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
             }
-        } catch (_error) {
-            toast.error('Chyba pri schvaľovaní');
-        }
+        });
     };
 
-    const handleReject = async (id: string) => {
-        const reason = prompt('Zadajte dôvod zamietnutia:');
-        if (!reason) return;
+    const handleRejectClick = (salon: Salon) => {
+        setRejectModal({
+            isOpen: true,
+            salonId: salon.id,
+            salonName: salon.name
+        });
+    };
 
+    const confirmReject = async (reason: string) => {
         try {
             const response = await fetch('/api/admin/salons', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, status: 'rejected' }),
+                body: JSON.stringify({
+                    id: rejectModal.salonId,
+                    status: 'rejected',
+                    rejection_reason: reason
+                }),
             });
 
             if (response.ok) {
                 toast.success('Salón bol zamietnutý');
                 loadSalons();
+                if (viewingSalon?.id === rejectModal.salonId) setViewingSalon(null);
             } else {
                 const data = await response.json();
                 toast.error('Chyba pri zamietnutí: ' + data.error);
@@ -112,14 +133,6 @@ export default function AdminSalonsPage() {
         } catch (_error) {
             toast.error('Chyba pri zamietnutí');
         }
-    };
-
-    const handleView = (salon: Salon) => {
-        setViewingSalon(salon);
-    };
-
-    const handleEdit = (salon: Salon) => {
-        setEditingSalon(salon);
     };
 
     const handleSaveEdit = async () => {
@@ -195,59 +208,105 @@ export default function AdminSalonsPage() {
                     <p>Zatiaľ neboli zaregistrované žiadne salóny.</p>
                 </div>
             ) : (
-                <div className={styles.table}>
-                    <div className={styles.tableHeader}>
-                        <span>Názov</span>
-                        <span>Mesto</span>
-                        <span>Stav</span>
-                        <span>Tier</span>
-                        <span>Dátum</span>
-                        <span>Akcie</span>
+                <>
+                    {/* Mobile Card Layout */}
+                    <div className={styles.cardList}>
+                        {filteredSalons.map((salon) => (
+                            <div key={salon.id} className={styles.salonCard}>
+                                <div className={styles.cardHeader}>
+                                    <Link href={`/admin/salony/${salon.id}`} className={styles.salonName}>
+                                        {salon.name}
+                                    </Link>
+                                    <div className={styles.cardBadges}>
+                                        <StatusBadge status={salon.status} size="sm" />
+                                    </div>
+                                </div>
+                                <div className={styles.cardDetails}>
+                                    {salon.city && (
+                                        <span className={styles.cardDetail}>📍 {salon.city}</span>
+                                    )}
+                                    <span className={styles.cardDetail}>
+                                        {salon.tier === 'premium' ? '⭐ Premium' : '🆓 Free'}
+                                    </span>
+                                    <span className={styles.cardDetail}>📅 {formatDate(salon.created_at)}</span>
+                                </div>
+                                <div className={styles.cardActions}>
+                                    <button className={styles.actionBtn} onClick={() => setViewingSalon(salon)}>
+                                        👁️ Detail
+                                    </button>
+                                    <button className={styles.actionBtn} onClick={() => setEditingSalon(salon)}>
+                                        ✏️ Upraviť
+                                    </button>
+                                    {salon.status !== 'approved' && (
+                                        <button className={styles.approveBtn} onClick={() => handleApproveClick(salon)}>
+                                            ✓ Schváliť
+                                        </button>
+                                    )}
+                                    {salon.status !== 'rejected' && (
+                                        <button className={styles.rejectBtn} onClick={() => handleRejectClick(salon)}>
+                                            ✗ Zamietnuť
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    {filteredSalons.map((salon) => (
-                        <div key={salon.id} className={styles.tableRow}>
-                            <span className={styles.salonName}>{salon.name}</span>
-                            <span>{salon.city || '—'}</span>
-                            <span>{getStatusBadge(salon.status)}</span>
-                            <span>{salon.tier === 'premium' ? '⭐ Premium' : 'Free'}</span>
-                            <span>{formatDate(salon.created_at)}</span>
-                            <span className={styles.actions}>
-                                <button
-                                    className={styles.actionBtn}
-                                    title="Zobraziť"
-                                    onClick={() => handleView(salon)}
-                                >
-                                    👁️
-                                </button>
-                                <button
-                                    className={styles.actionBtn}
-                                    title="Upraviť"
-                                    onClick={() => handleEdit(salon)}
-                                >
-                                    ✏️
-                                </button>
-                                {salon.status !== 'approved' && (
-                                    <button
-                                        className={styles.approveBtn}
-                                        title="Schváliť"
-                                        onClick={() => handleApprove(salon.id)}
-                                    >
-                                        ✓
-                                    </button>
-                                )}
-                                {salon.status !== 'rejected' && (
-                                    <button
-                                        className={styles.rejectBtn}
-                                        title="Zamietnuť"
-                                        onClick={() => handleReject(salon.id)}
-                                    >
-                                        ✗
-                                    </button>
-                                )}
-                            </span>
+
+                    {/* Desktop Table Layout */}
+                    <div className={styles.table}>
+                        <div className={styles.tableHeader}>
+                            <span>Názov</span>
+                            <span>Mesto</span>
+                            <span>Stav</span>
+                            <span>Tier</span>
+                            <span>Dátum</span>
+                            <span>Akcie</span>
                         </div>
-                    ))}
-                </div>
+                        {filteredSalons.map((salon) => (
+                            <div key={salon.id} className={styles.tableRow}>
+                                <div className={styles.salonName}>{salon.name}</div>
+                                <span>{salon.city || '—'}</span>
+                                <div><StatusBadge status={salon.status} size="sm" /></div>
+                                <span>{salon.tier === 'premium' ? '⭐ Premium' : 'Free'}</span>
+                                <span>{formatDate(salon.created_at)}</span>
+                                <span className={styles.actions}>
+                                    <button
+                                        className={styles.actionBtn}
+                                        title="Detail"
+                                        onClick={() => setViewingSalon(salon)}
+                                    >
+                                        👁️
+                                    </button>
+                                    <button
+                                        className={styles.actionBtn}
+                                        title="Upraviť"
+                                        onClick={() => setEditingSalon(salon)}
+                                    >
+                                        ✏️
+                                    </button>
+                                    {salon.status !== 'approved' && (
+                                        <button
+                                            className={styles.approveBtn}
+                                            title="Schváliť"
+                                            onClick={() => handleApproveClick(salon)}
+                                        >
+                                            ✓
+                                        </button>
+                                    )}
+                                    {salon.status !== 'rejected' && (
+                                        <button
+                                            className={styles.rejectBtn}
+                                            title="Zamietnuť"
+                                            onClick={() => handleRejectClick(salon)}
+                                        >
+                                            ✗
+                                        </button>
+                                    )}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </>
             )}
 
             {/* View Modal */}
@@ -287,7 +346,7 @@ export default function AdminSalonsPage() {
                                 </div>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>Stav:</span>
-                                    <span>{getStatusBadge(viewingSalon.status)}</span>
+                                    <StatusBadge status={viewingSalon.status} />
                                 </div>
                                 <div className={styles.detailRow}>
                                     <span className={styles.detailLabel}>Tier:</span>
@@ -307,12 +366,12 @@ export default function AdminSalonsPage() {
                         </div>
                         <div className={styles.modalActions}>
                             {viewingSalon.status !== 'approved' && (
-                                <button className={styles.approveBtn} onClick={() => { handleApprove(viewingSalon.id); setViewingSalon(null); }}>
+                                <button className={styles.approveBtn} onClick={() => handleApproveClick(viewingSalon)}>
                                     ✓ Schváliť
                                 </button>
                             )}
                             {viewingSalon.status !== 'rejected' && (
-                                <button className={styles.rejectBtn} onClick={() => { handleReject(viewingSalon.id); setViewingSalon(null); }}>
+                                <button className={styles.rejectBtn} onClick={() => handleRejectClick(viewingSalon)}>
                                     ✗ Zamietnuť
                                 </button>
                             )}
@@ -362,6 +421,21 @@ export default function AdminSalonsPage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+
+            <RejectionModal
+                isOpen={rejectModal.isOpen}
+                onClose={() => setRejectModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmReject}
+                salonName={rejectModal.salonName}
+            />
         </div>
     );
 }

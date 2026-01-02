@@ -119,6 +119,15 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                                 <Link href="/dashboard/moj-salon" className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
                                     Môj salón
                                 </Link>
+                                <button
+                                    onClick={() => {
+                                        signOut();
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className={styles.mobileLogoutButton}
+                                >
+                                    Odhlásiť
+                                </button>
                             </>
                         ) : (
                             <>

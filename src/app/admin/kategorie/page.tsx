@@ -132,10 +132,10 @@ export default function AdminKategoriesPage() {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Kategórie</h1>
-                    <p className={styles.subtitle}>Správa kategórií salónov ({categories.length} kategórií)</p>
+                    <p className={styles.subtitle}>Správa kategórií salónov ({categories.length})</p>
                 </div>
                 <button className={styles.addButton} onClick={() => setShowAddForm(true)}>
-                    + Pridať kategóriu
+                    + Pridať
                 </button>
             </div>
 
@@ -194,18 +194,18 @@ export default function AdminKategoriesPage() {
                             />
                         </div>
                         <div className={styles.formGroup}>
-                            <label>Typ kategórie</label>
+                            <label>Typ</label>
                             <select
                                 value={formData.category_type}
                                 onChange={(e) => setFormData({ ...formData, category_type: e.target.value })}
                                 className={styles.input}
                             >
-                                <option value="primary">Primárna (hlavná)</option>
-                                <option value="secondary">Sekundárna (podkategória)</option>
+                                <option value="primary">Primárna</option>
+                                <option value="secondary">Sekundárna</option>
                             </select>
                         </div>
                         <div className={styles.formGroup}>
-                            <label>Poradie zobrazenia</label>
+                            <label>Poradie</label>
                             <input
                                 type="number"
                                 placeholder="1"
@@ -227,42 +227,75 @@ export default function AdminKategoriesPage() {
             )}
 
             <div className={styles.content}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Ikona</th>
-                            <th>Názov (SK)</th>
-                            <th>Slug</th>
-                            <th>Typ</th>
-                            <th>Poradie</th>
-                            <th>Aktívna</th>
-                            <th>Akcie</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {categories.map((cat) => (
-                            <tr key={cat.id}>
-                                <td className={styles.iconCell}>{cat.icon}</td>
-                                <td>{cat.name_sk}</td>
-                                <td><code>{cat.slug}</code></td>
-                                <td>{cat.category_type === 'primary' ? 'Primárna' : 'Sekundárna'}</td>
-                                <td>{cat.sort_order}</td>
-                                <td>
-                                    <button
-                                        className={cat.is_active ? styles.activeBtn : styles.inactiveBtn}
-                                        onClick={() => handleToggleActive(cat.id, cat.is_active)}
-                                    >
-                                        {cat.is_active ? '✓ Aktívna' : '✗ Neaktívna'}
-                                    </button>
-                                </td>
-                                <td>
+                {/* Mobile Card Layout */}
+                <div className={styles.cardList}>
+                    {categories.map((cat) => (
+                        <div key={cat.id} className={styles.categoryCard}>
+                            <div className={styles.cardHeader}>
+                                <div className={styles.iconCell}>{cat.icon}</div>
+                                <div className={styles.cardInfo}>
+                                    <span className={styles.cardName}>{cat.name_sk}</span>
+                                    <span className={styles.cardSlug}>{cat.slug}</span>
+                                </div>
+                                <div className={styles.cardActions}>
                                     <button className={styles.editBtn} onClick={() => handleEdit(cat)}>✏️</button>
                                     <button className={styles.deleteBtn} onClick={() => handleDelete(cat.id)}>🗑️</button>
-                                </td>
+                                </div>
+                            </div>
+                            <div className={styles.cardMeta}>
+                                <button
+                                    className={cat.is_active ? styles.activeBtn : styles.inactiveBtn}
+                                    onClick={() => handleToggleActive(cat.id, cat.is_active)}
+                                >
+                                    {cat.is_active ? '✓ Aktívna' : '✗ Neaktívna'}
+                                </button>
+                                <span className={styles.cardType}>
+                                    {cat.category_type === 'primary' ? 'Primárna' : 'Sekundárna'}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop Table Layout */}
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Ikona</th>
+                                <th>Názov (SK)</th>
+                                <th>Slug</th>
+                                <th>Typ</th>
+                                <th>Poradie</th>
+                                <th>Aktívna</th>
+                                <th>Akcie</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {categories.map((cat) => (
+                                <tr key={cat.id}>
+                                    <td className={styles.iconCell}>{cat.icon}</td>
+                                    <td>{cat.name_sk}</td>
+                                    <td><code>{cat.slug}</code></td>
+                                    <td>{cat.category_type === 'primary' ? 'Primárna' : 'Sekundárna'}</td>
+                                    <td>{cat.sort_order}</td>
+                                    <td>
+                                        <button
+                                            className={cat.is_active ? styles.activeBtn : styles.inactiveBtn}
+                                            onClick={() => handleToggleActive(cat.id, cat.is_active)}
+                                        >
+                                            {cat.is_active ? '✓ Aktívna' : '✗ Neaktívna'}
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button className={styles.editBtn} onClick={() => handleEdit(cat)}>✏️</button>
+                                        <button className={styles.deleteBtn} onClick={() => handleDelete(cat.id)}>🗑️</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

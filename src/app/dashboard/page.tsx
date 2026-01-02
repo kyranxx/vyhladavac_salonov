@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { useDashboardTranslations } from '@/hooks/useTranslations';
 import styles from './page.module.css';
 
 interface Salon {
@@ -17,6 +18,7 @@ export default function DashboardPage() {
     const { user } = useAuth();
     const [salon, setSalon] = useState<Salon | null>(null);
     const [loadingSalon, setLoadingSalon] = useState(true);
+    const t = useDashboardTranslations();
 
     useEffect(() => {
         if (user) {
@@ -49,35 +51,35 @@ export default function DashboardPage() {
 
     const getSalonStatus = () => {
         if (loadingSalon) {
-            return { text: 'Načítavam...', class: styles.statusBadgeLoading };
+            return { text: '...', class: styles.statusBadgeLoading };
         }
         if (!salon) {
-            return { text: 'Nemáte salón', class: styles.statusBadge };
+            return { text: t.noSalon, class: styles.statusBadge };
         }
         switch (salon.status) {
             case 'approved':
-                return { text: 'Aktívny ✓', class: styles.statusBadgeActive };
+                return { text: `${t.active} ✓`, class: styles.statusBadgeActive };
             case 'pending':
-                return { text: 'Čaká na schválenie', class: styles.statusBadgePending };
+                return { text: t.pending, class: styles.statusBadgePending };
             case 'rejected':
-                return { text: 'Zamietnutý', class: styles.statusBadgeRejected };
+                return { text: t.rejected, class: styles.statusBadgeRejected };
             default:
                 return { text: salon.status, class: styles.statusBadge };
         }
     };
 
     const getSubscriptionStatus = () => {
-        if (!salon) return 'Žiadne';
-        if (salon.tier === 'premium') return 'Premium ⭐';
-        return 'Základné (zadarmo)';
+        if (!salon) return t.noSalon;
+        if (salon.tier === 'premium') return `${t.premium} ⭐`;
+        return t.basic;
     };
 
     const status = getSalonStatus();
 
     return (
         <div className={styles.dashboard}>
-            <h1 className={styles.title}>Prehľad</h1>
-            <p className={styles.subtitle}>Vitajte, {user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'používateľ'}!</p>
+            <h1 className={styles.title}>{t.title}</h1>
+            <p className={styles.subtitle}>{t.welcome}, {user?.user_metadata?.first_name || user?.email?.split('@')[0] || ''}!</p>
 
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
@@ -85,65 +87,65 @@ export default function DashboardPage() {
                     <span className={styles.statIcon}>👁️</span>
                     <div>
                         <span className={styles.statValue}>0</span>
-                        <span className={styles.statLabel}>Zobrazenia profilu</span>
+                        <span className={styles.statLabel}>{t.profileViews}</span>
                     </div>
                 </div>
                 <div className={styles.statCard}>
                     <span className={styles.statIcon}>📞</span>
                     <div>
                         <span className={styles.statValue}>0</span>
-                        <span className={styles.statLabel}>Kliknutia na telefón</span>
+                        <span className={styles.statLabel}>{t.phoneClicks}</span>
                     </div>
                 </div>
                 <div className={styles.statCard}>
                     <span className={styles.statIcon}>🌐</span>
                     <div>
                         <span className={styles.statValue}>0</span>
-                        <span className={styles.statLabel}>Kliknutia na web</span>
+                        <span className={styles.statLabel}>{t.webClicks}</span>
                     </div>
                 </div>
                 <div className={styles.statCard}>
                     <span className={styles.statIcon}>⭐</span>
                     <div>
                         <span className={styles.statValue}>0</span>
-                        <span className={styles.statLabel}>Hodnotenia</span>
+                        <span className={styles.statLabel}>{t.ratings}</span>
                     </div>
                 </div>
             </div>
 
             {/* Quick Actions */}
             <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Rýchle akcie</h2>
+                <h2 className={styles.sectionTitle}>{t.quickActions}</h2>
                 <div className={styles.actionsGrid}>
                     <Link href="/dashboard/moj-salon" className={styles.actionCard}>
                         <span className={styles.actionIcon}>✏️</span>
-                        <span className={styles.actionLabel}>{salon ? 'Upraviť salón' : 'Pridať salón'}</span>
+                        <span className={styles.actionLabel}>{salon ? t.editSalon : t.addSalon}</span>
                     </Link>
                     <Link href="/dashboard/fotky" className={styles.actionCard}>
                         <span className={styles.actionIcon}>📷</span>
-                        <span className={styles.actionLabel}>Pridať fotky</span>
+                        <span className={styles.actionLabel}>{t.addPhotos}</span>
                     </Link>
                     <Link href="/dashboard/sluzby" className={styles.actionCard}>
                         <span className={styles.actionIcon}>📋</span>
-                        <span className={styles.actionLabel}>Spravovať služby</span>
+                        <span className={styles.actionLabel}>{t.manageServices}</span>
                     </Link>
                     <Link href="/dashboard/predplatne" className={styles.actionCard}>
                         <span className={styles.actionIcon}>⭐</span>
-                        <span className={styles.actionLabel}>Prejsť na Premium</span>
+                        <span className={styles.actionLabel}>{t.goPremium}</span>
                     </Link>
                 </div>
             </div>
 
             {/* Salon Status */}
             <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Stav salónu</h2>
+                <h2 className={styles.sectionTitle}>{t.salonStatus}</h2>
                 <div className={styles.statusCard}>
                     <div className={styles.statusItem}>
-                        <span className={styles.statusLabel}>Stav salónu</span>
+                        <span className={styles.statusLabel}>{t.salonStatus}</span>
                         <span className={status.class}>{status.text}</span>
                     </div>
                     <div className={styles.statusItem}>
-                        <span className={styles.statusLabel}>Predplatné</span>
+                        <span className={styles.statusLabel}>{t.subscription}</span>
                         <span className={salon?.tier === 'premium' ? styles.statusBadgePremium : styles.statusBadgeBasic}>
                             {getSubscriptionStatus()}
                         </span>
@@ -152,30 +154,30 @@ export default function DashboardPage() {
                     {/* Contextual help based on salon state */}
                     {!salon && (
                         <div className={styles.statusHint}>
-                            <p><strong>Ešte nemáte salón</strong></p>
+                            <p><strong>{t.noSalonYet}</strong></p>
                             <p>
-                                <Link href="/dashboard/moj-salon">Zaregistrujte svoj salón</Link> a začnite získavať zákazníkov.
+                                <Link href="/dashboard/moj-salon">{t.registerSalon}</Link> {t.getCustomers}
                             </p>
                         </div>
                     )}
                     {salon?.status === 'pending' && (
                         <div className={styles.statusHintPending}>
-                            <p><strong>🕐 Čaká na schválenie</strong></p>
-                            <p>Váš salón čaká na schválenie administrátorom. Zvyčajne to trvá do 24 hodín.</p>
+                            <p><strong>🕐 {t.pendingApproval}</strong></p>
+                            <p>{t.pendingApprovalDesc}</p>
                         </div>
                     )}
                     {salon?.status === 'approved' && salon?.tier !== 'premium' && (
                         <div className={styles.statusHintSuccess}>
-                            <p><strong>✓ Váš salón je aktívny</strong></p>
+                            <p><strong>✓ {t.salonActive}</strong></p>
                             <p>
-                                <Link href="/dashboard/predplatne">Prejdite na Premium</Link> pre lepšiu viditeľnosť!
+                                <Link href="/dashboard/predplatne">{t.upgradePremium}</Link>
                             </p>
                         </div>
                     )}
                     {salon?.status === 'rejected' && (
                         <div className={styles.statusHintRejected}>
-                            <p><strong>❌ Salón bol zamietnutý</strong></p>
-                            <p>Kontaktujte nás pre viac informácií alebo <Link href="/dashboard/moj-salon">upravte údaje</Link>.</p>
+                            <p><strong>❌ {t.salonRejected}</strong></p>
+                            <p>{t.contactUs} <Link href="/dashboard/moj-salon">{t.editSalon}</Link>.</p>
                         </div>
                     )}
                 </div>
@@ -183,4 +185,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-

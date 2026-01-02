@@ -1,152 +1,160 @@
+/* =============================================
+   SALONS LIST PAGE - MOBILE FIRST DESIGN
+   ============================================= */
+
 .main {
     min-height: 100vh;
-    background: var(--color-background);
-    padding-bottom: var(--spacing-3xl);
+    background: #f8fafc;
+    padding-bottom: 2rem;
 }
 
 .container {
-    max-width: 1280px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: var(--spacing-xl) var(--spacing-lg);
+    padding: 1rem;
 }
 
-/* Page Header */
+/* =============================================
+   PAGE HEADER
+   ============================================= */
 .pageHeader {
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 1.5rem;
 }
 
 .title {
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: var(--spacing-sm);
+    color: #1f2937;
+    margin: 0 0 0.25rem;
 }
 
 .subtitle {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-lg);
+    color: #6b7280;
+    font-size: 0.9375rem;
+    margin: 0;
 }
 
-/* Layout */
+/* =============================================
+   LAYOUT - Single column on mobile
+   ============================================= */
 .layout {
-    display: grid;
-    gap: var(--spacing-2xl);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-@media (min-width: 1024px) {
-    .layout {
-        grid-template-columns: 280px 1fr;
-    }
-}
-
-/* Sidebar */
+/* =============================================
+   SIDEBAR - Hidden on mobile by default
+   ============================================= */
 .sidebar {
     display: none;
 }
 
-@media (min-width: 1024px) {
-    .sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-lg);
-    }
-}
-
 .filterSection {
     background: white;
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
 }
 
 .filterTitle {
-    font-size: var(--font-size-base);
+    font-size: 0.875rem;
     font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--color-border);
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .filterList {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: 0.25rem;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-/* Search Input */
+/* =============================================
+   SEARCH INPUT
+   ============================================= */
 .searchInput {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    transition: var(--transition-fast);
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    min-height: 48px;
 }
 
 .searchInput:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: #c19a6b;
     box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.15);
 }
 
 .citySearchInput {
     width: 100%;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-xs);
-    margin-bottom: var(--spacing-sm);
-    transition: var(--transition-fast);
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
 }
 
 .citySearchInput:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: #c19a6b;
 }
 
-/* Filter Buttons */
+/* =============================================
+   FILTER BUTTONS
+   ============================================= */
 .filterButton {
     display: block;
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 0.625rem 0.75rem;
     background: transparent;
     border: none;
-    color: var(--color-text-secondary);
+    color: #6b7280;
     text-align: left;
-    font-size: var(--font-size-sm);
-    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    border-radius: 6px;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s;
+    min-height: 40px;
 }
 
 .filterButton:hover {
-    background: var(--color-background-alt);
-    color: var(--color-text);
+    background: #f3f4f6;
+    color: #1f2937;
 }
 
 .filterButtonActive {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
+    background: rgba(193, 154, 107, 0.1);
+    color: #c19a6b;
     font-weight: 500;
 }
 
 .majorCity {
     font-weight: 600;
-    color: var(--color-text);
+    color: #1f2937;
 }
 
-/* Clear Filters Button */
+/* =============================================
+   CLEAR BUTTON
+   ============================================= */
 .clearButton {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 0.625rem 1rem;
     background: white;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
-    border-radius: var(--radius-md);
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.875rem;
+    border-radius: 8px;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s;
+    min-height: 44px;
 }
 
 .clearButton:hover {
@@ -155,32 +163,34 @@
     color: #dc2626;
 }
 
-/* Active Filters Chips */
+/* =============================================
+   ACTIVE FILTERS
+   ============================================= */
 .activeFilters {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .filterChip {
     display: inline-flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-    font-size: var(--font-size-xs);
-    border-radius: var(--radius-full);
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    background: rgba(193, 154, 107, 0.1);
+    color: #c19a6b;
+    font-size: 0.75rem;
+    border-radius: 9999px;
 }
 
 .filterChip button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
-    background: var(--color-primary);
+    width: 18px;
+    height: 18px;
+    background: #c19a6b;
     color: white;
     border: none;
     border-radius: 50%;
@@ -193,49 +203,42 @@
     background: #a67c4a;
 }
 
-/* Content Grid - 3 columns */
+/* =============================================
+   GRID - 1 column on mobile
+   ============================================= */
 .grid {
     display: grid;
-    gap: var(--spacing-lg);
+    gap: 0.75rem;
     grid-template-columns: 1fr;
 }
 
-@media (min-width: 640px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (min-width: 1024px) {
-    .grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* No Results */
+/* =============================================
+   NO RESULTS
+   ============================================= */
 .noResults {
     text-align: center;
-    padding: var(--spacing-3xl) var(--spacing-xl);
+    padding: 2rem 1rem;
     background: white;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
 }
 
 .noResultsIcon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     display: block;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 0.75rem;
 }
 
 .noResults h3 {
-    font-size: var(--font-size-xl);
-    color: var(--color-text);
-    margin: 0 0 var(--spacing-sm) 0;
+    font-size: 1.125rem;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
 }
 
 .noResults p {
-    color: var(--color-text-secondary);
-    margin: 0 0 var(--spacing-lg) 0;
+    color: #6b7280;
+    margin: 0 0 1rem 0;
+    font-size: 0.9375rem;
 }
 
 .noResults .clearButton {
@@ -243,40 +246,97 @@
     width: auto;
 }
 
-/* Pagination */
+/* =============================================
+   PAGINATION
+   ============================================= */
 .pagination {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-2xl);
-    padding-top: var(--spacing-xl);
-    border-top: 1px solid var(--color-border);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
 }
 
 .pageButton {
-    padding: var(--spacing-sm) var(--spacing-lg);
+    padding: 0.75rem 1.5rem;
     background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #1f2937;
     font-weight: 500;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.2s;
+    min-height: 48px;
+    min-width: 120px;
 }
 
 .pageButton:hover:not(:disabled) {
-    background: var(--color-primary);
+    background: #c19a6b;
     color: white;
-    border-color: var(--color-primary);
+    border-color: #c19a6b;
 }
 
 .pageButton:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
 .pageInfo {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* =============================================
+   TABLET BREAKPOINT (640px+)
+   ============================================= */
+@media (min-width: 640px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .pagination {
+        flex-direction: row;
+        gap: 1.5rem;
+    }
+}
+
+/* =============================================
+   DESKTOP BREAKPOINT (1024px+)
+   ============================================= */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1280px;
+        padding: 2rem 1.5rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }

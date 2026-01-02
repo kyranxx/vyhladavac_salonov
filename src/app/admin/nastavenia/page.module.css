@@ -1,57 +1,71 @@
+/* =============================================
+   SETTINGS PAGE - MOBILE FIRST DESIGN
+   ============================================= */
+
 .container {
-    padding: 2rem;
+    padding: 1rem;
+    max-width: 100%;
 }
 
 .header {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-primary, #1f2937);
-    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
 }
 
 .subtitle {
-    color: var(--text-secondary, #6b7280);
+    color: #6b7280;
     margin: 0;
+    font-size: 0.875rem;
 }
 
 .successMessage {
     background: #d1fae5;
     color: #065f46;
-    padding: 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-weight: 500;
+    font-size: 0.9375rem;
 }
 
 .form {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
 }
 
+/* =============================================
+   SECTION
+   ============================================= */
 .section {
     background: white;
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .sectionTitle {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary, #1f2937);
-    margin: 0 0 1rem 0;
+    color: #1f2937;
+    margin: 0 0 0.75rem 0;
 }
 
 .sectionDescription {
-    color: var(--text-secondary, #6b7280);
+    color: #6b7280;
     margin: 0;
+    font-size: 0.875rem;
 }
 
+/* =============================================
+   FORM ELEMENTS
+   ============================================= */
 .formGroup {
     display: flex;
     flex-direction: column;
@@ -66,7 +80,7 @@
 .formGroup label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-primary, #1f2937);
+    color: #1f2937;
 }
 
 .formGroup input,
@@ -76,22 +90,31 @@
     border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
     resize: vertical;
+    min-height: 48px;
+}
+
+.formGroup textarea {
+    min-height: 100px;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus {
     outline: none;
     border-color: #c19a6b;
+    box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.15);
 }
 
-/* Toggle Group */
+/* =============================================
+   TOGGLE
+   ============================================= */
 .toggleGroup {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
+    padding: 0.75rem 0;
 }
 
 .toggleInfo {
@@ -100,23 +123,23 @@
 
 .toggleLabel {
     font-weight: 500;
-    color: var(--text-primary, #1f2937);
+    color: #1f2937;
     display: block;
     margin-bottom: 0.25rem;
 }
 
 .toggleInfo p {
-    color: var(--text-secondary, #6b7280);
-    font-size: 0.875rem;
+    color: #6b7280;
+    font-size: 0.8125rem;
     margin: 0;
 }
 
 .toggle {
-    width: 48px;
-    height: 28px;
+    width: 52px;
+    height: 32px;
     background: #e5e7eb;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     position: relative;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -129,10 +152,10 @@
 
 .toggleHandle {
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 24px;
-    height: 24px;
+    top: 3px;
+    left: 3px;
+    width: 26px;
+    height: 26px;
     background: white;
     border-radius: 50%;
     transition: transform 0.2s;
@@ -143,22 +166,27 @@
     transform: translateX(20px);
 }
 
-/* Actions */
+/* =============================================
+   ACTIONS
+   ============================================= */
 .actions {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .saveButton {
-    padding: 0.75rem 1.5rem;
+    width: 100%;
+    padding: 0.875rem 1.5rem;
     background: #c19a6b;
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
+    min-height: 48px;
 }
 
 .saveButton:hover {
@@ -168,15 +196,65 @@
 .content {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .warningBox {
     background: #fef3c7;
     color: #92400e;
-    padding: 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 8px;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     font-weight: 500;
+    font-size: 0.875rem;
     border: 1px solid #fde68a;
+}
+
+/* =============================================
+   TABLET BREAKPOINT (640px+)
+   ============================================= */
+@media (min-width: 640px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .section {
+        padding: 1.5rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.125rem;
+    }
+
+    .actions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .saveButton {
+        width: auto;
+        min-width: 150px;
+    }
+}
+
+/* =============================================
+   DESKTOP BREAKPOINT (1024px+)
+   ============================================= */
+@media (min-width: 1024px) {
+    .container {
+        padding: 0;
+        max-width: 800px;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .header {
+        margin-bottom: 1.5rem;
+    }
+
+    .form {
+        gap: 1.5rem;
+    }
 }
