@@ -64,6 +64,103 @@
 }
 
 /* =============================================
+   SEARCH AND SORT
+   ============================================= */
+.searchSort {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0 0.75rem;
+    min-height: 44px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchBox:focus-within {
+    border-color: #c19a6b;
+    box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.15);
+}
+
+.searchBox svg {
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 0.9375rem;
+    padding: 0.625rem 0;
+    outline: none;
+    min-width: 0;
+}
+
+.searchInput::placeholder {
+    color: #9ca3af;
+}
+
+.clearSearch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #e5e7eb;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #6b7280;
+    transition: background 0.2s;
+}
+
+.clearSearch:hover {
+    background: #d1d5db;
+}
+
+.sortSelect {
+    padding: 0.625rem 0.75rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    min-height: 44px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.sortSelect:focus {
+    outline: none;
+    border-color: #c19a6b;
+}
+
+@media (min-width: 640px) {
+    .searchSort {
+        flex-direction: row;
+        max-width: 500px;
+    }
+
+    .searchBox {
+        flex: 1;
+    }
+
+    .sortSelect {
+        width: auto;
+        min-width: 150px;
+    }
+}
+
+/* =============================================
    TABLE - Hidden on mobile, shown on desktop
    ============================================= */
 .table {
@@ -88,10 +185,22 @@
 }
 
 .salonCard {
+    display: block;
+    text-decoration: none;
+    color: inherit;
     background: white;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.salonCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #c19a6b;
+    transform: translateY(-2px);
 }
 
 .cardHeader {
@@ -100,6 +209,26 @@
     justify-content: space-between;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
+}
+
+.cardTitleRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.salonId {
+    font-size: 0.6875rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.salonIdCell {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    font-weight: 500;
+    font-family: monospace;
 }
 
 .salonName {
@@ -606,6 +735,10 @@
         align-items: center;
         border-bottom: 1px solid #e5e7eb;
         font-size: 0.875rem;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition: background 0.2s;
     }
 
     .tableRow:last-child {

@@ -5,6 +5,9 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 export const locales = ['sk', 'en', 'hu'];
 export const defaultLocale = 'sk';
 
+// Admin emails that bypass maintenance mode
+const ADMIN_EMAILS = ['admin@salonfinder.sk', 'admin@apollotech.sk', 'blanarikdaniel@gmail.com'];
+
 // Simple in-memory rate limiting (resets on deploy)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
@@ -46,6 +49,32 @@ export async function middleware(request: NextRequest) {
             if (isRateLimited(ip, 100, 60000)) {
                 return new NextResponse('Too Many Requests', { status: 429 });
             }
+        }
+    }
+
+    // Check maintenance mode for public pages
+    // Primary: environment variable, Secondary: cookie for dynamic toggle
+    const isMaintenanceByEnv = process.env.MAINTENANCE_MODE === 'true';
+    const maintenanceModeCookie = request.cookies.get('maintenance_mode');
+    const isMaintenanceMode = isMaintenanceByEnv || maintenanceModeCookie?.value === 'true';
+
+    // Pages that should show maintenance mode (exclude admin, dashboard, api, auth, static)
+    const isPublicPage = !pathname.startsWith('/admin') &&
+        !pathname.startsWith('/dashboard') &&
+        !pathname.startsWith('/api') &&
+        !pathname.startsWith('/auth') &&
+        !pathname.startsWith('/prihlasenie') &&
+        !pathname.startsWith('/registracia') &&
+        !pathname.startsWith('/_next') &&
+        !pathname.startsWith('/maintenance') &&
+        !pathname.includes('.');
+
+    if (isMaintenanceMode && isPublicPage) {
+        // Check if user is admin by checking for admin session
+        const adminBypassCookie = request.cookies.get('admin_bypass');
+        if (adminBypassCookie?.value !== 'true') {
+            // Redirect to maintenance page
+            return NextResponse.redirect(new URL('/maintenance', request.url));
         }
     }
 

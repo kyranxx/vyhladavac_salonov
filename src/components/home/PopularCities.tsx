@@ -10,17 +10,18 @@ interface City {
     name: string;
     count: number;
     region: string;
+    image: string;
 }
 
 const defaultCities = [
-    { slug: 'bratislava', name: 'Bratislava', region: 'Bratislavský kraj' },
-    { slug: 'kosice', name: 'Košice', region: 'Košický kraj' },
-    { slug: 'zilina', name: 'Žilina', region: 'Žilinský kraj' },
-    { slug: 'nitra', name: 'Nitra', region: 'Nitriansky kraj' },
-    { slug: 'presov', name: 'Prešov', region: 'Prešovský kraj' },
-    { slug: 'banska-bystrica', name: 'Banská Bystrica', region: 'Banskobystrický kraj' },
-    { slug: 'trnava', name: 'Trnava', region: 'Trnavský kraj' },
-    { slug: 'trencin', name: 'Trenčín', region: 'Trenčiansky kraj' },
+    { slug: 'bratislava', name: 'Bratislava', region: 'Bratislavský kraj', image: 'https://images.unsplash.com/photo-1565711561500-49678a10a63f?w=400&h=300&fit=crop' },
+    { slug: 'kosice', name: 'Košice', region: 'Košický kraj', image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop' },
+    { slug: 'zilina', name: 'Žilina', region: 'Žilinský kraj', image: 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=400&h=300&fit=crop' },
+    { slug: 'nitra', name: 'Nitra', region: 'Nitriansky kraj', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop' },
+    { slug: 'presov', name: 'Prešov', region: 'Prešovský kraj', image: 'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?w=400&h=300&fit=crop' },
+    { slug: 'banska-bystrica', name: 'Banská Bystrica', region: 'Banskobystrický kraj', image: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&h=300&fit=crop' },
+    { slug: 'trnava', name: 'Trnava', region: 'Trnavský kraj', image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400&h=300&fit=crop' },
+    { slug: 'trencin', name: 'Trenčín', region: 'Trenčiansky kraj', image: 'https://images.unsplash.com/photo-1558618047-f4b511985e72?w=400&h=300&fit=crop' },
 ];
 
 const textsByLocale: Record<string, { title: string; subtitle: string; viewAll: string; salons: string }> = {
@@ -113,15 +114,16 @@ export function PopularCities({ locale = 'sk' }: PopularCitiesProps) {
                             href={`${basePath}/salony/${city.slug}`}
                             className={`${styles.card} ${index === 0 ? styles.featured : ''}`}
                         >
+                            <div className={styles.cardImage}>
+                                <img src={city.image} alt={city.name} loading="lazy" />
+                            </div>
                             <div className={styles.cardContent}>
-                                <span className={styles.pin}>📍</span>
                                 <h3 className={styles.cityName}>{city.name}</h3>
                                 <p className={styles.region}>{city.region}</p>
                                 <span className={styles.count}>
                                     {city.count > 0 ? `${city.count} ${texts.salons}` : texts.salons}
                                 </span>
                             </div>
-                            <span className={styles.arrow}>→</span>
                         </Link>
                     ))}
                 </div>

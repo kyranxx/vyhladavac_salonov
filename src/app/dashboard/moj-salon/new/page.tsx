@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { Select } from '@/components/ui/Select';
 import Link from 'next/link';
 import styles from '../page.module.css';
 
@@ -42,11 +43,18 @@ const cities = [
     { value: 'Iné', label: 'Iné mesto...' },
 ];
 
+interface Company {
+    id: string;
+    name: string;
+}
+
 export default function NewSalonPage() {
     const { user } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [loadingCompanies, setLoadingCompanies] = useState(true);
 
     // Form state
     const [form, setForm] = useState({
@@ -57,15 +65,41 @@ export default function NewSalonPage() {
         description: '',
         website: '',
         category: '',
+        company_id: '',
     });
+
+    // Load user's companies
+    useEffect(() => {
+        const loadCompanies = async () => {
+            const supabase = createBrowserSupabaseClient();
+            if (!supabase || !user) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('companies')
+                    .select('id, name')
+                    .eq('owner_id', user.id)
+                    .order('name');
+
+                if (error) throw error;
+                setCompanies(data || []);
+            } catch (err) {
+                console.error('Error loading companies:', err);
+            } finally {
+                setLoadingCompanies(false);
+            }
+        };
+
+        if (user) loadCompanies();
+    }, [user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
-        if (!form.name || !form.phone || !form.address || !form.city || !form.category) {
-            setError('Vyplňte všetky povinné polia.');
+        if (!form.name || !form.phone || !form.address || !form.city || !form.category || !form.company_id) {
+            setError('Vyplňte všetky povinné polia vrátane výberu firmy.');
             setLoading(false);
             return;
         }
@@ -100,16 +134,31 @@ export default function NewSalonPage() {
                     .replace(/\s+/g, '-')
                     .replace(/[^a-z0-9-]/g, '');
 
+            // Check if auto-approval is enabled
+            let initialStatus = 'pending';
+            try {
+                const settings = localStorage.getItem('salon_finder_settings');
+                if (settings) {
+                    const parsedSettings = JSON.parse(settings);
+                    if (parsedSettings.auto_approve === true) {
+                        initialStatus = 'approved';
+                    }
+                }
+            } catch {
+                // Settings not available, use default pending status
+            }
+
             // Create salon
             const { data: salon, error: dbError } = await supabase.from('salons').insert({
                 owner_id: user?.id,
+                company_id: form.company_id,
                 name: form.name,
                 phone: form.phone,
                 address: form.address,
                 city: form.city,
                 description_sk: form.description,
                 website: form.website || null,
-                status: 'pending',
+                status: initialStatus,
                 tier: 'free',
                 slug: slug,
             }).select().single();
@@ -156,6 +205,28 @@ export default function NewSalonPage() {
                 {error && <div className={styles.error}>{error}</div>}
 
                 <form onSubmit={handleSubmit} className={styles.infoForm}>
+                    {/* Company Selection - Required */}
+                    <div className={styles.formGroup}>
+                        <label>Firma (fakturačné údaje) *</label>
+                        {loadingCompanies ? (
+                            <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Načítavam firmy...</p>
+                        ) : companies.length === 0 ? (
+                            <div className={styles.noCompanyWarning}>
+                                <p>Pred vytvorením salónu musíte najprv vytvoriť firmu s fakturačnými údajmi.</p>
+                                <Link href="/dashboard/firmy" className={styles.createCompanyLink}>
+                                    + Vytvoriť firmu
+                                </Link>
+                            </div>
+                        ) : (
+                            <Select
+                                options={companies.map(c => ({ value: c.id, label: c.name }))}
+                                value={form.company_id}
+                                onChange={(value) => setForm({ ...form, company_id: value })}
+                                placeholder="Vyberte firmu..."
+                            />
+                        )}
+                    </div>
+
                     <div className={styles.formGroup}>
                         <label>Názov salónu *</label>
                         <input
@@ -169,17 +240,13 @@ export default function NewSalonPage() {
 
                     <div className={styles.formGroup}>
                         <label>Hlavná kategória *</label>
-                        <select
+                        <Select
+                            options={categories}
                             value={form.category}
-                            onChange={(e) => setForm({ ...form, category: e.target.value })}
-                            required
-                        >
-                            {categories.map((cat) => (
-                                <option key={cat.value} value={cat.value}>
-                                    {cat.label}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setForm({ ...form, category: value })}
+                            placeholder="Vyberte kategóriu..."
+                            searchable
+                        />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -205,17 +272,13 @@ export default function NewSalonPage() {
                         </div>
                         <div className={styles.formGroup}>
                             <label>Mesto *</label>
-                            <select
+                            <Select
+                                options={cities}
                                 value={form.city}
-                                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                                required
-                            >
-                                {cities.map((c) => (
-                                    <option key={c.value} value={c.value}>
-                                        {c.label}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(value) => setForm({ ...form, city: value })}
+                                placeholder="Vyberte mesto..."
+                                searchable
+                            />
                         </div>
                     </div>
 

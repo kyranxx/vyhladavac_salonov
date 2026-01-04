@@ -145,9 +145,10 @@
 }
 
 .logoImage {
-    height: 34px;
+    height: 48px;
     width: auto;
     object-fit: contain;
+    filter: brightness(0) invert(1);
 }
 
 .closeButton {
@@ -236,7 +237,12 @@
 }
 
 .userAvatar {
-    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .userName {
@@ -246,6 +252,47 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 500;
+}
+
+.adminLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.adminLink:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.backLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.625rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.backLink:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
 }
 
 .signOutButton {

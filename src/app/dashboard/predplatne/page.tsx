@@ -4,7 +4,16 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
+import { useToast } from '@/components/ui/Toast';
 import styles from './page.module.css';
+
+interface SalonOption {
+    id: string;
+    name: string;
+    tier: string;
+    is_verified: boolean;
+    is_featured: boolean;
+}
 
 const plans = [
     {
@@ -76,9 +85,11 @@ export default function SubscriptionPage() {
     const [loading, setLoading] = useState<string | null>(null);
     const [currentTier, setCurrentTier] = useState<string>('free');
     const [salonId, setSalonId] = useState<string | null>(null);
+    const [salons, setSalons] = useState<SalonOption[]>([]);
     const [_isVerified, setIsVerified] = useState(false);
     const [_isFeatured, setIsFeatured] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const toast = useToast();
 
     // Check for success/cancel URL params
     useEffect(() => {
@@ -117,17 +128,22 @@ export default function SubscriptionPage() {
 
             // Also update their salon tier in database if they have one
             try {
-                const { data: salon } = await supabase
+                const { data: userSalons } = await supabase
                     .from('salons')
-                    .update({ tier: 'premium', is_featured: true, is_verified: true })
-                    .eq('owner_id', user.id)
-                    .select('id')
-                    .single();
+                    .select('id, name, tier, is_verified, is_featured')
+                    .eq('owner_id', user.id);
 
-                if (salon) {
-                    setSalonId(salon.id);
+                if (userSalons && userSalons.length > 0) {
+                    setSalons(userSalons);
+                    setSalonId(userSalons[0].id);
                     setIsVerified(true);
                     setIsFeatured(true);
+
+                    // Update all salons to premium
+                    await supabase
+                        .from('salons')
+                        .update({ tier: 'premium', is_featured: true, is_verified: true })
+                        .eq('owner_id', user.id);
                 }
             } catch {
                 // Ignore if no salon
@@ -136,32 +152,44 @@ export default function SubscriptionPage() {
         }
 
         try {
-            // Get user's salon
-            const { data: salon } = await supabase
+            // Get all user's salons
+            const { data: userSalons } = await supabase
                 .from('salons')
-                .select('id, tier, is_verified, is_featured')
-                .eq('owner_id', user.id)
-                .single();
+                .select('id, name, tier, is_verified, is_featured')
+                .eq('owner_id', user.id);
 
-            if (salon) {
-                setSalonId(salon.id);
-                setCurrentTier(salon.tier || 'free');
-                setIsVerified(salon.is_verified || false);
-                setIsFeatured(salon.is_featured || false);
+            if (userSalons && userSalons.length > 0) {
+                setSalons(userSalons);
+                // Default to first salon
+                const firstSalon = userSalons[0];
+                setSalonId(firstSalon.id);
+                setCurrentTier(firstSalon.tier || 'free');
+                setIsVerified(firstSalon.is_verified || false);
+                setIsFeatured(firstSalon.is_featured || false);
             }
         } catch {
             // User might not have a salon yet
         }
     };
 
+    const handleSalonChange = (newSalonId: string) => {
+        setSalonId(newSalonId);
+        const salon = salons.find(s => s.id === newSalonId);
+        if (salon) {
+            setCurrentTier(salon.tier || 'free');
+            setIsVerified(salon.is_verified || false);
+            setIsFeatured(salon.is_featured || false);
+        }
+    };
+
     const handleSubscribe = async (priceId: string | null, planName: string, type?: string) => {
         if (!priceId) return;
         if (!user) {
-            alert('Musíte byť prihlásený pre zakúpenie predplatného.');
+            toast.error('Musíte byť prihlásený pre zakúpenie predplatného.');
             return;
         }
         if (!salonId) {
-            alert('Najprv musíte zaregistrovať salón v sekcii "Môj salón".');
+            toast.error('Najprv musíte zaregistrovať salón v sekcii "Môj salón".');
             return;
         }
 
@@ -213,6 +241,25 @@ export default function SubscriptionPage() {
             {message && (
                 <div className={`${styles.message} ${styles[message.type]}`}>
                     {message.text}
+                </div>
+            )}
+
+            {/* Salon Selector for Multi-Salon Users */}
+            {salons.length > 1 && (
+                <div className={styles.salonSelector}>
+                    <label htmlFor="salon-select">Vybrať salón:</label>
+                    <select
+                        id="salon-select"
+                        value={salonId || ''}
+                        onChange={(e) => handleSalonChange(e.target.value)}
+                        className={styles.salonSelect}
+                    >
+                        {salons.map((salon) => (
+                            <option key={salon.id} value={salon.id}>
+                                {salon.name} ({salon.tier === 'premium' ? 'Premium' : 'Základný'})
+                            </option>
+                        ))}
+                    </select>
                 </div>
             )}
 

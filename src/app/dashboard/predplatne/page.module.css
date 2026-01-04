@@ -24,6 +24,56 @@
     gap: 2.5rem;
 }
 
+/* Salon Selector for multi-salon users */
+.salonSelector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f0f9ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.salonSelector label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.salonSelect {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #93c5fd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+}
+
+.salonSelect:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+@media (min-width: 640px) {
+    .salonSelector {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .salonSelector label {
+        white-space: nowrap;
+    }
+
+    .salonSelect {
+        width: auto;
+        min-width: 250px;
+    }
+}
+
 /* Plans Grid */
 .plansGrid {
     display: grid;

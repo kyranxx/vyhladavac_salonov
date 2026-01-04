@@ -61,6 +61,17 @@
     border-radius: var(--radius-lg);
 }
 
+.statIconSvg {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-lighter);
+    border-radius: var(--radius-lg);
+    color: var(--color-primary);
+}
+
 .statValue {
     display: block;
     font-size: 1.5rem;
@@ -325,6 +336,80 @@
     color: var(--color-error);
     text-decoration: underline;
     font-weight: 600;
+}
+
+/* =============================================
+   STATUS HEADER
+   ============================================= */
+.statusHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.statusHeader .sectionTitle {
+    margin-bottom: 0;
+}
+
+/* =============================================
+   EMPTY STATE CENTER
+   ============================================= */
+.emptyStateCenter {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.emptyStateCenter .emptyIcon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-lighter);
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+}
+
+.emptyStateCenter h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.emptyStateCenter p {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    max-width: 280px;
+}
+
+.primaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 12px rgba(183, 110, 121, 0.3);
+    margin-top: 0.5rem;
+}
+
+.primaryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(183, 110, 121, 0.4);
 }
 
 /* =============================================

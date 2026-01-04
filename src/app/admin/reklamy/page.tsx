@@ -68,6 +68,8 @@ export default function AdminAdsPage() {
                 }),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
                 toast.success('Reklama bola vytvorená!');
                 setShowForm(false);
@@ -78,11 +80,13 @@ export default function AdminAdsPage() {
                 setExpiresAt('');
                 loadAds();
             } else {
-                throw new Error('Failed to create ad');
+                const errorMsg = data.error || 'Failed to create ad';
+                console.error('Error creating ad:', errorMsg);
+                toast.error(`Chyba pri vytváraní reklamy: ${errorMsg}`);
             }
         } catch (error) {
             console.error('Error creating ad:', error);
-            toast.error('Chyba pri vytváraní reklamy');
+            toast.error('Chyba pri vytváraní reklamy - skontrolujte konzolu pre detaily');
         }
     };
 

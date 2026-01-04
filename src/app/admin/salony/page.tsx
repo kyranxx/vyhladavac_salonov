@@ -10,6 +10,7 @@ import styles from './page.module.css';
 
 interface Salon {
     id: string;
+    display_id?: number;
     name: string;
     city: string;
     address?: string;
@@ -21,10 +22,23 @@ interface Salon {
     status: string;
     tier: string;
     created_at: string;
+    owner_id?: string;
+    company_id?: string;
+    profiles?: {
+        email?: string;
+        first_name?: string;
+        last_name?: string;
+    };
+    companies?: {
+        name?: string;
+        display_id?: number;
+    };
 }
 
 export default function AdminSalonsPage() {
     const [filter, setFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name' | 'city'>('newest');
     const [salons, setSalons] = useState<Salon[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingSalon, setEditingSalon] = useState<Salon | null>(null);
@@ -69,9 +83,28 @@ export default function AdminSalonsPage() {
         }
     };
 
-    const filteredSalons = filter === 'all'
-        ? salons
-        : salons.filter(s => s.status === filter);
+    // Filter and sort salons
+    const filteredSalons = salons
+        .filter(s => filter === 'all' || s.status === filter)
+        .filter(s => {
+            if (!searchQuery) return true;
+            const query = searchQuery.toLowerCase();
+            return (
+                s.name.toLowerCase().includes(query) ||
+                (s.city && s.city.toLowerCase().includes(query)) ||
+                (s.phone && s.phone.includes(query)) ||
+                (s.email && s.email.toLowerCase().includes(query))
+            );
+        })
+        .sort((a, b) => {
+            switch (sortBy) {
+                case 'newest': return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                case 'oldest': return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                case 'name': return a.name.localeCompare(b.name);
+                case 'city': return (a.city || '').localeCompare(b.city || '');
+                default: return 0;
+            }
+        });
 
     const handleApproveClick = (salon: Salon) => {
         setConfirmModal({
@@ -179,6 +212,37 @@ export default function AdminSalonsPage() {
         <div className={styles.page}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Správa salónov</h1>
+
+                {/* Search and Sort Controls */}
+                <div className={styles.searchSort}>
+                    <div className={styles.searchBox}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                        <input
+                            type="text"
+                            placeholder="Hľadať podľa názvu, mesta, telefónu..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={styles.searchInput}
+                        />
+                        {searchQuery && (
+                            <button
+                                className={styles.clearSearch}
+                                onClick={() => setSearchQuery('')}
+                            >×</button>
+                        )}
+                    </div>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'name' | 'city')}
+                        className={styles.sortSelect}
+                    >
+                        <option value="newest">Najnovšie</option>
+                        <option value="oldest">Najstaršie</option>
+                        <option value="name">Podľa názvu</option>
+                        <option value="city">Podľa mesta</option>
+                    </select>
+                </div>
+
                 <div className={styles.filters}>
                     <button
                         className={`${styles.filterBtn} ${filter === 'all' ? styles.active : ''}`}
@@ -212,49 +276,51 @@ export default function AdminSalonsPage() {
                     {/* Mobile Card Layout */}
                     <div className={styles.cardList}>
                         {filteredSalons.map((salon) => (
-                            <div key={salon.id} className={styles.salonCard}>
+                            <Link
+                                key={salon.id}
+                                href={`/admin/salony/${salon.id}`}
+                                className={styles.salonCard}
+                            >
                                 <div className={styles.cardHeader}>
-                                    <Link href={`/admin/salony/${salon.id}`} className={styles.salonName}>
-                                        {salon.name}
-                                    </Link>
+                                    <div className={styles.cardTitleRow}>
+                                        <span className={styles.salonId}>#{salon.display_id || salon.id.slice(0, 6)}</span>
+                                        <span className={styles.salonName}>
+                                            {salon.name}
+                                        </span>
+                                    </div>
                                     <div className={styles.cardBadges}>
                                         <StatusBadge status={salon.status} size="sm" />
                                     </div>
                                 </div>
                                 <div className={styles.cardDetails}>
                                     {salon.city && (
-                                        <span className={styles.cardDetail}>📍 {salon.city}</span>
+                                        <span className={styles.cardDetail}>{salon.city}</span>
                                     )}
                                     <span className={styles.cardDetail}>
-                                        {salon.tier === 'premium' ? '⭐ Premium' : '🆓 Free'}
+                                        {salon.tier === 'premium' ? 'Premium' : 'Free'}
                                     </span>
-                                    <span className={styles.cardDetail}>📅 {formatDate(salon.created_at)}</span>
+                                    <span className={styles.cardDetail}>{formatDate(salon.created_at)}</span>
                                 </div>
-                                <div className={styles.cardActions}>
-                                    <button className={styles.actionBtn} onClick={() => setViewingSalon(salon)}>
-                                        👁️ Detail
-                                    </button>
-                                    <button className={styles.actionBtn} onClick={() => setEditingSalon(salon)}>
-                                        ✏️ Upraviť
-                                    </button>
+                                <div className={styles.cardActions} onClick={(e) => e.preventDefault()}>
                                     {salon.status !== 'approved' && (
-                                        <button className={styles.approveBtn} onClick={() => handleApproveClick(salon)}>
+                                        <button className={styles.approveBtn} onClick={(e) => { e.preventDefault(); handleApproveClick(salon); }}>
                                             ✓ Schváliť
                                         </button>
                                     )}
                                     {salon.status !== 'rejected' && (
-                                        <button className={styles.rejectBtn} onClick={() => handleRejectClick(salon)}>
+                                        <button className={styles.rejectBtn} onClick={(e) => { e.preventDefault(); handleRejectClick(salon); }}>
                                             ✗ Zamietnuť
                                         </button>
                                     )}
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
 
                     {/* Desktop Table Layout */}
                     <div className={styles.table}>
                         <div className={styles.tableHeader}>
+                            <span>ID</span>
                             <span>Názov</span>
                             <span>Mesto</span>
                             <span>Stav</span>
@@ -263,32 +329,19 @@ export default function AdminSalonsPage() {
                             <span>Akcie</span>
                         </div>
                         {filteredSalons.map((salon) => (
-                            <div key={salon.id} className={styles.tableRow}>
+                            <Link key={salon.id} href={`/admin/salony/${salon.id}`} className={styles.tableRow}>
+                                <span className={styles.salonIdCell}>#{salon.display_id || salon.id.slice(0, 6)}</span>
                                 <div className={styles.salonName}>{salon.name}</div>
                                 <span>{salon.city || '—'}</span>
                                 <div><StatusBadge status={salon.status} size="sm" /></div>
-                                <span>{salon.tier === 'premium' ? '⭐ Premium' : 'Free'}</span>
+                                <span>{salon.tier === 'premium' ? 'Premium' : 'Free'}</span>
                                 <span>{formatDate(salon.created_at)}</span>
-                                <span className={styles.actions}>
-                                    <button
-                                        className={styles.actionBtn}
-                                        title="Detail"
-                                        onClick={() => setViewingSalon(salon)}
-                                    >
-                                        👁️
-                                    </button>
-                                    <button
-                                        className={styles.actionBtn}
-                                        title="Upraviť"
-                                        onClick={() => setEditingSalon(salon)}
-                                    >
-                                        ✏️
-                                    </button>
+                                <span className={styles.actions} onClick={(e) => e.preventDefault()}>
                                     {salon.status !== 'approved' && (
                                         <button
                                             className={styles.approveBtn}
                                             title="Schváliť"
-                                            onClick={() => handleApproveClick(salon)}
+                                            onClick={(e) => { e.preventDefault(); handleApproveClick(salon); }}
                                         >
                                             ✓
                                         </button>
@@ -297,13 +350,13 @@ export default function AdminSalonsPage() {
                                         <button
                                             className={styles.rejectBtn}
                                             title="Zamietnuť"
-                                            onClick={() => handleRejectClick(salon)}
+                                            onClick={(e) => { e.preventDefault(); handleRejectClick(salon); }}
                                         >
                                             ✗
                                         </button>
                                     )}
                                 </span>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </>

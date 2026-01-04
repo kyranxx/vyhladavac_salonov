@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useToast } from '@/components/ui/Toast';
 import { getTranslation } from '@/lib/translations';
 import styles from './Header.module.css';
 
@@ -15,6 +17,20 @@ export function Header({ locale = 'sk' }: HeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { user, loading, signOut } = useAuth();
     const t = getTranslation(locale);
+    const toast = useToast();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // Show login success toast
+    useEffect(() => {
+        if (searchParams.get('login_success') === 'true' && user) {
+            toast.success('Vitajte späť! Boli ste úspešne prihlásený.');
+            // Remove the param from URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('login_success');
+            router.replace(url.pathname + url.search, { scroll: false });
+        }
+    }, [searchParams, user, toast, router]);
 
     // Base path for links (add locale prefix for non-default)
     const basePath = locale === 'sk' ? '' : `/${locale}`;
@@ -35,9 +51,6 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                 <nav className={styles.desktopNav}>
                     <Link href={`${basePath}/salony`} className={styles.navLink}>
                         {t.nav.allSalons}
-                    </Link>
-                    <Link href={`${basePath}/kategorie`} className={styles.navLink}>
-                        {t.nav.categories}
                     </Link>
                     <Link href={`${basePath}/pre-majitelov`} className={styles.navLink}>
                         {t.nav.forOwners}
@@ -62,7 +75,7 @@ export function Header({ locale = 'sk' }: HeaderProps) {
                                             {user.email?.charAt(0).toUpperCase() || 'U'}
                                         </span>
                                     )}
-                                    <span className={styles.userName}>Dashboard</span>
+                                    <span className={styles.userName}>Môj účet</span>
                                 </Link>
                                 <button
                                     onClick={() => signOut()}

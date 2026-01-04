@@ -21,6 +21,7 @@ export default function AdminKategoriesPage() {
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const toast = useToast();
     const [formData, setFormData] = useState({
         slug: '',
@@ -123,6 +124,15 @@ export default function AdminKategoriesPage() {
         }
     };
 
+    // Filter categories by search
+    const filteredCategories = categories.filter(cat => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return cat.name_sk.toLowerCase().includes(q) ||
+            cat.slug.toLowerCase().includes(q) ||
+            cat.icon.includes(q);
+    });
+
     if (loading) {
         return <div className={styles.container}><p>Načítavam...</p></div>;
     }
@@ -132,11 +142,20 @@ export default function AdminKategoriesPage() {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Kategórie</h1>
-                    <p className={styles.subtitle}>Správa kategórií salónov ({categories.length})</p>
+                    <p className={styles.subtitle}>Správa kategórií salónov ({filteredCategories.length} z {categories.length})</p>
                 </div>
-                <button className={styles.addButton} onClick={() => setShowAddForm(true)}>
-                    + Pridať
-                </button>
+                <div className={styles.headerActions}>
+                    <input
+                        type="text"
+                        placeholder="Hľadať..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className={styles.searchInput}
+                    />
+                    <button className={styles.addButton} onClick={() => setShowAddForm(true)}>
+                        + Pridať
+                    </button>
+                </div>
             </div>
 
             {(showAddForm || editingId) && (
@@ -229,7 +248,7 @@ export default function AdminKategoriesPage() {
             <div className={styles.content}>
                 {/* Mobile Card Layout */}
                 <div className={styles.cardList}>
-                    {categories.map((cat) => (
+                    {filteredCategories.map((cat) => (
                         <div key={cat.id} className={styles.categoryCard}>
                             <div className={styles.cardHeader}>
                                 <div className={styles.iconCell}>{cat.icon}</div>
@@ -272,7 +291,7 @@ export default function AdminKategoriesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {categories.map((cat) => (
+                            {filteredCategories.map((cat) => (
                                 <tr key={cat.id}>
                                     <td className={styles.iconCell}>{cat.icon}</td>
                                     <td>{cat.name_sk}</td>

@@ -98,18 +98,30 @@
 }
 
 .highlight {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-primary);
     position: relative;
-    display: inline-block;
+    display: block;
+    text-shadow: 0 2px 4px rgba(183, 110, 121, 0.2);
 }
 
 .rotatingText {
-    display: inline-flex;
-    justify-content: center;
-    min-width: unset;
+    display: block;
+    min-height: 1.2em;
+}
+
+.word {
+    display: inline-block;
+    transition: all 0.3s ease-out;
+}
+
+.fadeIn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fadeOut {
+    opacity: 0;
+    transform: translateY(10px);
 }
 
 .word {
@@ -167,7 +179,6 @@
 .searchInputGroup:focus-within {
     box-shadow: var(--shadow-card-hover), var(--shadow-glow);
     border-color: var(--color-primary-light);
-    transform: translateY(-2px);
 }
 
 @media (min-width: 768px) {
@@ -185,11 +196,6 @@
     gap: var(--spacing-md);
     padding: var(--spacing-md) var(--spacing-lg);
     border-radius: var(--radius-xl);
-    transition: background-color var(--transition-fast);
-}
-
-.inputWrapper:hover {
-    background-color: var(--color-background-alt);
 }
 
 @media (min-width: 768px) {
@@ -221,8 +227,7 @@
     height: 22px;
 }
 
-.searchInput,
-.citySelect {
+.searchInput {
     width: 100%;
     border: none;
     background: transparent;
@@ -237,13 +242,59 @@
     font-weight: 400;
 }
 
+/* Custom city select wrapper */
+.citySelectWrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-md);
+    padding-left: var(--spacing-lg);
+    height: 56px;
+    border: 2px solid transparent;
+    transition: border-color var(--transition-fast);
+    position: relative;
+}
+
+.citySelectWrapper .inputIcon {
+    position: absolute;
+    left: var(--spacing-lg);
+    z-index: 1;
+    pointer-events: none;
+}
+
 .citySelect {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0 center;
-    padding-right: 24px;
+    flex: 1;
+    margin-left: 32px;
+}
+
+/* Override Select component styles in hero context */
+.citySelect :global(.trigger) {
+    border: none;
+    background: transparent;
+    padding: 0;
+    height: auto;
+    min-height: auto;
+}
+
+.citySelect :global(.trigger:focus) {
+    box-shadow: none;
+}
+
+.citySelect :global(.dropdown) {
+    width: 280px;
+    right: auto;
+}
+
+@media (min-width: 768px) {
+    .citySelectWrapper {
+        height: 64px;
+        border-radius: 0;
+        border-top-right-radius: 32px;
+        border-bottom-right-radius: 32px;
+        border-left: 1px solid var(--color-border);
+    }
 }
 
 .searchButton {

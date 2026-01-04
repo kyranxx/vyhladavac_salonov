@@ -1,15 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/Toast';
 import styles from './page.module.css';
+
+interface EmailSettings {
+    enabled: boolean;
+    recipient: string;
+}
 
 interface Settings {
     site_name: string;
     site_description: string;
     contact_email: string;
     auto_approve: boolean;
-    email_notifications: boolean;
     maintenance_mode: boolean;
+    email_new_salon: EmailSettings;
+    email_salon_approved: EmailSettings;
+    email_salon_rejected: EmailSettings;
+    email_new_subscription: EmailSettings;
+    email_contact_form: EmailSettings;
 }
 
 const defaultSettings: Settings = {
@@ -17,27 +27,35 @@ const defaultSettings: Settings = {
     site_description: 'Nájdite najlepšie salóny krásy na Slovensku',
     contact_email: 'info@salonfinder.sk',
     auto_approve: false,
-    email_notifications: true,
     maintenance_mode: false,
+    email_new_salon: { enabled: true, recipient: '' },
+    email_salon_approved: { enabled: true, recipient: '' },
+    email_salon_rejected: { enabled: true, recipient: '' },
+    email_new_subscription: { enabled: true, recipient: '' },
+    email_contact_form: { enabled: true, recipient: '' },
 };
 
 export default function AdminSettingsPage() {
     const [settings, setSettings] = useState<Settings>(defaultSettings);
     const [saving, setSaving] = useState(false);
-    const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(true);
+    const toast = useToast();
 
     useEffect(() => {
         loadSettings();
     }, []);
 
     const loadSettings = async () => {
-        // Settings are stored in localStorage for now
-        // In production, you'd want to store these in a database table
         const stored = localStorage.getItem('salon_finder_settings');
         if (stored) {
             try {
-                setSettings(JSON.parse(stored));
+                const parsedSettings = { ...defaultSettings, ...JSON.parse(stored) };
+                setSettings(parsedSettings);
+
+                if (parsedSettings.maintenance_mode) {
+                    document.cookie = 'maintenance_mode=true; path=/; max-age=31536000';
+                    document.cookie = 'admin_bypass=true; path=/; max-age=86400';
+                }
             } catch {
                 // Use defaults
             }
@@ -45,23 +63,70 @@ export default function AdminSettingsPage() {
         setLoading(false);
     };
 
+    const saveSettings = async (newSettings: Settings) => {
+        localStorage.setItem('salon_finder_settings', JSON.stringify(newSettings));
+        document.cookie = 'admin_bypass=true; path=/; max-age=86400';
+
+        if (newSettings.maintenance_mode) {
+            document.cookie = 'maintenance_mode=true; path=/; max-age=31536000';
+            await fetch('/api/admin/maintenance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: true })
+            });
+        } else {
+            document.cookie = 'maintenance_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            await fetch('/api/admin/maintenance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: false })
+            });
+        }
+    };
+
+    const handleToggle = async (field: keyof Settings) => {
+        const newValue = !settings[field as keyof Settings];
+        const newSettings = { ...settings, [field]: newValue };
+        setSettings(newSettings);
+        await saveSettings(newSettings);
+
+        if (field === 'maintenance_mode') {
+            toast.success(newValue ? 'Režim údržby aktivovaný' : 'Režim údržby deaktivovaný');
+        } else if (field === 'auto_approve') {
+            toast.success(newValue ? 'Automatické schvaľovanie zapnuté' : 'Automatické schvaľovanie vypnuté');
+        }
+    };
+
+    const handleEmailToggle = (emailType: keyof Settings) => {
+        const current = settings[emailType] as EmailSettings;
+        const newSettings = {
+            ...settings,
+            [emailType]: { ...current, enabled: !current.enabled }
+        };
+        setSettings(newSettings);
+        saveSettings(newSettings);
+    };
+
+    const handleEmailRecipientChange = (emailType: keyof Settings, value: string) => {
+        const current = settings[emailType] as EmailSettings;
+        const newSettings = {
+            ...settings,
+            [emailType]: { ...current, recipient: value }
+        };
+        setSettings(newSettings);
+    };
+
+    const handleSaveEmailRecipient = (emailType: keyof Settings) => {
+        saveSettings(settings);
+        toast.success('Email uložený');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
-
-        // Save to localStorage
-        localStorage.setItem('salon_finder_settings', JSON.stringify(settings));
-
-        // Also save maintenance mode to a cookie that middleware can read
-        if (settings.maintenance_mode) {
-            document.cookie = 'maintenance_mode=true; path=/';
-        } else {
-            document.cookie = 'maintenance_mode=false; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        }
-
+        await saveSettings(settings);
         setSaving(false);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
+        toast.success('Nastavenia boli uložené!');
     };
 
     if (loading) {
@@ -71,115 +136,230 @@ export default function AdminSettingsPage() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Všeobecné nastavenia</h1>
-                <p className={styles.subtitle}>Konfigurácia stránky a systémové nastavenia</p>
+                <h1 className={styles.title}>Nastavenia</h1>
+                <p className={styles.subtitle}>Konfigurácia aplikácie a notifikácií</p>
             </div>
 
-            {saved && (
-                <div className={styles.successMessage}>
-                    ✅ Nastavenia boli uložené!
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Základné informácie</h2>
+                {/* General Settings */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Všeobecné nastavenia</h2>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="siteName">Názov stránky</label>
+                        <label>Názov stránky</label>
                         <input
                             type="text"
-                            id="siteName"
                             value={settings.site_name}
                             onChange={(e) => setSettings({ ...settings, site_name: e.target.value })}
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="siteDescription">Popis stránky</label>
+                        <label>Popis stránky</label>
                         <textarea
-                            id="siteDescription"
                             value={settings.site_description}
                             onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
-                            rows={3}
+                            rows={2}
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="contactEmail">Kontaktný e-mail</label>
+                        <label>Kontaktný email</label>
                         <input
                             type="email"
-                            id="contactEmail"
                             value={settings.contact_email}
                             onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
                         />
                     </div>
-                </div>
+                </section>
 
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Schvaľovanie salónov</h2>
+                {/* Toggles */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Funkcie</h2>
 
-                    <div className={styles.toggleGroup}>
+                    <div className={styles.toggleItem}>
                         <div className={styles.toggleInfo}>
                             <span className={styles.toggleLabel}>Automatické schvaľovanie</span>
-                            <p>Nové salóny budú automaticky schválené bez nutnosti manuálneho schválenia.</p>
+                            <span className={styles.toggleDesc}>Nové salóny budú automaticky schválené</span>
                         </div>
                         <button
                             type="button"
                             className={`${styles.toggle} ${settings.auto_approve ? styles.toggleActive : ''}`}
-                            onClick={() => setSettings({ ...settings, auto_approve: !settings.auto_approve })}
+                            onClick={() => handleToggle('auto_approve')}
                         >
-                            <span className={styles.toggleHandle}></span>
+                            <span className={styles.toggleKnob}></span>
                         </button>
                     </div>
-                </div>
 
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Notifikácie</h2>
-
-                    <div className={styles.toggleGroup}>
-                        <div className={styles.toggleInfo}>
-                            <span className={styles.toggleLabel}>E-mailové notifikácie</span>
-                            <p>Dostávať e-maily o nových registráciách a platbách.</p>
-                        </div>
-                        <button
-                            type="button"
-                            className={`${styles.toggle} ${settings.email_notifications ? styles.toggleActive : ''}`}
-                            onClick={() => setSettings({ ...settings, email_notifications: !settings.email_notifications })}
-                        >
-                            <span className={styles.toggleHandle}></span>
-                        </button>
-                    </div>
-                </div>
-
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Údržba</h2>
-
-                    <div className={styles.toggleGroup}>
+                    <div className={styles.toggleItem}>
                         <div className={styles.toggleInfo}>
                             <span className={styles.toggleLabel}>Režim údržby</span>
-                            <p>Stránka bude nedostupná pre verejnosť (okrem adminov).</p>
+                            <span className={styles.toggleDesc}>Stránka bude nedostupná pre verejnosť</span>
                         </div>
                         <button
                             type="button"
                             className={`${styles.toggle} ${settings.maintenance_mode ? styles.toggleActive : ''}`}
-                            onClick={() => setSettings({ ...settings, maintenance_mode: !settings.maintenance_mode })}
+                            onClick={() => handleToggle('maintenance_mode')}
                         >
-                            <span className={styles.toggleHandle}></span>
+                            <span className={styles.toggleKnob}></span>
                         </button>
                     </div>
-                    {settings.maintenance_mode && (
-                        <div className={styles.warningBox}>
-                            ⚠️ Režim údržby je aktívny! Verejnosť nemôže pristupovať na stránku.
-                        </div>
-                    )}
-                </div>
+                </section>
 
-                <div className={styles.actions}>
-                    <button type="submit" className={styles.saveButton} disabled={saving}>
-                        {saving ? 'Ukladám...' : 'Uložiť nastavenia'}
-                    </button>
-                </div>
+                {/* Email Notifications */}
+                <section className={styles.section}>
+                    <h2 className={styles.sectionTitle}>E-mailové notifikácie</h2>
+                    <p className={styles.sectionDesc}>Nastavte, ktoré notifikácie chcete dostávať a na akú adresu</p>
+
+                    {/* New Salon Registration */}
+                    <div className={styles.emailSetting}>
+                        <div className={styles.emailHeader}>
+                            <div className={styles.emailToggleRow}>
+                                <span className={styles.emailLabel}>Nová registrácia salónu</span>
+                                <button
+                                    type="button"
+                                    className={`${styles.toggleSmall} ${settings.email_new_salon.enabled ? styles.toggleActive : ''}`}
+                                    onClick={() => handleEmailToggle('email_new_salon')}
+                                >
+                                    <span className={styles.toggleKnob}></span>
+                                </button>
+                            </div>
+                        </div>
+                        {settings.email_new_salon.enabled && (
+                            <div className={styles.emailInput}>
+                                <input
+                                    type="email"
+                                    placeholder="admin@example.com"
+                                    value={settings.email_new_salon.recipient}
+                                    onChange={(e) => handleEmailRecipientChange('email_new_salon', e.target.value)}
+                                />
+                                <button type="button" onClick={() => handleSaveEmailRecipient('email_new_salon')} className={styles.saveBtn}>
+                                    Uložiť
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Salon Approved */}
+                    <div className={styles.emailSetting}>
+                        <div className={styles.emailHeader}>
+                            <div className={styles.emailToggleRow}>
+                                <span className={styles.emailLabel}>Salón schválený (majiteľovi)</span>
+                                <button
+                                    type="button"
+                                    className={`${styles.toggleSmall} ${settings.email_salon_approved.enabled ? styles.toggleActive : ''}`}
+                                    onClick={() => handleEmailToggle('email_salon_approved')}
+                                >
+                                    <span className={styles.toggleKnob}></span>
+                                </button>
+                            </div>
+                        </div>
+                        {settings.email_salon_approved.enabled && (
+                            <div className={styles.emailInput}>
+                                <input
+                                    type="email"
+                                    placeholder="Prázdne = email majiteľa salónu"
+                                    value={settings.email_salon_approved.recipient}
+                                    onChange={(e) => handleEmailRecipientChange('email_salon_approved', e.target.value)}
+                                />
+                                <button type="button" onClick={() => handleSaveEmailRecipient('email_salon_approved')} className={styles.saveBtn}>
+                                    Uložiť
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Salon Rejected */}
+                    <div className={styles.emailSetting}>
+                        <div className={styles.emailHeader}>
+                            <div className={styles.emailToggleRow}>
+                                <span className={styles.emailLabel}>Salón zamietnutý (majiteľovi)</span>
+                                <button
+                                    type="button"
+                                    className={`${styles.toggleSmall} ${settings.email_salon_rejected.enabled ? styles.toggleActive : ''}`}
+                                    onClick={() => handleEmailToggle('email_salon_rejected')}
+                                >
+                                    <span className={styles.toggleKnob}></span>
+                                </button>
+                            </div>
+                        </div>
+                        {settings.email_salon_rejected.enabled && (
+                            <div className={styles.emailInput}>
+                                <input
+                                    type="email"
+                                    placeholder="Prázdne = email majiteľa salónu"
+                                    value={settings.email_salon_rejected.recipient}
+                                    onChange={(e) => handleEmailRecipientChange('email_salon_rejected', e.target.value)}
+                                />
+                                <button type="button" onClick={() => handleSaveEmailRecipient('email_salon_rejected')} className={styles.saveBtn}>
+                                    Uložiť
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* New Subscription */}
+                    <div className={styles.emailSetting}>
+                        <div className={styles.emailHeader}>
+                            <div className={styles.emailToggleRow}>
+                                <span className={styles.emailLabel}>Nové predplatné</span>
+                                <button
+                                    type="button"
+                                    className={`${styles.toggleSmall} ${settings.email_new_subscription.enabled ? styles.toggleActive : ''}`}
+                                    onClick={() => handleEmailToggle('email_new_subscription')}
+                                >
+                                    <span className={styles.toggleKnob}></span>
+                                </button>
+                            </div>
+                        </div>
+                        {settings.email_new_subscription.enabled && (
+                            <div className={styles.emailInput}>
+                                <input
+                                    type="email"
+                                    placeholder="admin@example.com"
+                                    value={settings.email_new_subscription.recipient}
+                                    onChange={(e) => handleEmailRecipientChange('email_new_subscription', e.target.value)}
+                                />
+                                <button type="button" onClick={() => handleSaveEmailRecipient('email_new_subscription')} className={styles.saveBtn}>
+                                    Uložiť
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Contact Form */}
+                    <div className={styles.emailSetting}>
+                        <div className={styles.emailHeader}>
+                            <div className={styles.emailToggleRow}>
+                                <span className={styles.emailLabel}>Kontaktný formulár</span>
+                                <button
+                                    type="button"
+                                    className={`${styles.toggleSmall} ${settings.email_contact_form.enabled ? styles.toggleActive : ''}`}
+                                    onClick={() => handleEmailToggle('email_contact_form')}
+                                >
+                                    <span className={styles.toggleKnob}></span>
+                                </button>
+                            </div>
+                        </div>
+                        {settings.email_contact_form.enabled && (
+                            <div className={styles.emailInput}>
+                                <input
+                                    type="email"
+                                    placeholder="support@example.com"
+                                    value={settings.email_contact_form.recipient}
+                                    onChange={(e) => handleEmailRecipientChange('email_contact_form', e.target.value)}
+                                />
+                                <button type="button" onClick={() => handleSaveEmailRecipient('email_contact_form')} className={styles.saveBtn}>
+                                    Uložiť
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <button type="submit" className={styles.submitButton} disabled={saving}>
+                    {saving ? 'Ukladám...' : 'Uložiť všetky nastavenia'}
+                </button>
             </form>
         </div>
     );

@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
     const type = requestUrl.searchParams.get('type'); // 'signup', 'recovery', 'magiclink', etc.
 
     // Get the redirect URL from cookie (set before OAuth redirect)
-    const redirectTo = request.cookies.get('auth_redirect')?.value || '/';
+    let redirectTo = request.cookies.get('auth_redirect')?.value || '/';
+
+    // Never redirect back to login/registration pages
+    if (redirectTo.includes('prihlasenie') || redirectTo.includes('registracia')) {
+        redirectTo = '/';
+    }
 
     if (code) {
         const supabase = createServerSupabaseClient();
@@ -51,9 +56,13 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL('/auth/email-confirmed', request.url));
     }
 
-    // Create response and clear the redirect cookie
-    const response = NextResponse.redirect(new URL(redirectTo, request.url));
+    // Create response with login_success param for toast
+    const redirectUrl = new URL(redirectTo, request.url);
+    redirectUrl.searchParams.set('login_success', 'true');
+
+    const response = NextResponse.redirect(redirectUrl);
     response.cookies.delete('auth_redirect');
 
     return response;
 }
+

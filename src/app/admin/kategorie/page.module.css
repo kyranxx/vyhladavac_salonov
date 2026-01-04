@@ -58,6 +58,40 @@
     box-shadow: 0 4px 12px rgba(193, 154, 107, 0.3);
 }
 
+.headerActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    min-height: 44px;
+    box-sizing: border-box;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #c19a6b;
+    box-shadow: 0 0 0 3px rgba(193, 154, 107, 0.15);
+}
+
+@media (min-width: 640px) {
+    .headerActions {
+        flex-direction: row;
+        width: auto;
+    }
+
+    .searchInput {
+        width: 180px;
+    }
+}
+
 /* =============================================
    FORM CARD
    ============================================= */

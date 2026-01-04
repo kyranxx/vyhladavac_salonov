@@ -200,6 +200,52 @@ export default function SalonDetailPage() {
         }
     };
 
+    const toggleVerified = async () => {
+        if (!salon) return;
+
+        try {
+            setSaving(true);
+            const newValue = !salon.is_verified;
+            const response = await fetch(`/api/admin/salons/${salonId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_verified: newValue })
+            });
+
+            if (response.ok) {
+                setSalon({ ...salon, is_verified: newValue });
+                toast.success(newValue ? 'Salón bol overený' : 'Overenie bolo zrušené');
+            }
+        } catch (error) {
+            toast.error('Nepodarilo sa zmeniť stav overenia');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const toggleFeatured = async () => {
+        if (!salon) return;
+
+        try {
+            setSaving(true);
+            const newValue = !salon.is_featured;
+            const response = await fetch(`/api/admin/salons/${salonId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_featured: newValue })
+            });
+
+            if (response.ok) {
+                setSalon({ ...salon, is_featured: newValue });
+                toast.success(newValue ? 'Salón bol pridaný do odporúčaných' : 'Salón bol odstránený z odporúčaných');
+            }
+        } catch (error) {
+            toast.error('Nepodarilo sa zmeniť stav odporúčania');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('sk-SK', {
             year: 'numeric',
@@ -301,7 +347,26 @@ export default function SalonDetailPage() {
                             onClick={() => handleTierChange('premium')}
                             disabled={saving}
                         >
-                            ⭐ Premium
+                            Premium
+                        </button>
+                    </div>
+                </div>
+                <div className={styles.actionGroup}>
+                    <label className={styles.actionLabel}>Špeciálne:</label>
+                    <div className={styles.actionButtons}>
+                        <button
+                            className={`${styles.tierBtn} ${salon.is_verified ? styles.verifiedBtn : ''}`}
+                            onClick={toggleVerified}
+                            disabled={saving}
+                        >
+                            {salon.is_verified ? '✓ Overený' : 'Overiť'}
+                        </button>
+                        <button
+                            className={`${styles.tierBtn} ${salon.is_featured ? styles.featuredBtn : ''}`}
+                            onClick={toggleFeatured}
+                            disabled={saving}
+                        >
+                            {salon.is_featured ? '★ Odporúčaný' : 'Odporučiť'}
                         </button>
                     </div>
                 </div>
@@ -314,25 +379,25 @@ export default function SalonDetailPage() {
                         className={`${styles.tab} ${activeTab === 'info' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('info')}
                     >
-                        📋 Info
+                        Info
                     </button>
                     <button
                         className={`${styles.tab} ${activeTab === 'services' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('services')}
                     >
-                        ✂️ Služby
+                        Služby
                     </button>
                     <button
                         className={`${styles.tab} ${activeTab === 'hours' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('hours')}
                     >
-                        🕐 Hodiny
+                        Hodiny
                     </button>
                     <button
                         className={`${styles.tab} ${activeTab === 'photos' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('photos')}
                     >
-                        📷 Fotky
+                        Fotky
                     </button>
                 </div>
             </div>
@@ -608,7 +673,12 @@ export default function SalonDetailPage() {
                 {/* Services Tab */}
                 {activeTab === 'services' && (
                     <div className={styles.servicesTab}>
-                        <h3 className={styles.sectionTitle}>Služby ({salon.services?.length || 0})</h3>
+                        <div className={styles.tabHeader}>
+                            <h3 className={styles.sectionTitle}>Služby ({salon.services?.length || 0})</h3>
+                            <p className={styles.adminNote}>
+                                Pre úpravu služieb sa prihláste ako vlastník salónu v dashboarde.
+                            </p>
+                        </div>
                         {salon.services && salon.services.length > 0 ? (
                             <div className={styles.servicesList}>
                                 {salon.services.map(service => (
@@ -632,7 +702,7 @@ export default function SalonDetailPage() {
                             </div>
                         ) : (
                             <div className={styles.emptyState}>
-                                <span>✂️</span>
+                                <span>—</span>
                                 <p>Žiadne služby</p>
                             </div>
                         )}
@@ -642,7 +712,12 @@ export default function SalonDetailPage() {
                 {/* Opening Hours Tab */}
                 {activeTab === 'hours' && (
                     <div className={styles.hoursTab}>
-                        <h3 className={styles.sectionTitle}>Otváracie hodiny</h3>
+                        <div className={styles.tabHeader}>
+                            <h3 className={styles.sectionTitle}>Otváracie hodiny</h3>
+                            <p className={styles.adminNote}>
+                                Pre úpravu otváracích hodín sa prihláste ako vlastník salónu v dashboarde.
+                            </p>
+                        </div>
                         {salon.opening_hours && salon.opening_hours.length > 0 ? (
                             <div className={styles.hoursList}>
                                 {DAYS.map((day, idx) => {
@@ -665,7 +740,7 @@ export default function SalonDetailPage() {
                             </div>
                         ) : (
                             <div className={styles.emptyState}>
-                                <span>🕐</span>
+                                <span>—</span>
                                 <p>Otváracie hodiny nie sú nastavené</p>
                             </div>
                         )}
@@ -675,7 +750,12 @@ export default function SalonDetailPage() {
                 {/* Photos Tab */}
                 {activeTab === 'photos' && (
                     <div className={styles.photosTab}>
-                        <h3 className={styles.sectionTitle}>Fotografie ({salon.photos?.length || 0})</h3>
+                        <div className={styles.tabHeader}>
+                            <h3 className={styles.sectionTitle}>Fotografie ({salon.photos?.length || 0})</h3>
+                            <p className={styles.adminNote}>
+                                Pre nahrávanie/mazanie fotiek sa prihláste ako vlastník salónu v dashboarde.
+                            </p>
+                        </div>
                         {salon.photos && salon.photos.length > 0 ? (
                             <div className={styles.photosGrid}>
                                 {salon.photos.map(photo => (
@@ -686,7 +766,7 @@ export default function SalonDetailPage() {
                             </div>
                         ) : (
                             <div className={styles.emptyState}>
-                                <span>📷</span>
+                                <span>—</span>
                                 <p>Žiadne fotografie</p>
                             </div>
                         )}

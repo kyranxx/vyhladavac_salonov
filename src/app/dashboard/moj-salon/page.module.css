@@ -1,6 +1,7 @@
 .container {
     padding: var(--spacing-lg);
     max-width: 900px;
+    margin: 0 auto;
 }
 
 .header {
@@ -563,4 +564,35 @@
 
 .content {
     /* Content area styles */
+}
+
+/* Company Warning */
+.noCompanyWarning {
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.noCompanyWarning p {
+    margin: 0 0 var(--spacing-md);
+    color: #92400e;
+    font-size: var(--font-size-sm);
+}
+
+.createCompanyLink {
+    display: inline-block;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.createCompanyLink:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }

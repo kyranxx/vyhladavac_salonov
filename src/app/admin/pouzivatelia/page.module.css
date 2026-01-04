@@ -483,13 +483,16 @@
 }
 
 .badgePremium {
-    display: inline-block;
-    padding: 0.25rem 0.625rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
     color: #92400e;
     border-radius: 999px;
     font-size: 0.6875rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 /* =============================================

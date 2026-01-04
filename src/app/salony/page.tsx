@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SalonCard } from '@/components/salon/SalonCard';
+import { Select } from '@/components/ui/Select';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import styles from './page.module.css';
 
@@ -170,27 +171,29 @@ export default function SalonsPage() {
                             />
                         </div>
 
-                        <select
+                        <Select
+                            options={[
+                                { value: '', label: 'Všetky mestá' },
+                                ...cities.map(city => ({ value: city, label: city }))
+                            ]}
                             value={selectedCity}
-                            onChange={(e) => setSelectedCity(e.target.value)}
-                            className={styles.select}
-                        >
-                            <option value="">Všetky mestá</option>
-                            {cities.map((city) => (
-                                <option key={city} value={city}>{city}</option>
-                            ))}
-                        </select>
+                            onChange={setSelectedCity}
+                            placeholder="Všetky mestá"
+                            searchable
+                            className={styles.selectWrapper}
+                        />
 
-                        <select
+                        <Select
+                            options={[
+                                { value: '', label: 'Všetky kategórie' },
+                                ...categories.map(cat => ({ value: cat.slug, label: cat.name_sk }))
+                            ]}
                             value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className={styles.select}
-                        >
-                            <option value="">Všetky kategórie</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.slug}>{cat.name_sk}</option>
-                            ))}
-                        </select>
+                            onChange={setSelectedCategory}
+                            placeholder="Všetky kategórie"
+                            searchable
+                            className={styles.selectWrapper}
+                        />
                     </div>
 
                     {/* Results */}

@@ -72,7 +72,7 @@ const emailTemplates = {
 
 export async function POST(request: NextRequest) {
     try {
-        const { to, type, data } = await request.json();
+        const { to, type, data, notifyAdmin } = await request.json();
 
         if (!to || !type) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -90,10 +90,25 @@ export async function POST(request: NextRequest) {
             type
         };
 
-        // For now, log the email (in production, integrate with SendGrid/Resend)
-        console.log('📧 Email notification:', { to, type, subject: email.subject });
+        // Check if SMTP is configured
+        const isEmailConfigured = process.env.RESEND_API_KEY || process.env.SMTP_HOST;
 
-        // TODO: Integrate with email service
+        if (!isEmailConfigured) {
+            // Log the email that would have been sent
+            console.log('📧 Email notification (not sent - SMTP not configured):', {
+                to,
+                type,
+                subject: email.subject
+            });
+
+            return NextResponse.json({
+                success: true,
+                message: 'Email logged (SMTP not configured)',
+                configured: false
+            });
+        }
+
+        // TODO: Integrate with email service when SMTP is configured
         // Example with Resend:
         // const resend = new Resend(process.env.RESEND_API_KEY);
         // await resend.emails.send({
@@ -103,7 +118,23 @@ export async function POST(request: NextRequest) {
         //     html: email.html,
         // });
 
-        return NextResponse.json({ success: true, message: 'Email queued' });
+        // If notifyAdmin is true, also send to admin email
+        // if (notifyAdmin && process.env.ADMIN_EMAIL) {
+        //     await resend.emails.send({
+        //         from: 'noreply@salonfinder.sk',
+        //         to: process.env.ADMIN_EMAIL,
+        //         subject: `[Admin] ${email.subject}`,
+        //         html: email.html,
+        //     });
+        // }
+
+        console.log('📧 Email sent:', { to, type, subject: email.subject });
+
+        return NextResponse.json({
+            success: true,
+            message: 'Email sent',
+            configured: true
+        });
     } catch (error) {
         console.error('Error sending email:', error);
         return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });

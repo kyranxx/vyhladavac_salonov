@@ -4,16 +4,16 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { useToast } from '@/components/ui/Toast';
 import styles from './page.module.css';
 
 export default function SettingsPage() {
     const { user } = useAuth();
+    const toast = useToast();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState('');
 
     // Load user data on mount
     useEffect(() => {
@@ -27,25 +27,22 @@ export default function SettingsPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
-        setSuccess(false);
 
         try {
             const supabase = createBrowserSupabaseClient();
             if (!supabase) throw new Error('Supabase not configured');
 
+            // Only update phone - name fields are read-only
             const { error } = await supabase.auth.updateUser({
                 data: {
-                    first_name: firstName,
-                    last_name: lastName,
                     phone: phone,
                 }
             });
 
             if (error) throw error;
-            setSuccess(true);
+            toast.success('Zmeny boli úspešne uložené.');
         } catch (_err) {
-            setError('Nepodarilo sa uložiť zmeny. Skúste to znova.');
+            toast.error('Nepodarilo sa uložiť zmeny. Skúste to znova.');
         } finally {
             setLoading(false);
         }
@@ -63,9 +60,9 @@ export default function SettingsPage() {
             });
 
             if (error) throw error;
-            alert('Odkaz na zmenu hesla bol odoslaný na váš e-mail.');
+            toast.success('Odkaz na zmenu hesla bol odoslaný na váš e-mail.');
         } catch (_err) {
-            alert('Nepodarilo sa odoslať e-mail. Skúste to znova.');
+            toast.error('Nepodarilo sa odoslať e-mail. Skúste to znova.');
         }
     };
 
@@ -81,18 +78,6 @@ export default function SettingsPage() {
                 <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>Osobné údaje</h2>
 
-                    {success && (
-                        <div className={styles.success}>
-                            ✅ Zmeny boli úspešne uložené.
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className={styles.error}>
-                            {error}
-                        </div>
-                    )}
-
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.formRow}>
                             <div className={styles.formGroup}>
@@ -102,9 +87,10 @@ export default function SettingsPage() {
                                     id="firstName"
                                     className={styles.input}
                                     value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    disabled
                                     placeholder="Vaše meno"
                                 />
+                                <span className={styles.hint}>Meno nie je možné zmeniť</span>
                             </div>
                             <div className={styles.formGroup}>
                                 <label htmlFor="lastName" className={styles.label}>Priezvisko</label>
@@ -113,9 +99,10 @@ export default function SettingsPage() {
                                     id="lastName"
                                     className={styles.input}
                                     value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    disabled
                                     placeholder="Vaše priezvisko"
                                 />
+                                <span className={styles.hint}>Priezvisko nie je možné zmeniť</span>
                             </div>
                         </div>
 

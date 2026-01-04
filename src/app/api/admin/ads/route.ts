@@ -14,11 +14,18 @@ export async function GET() {
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return NextResponse.json(data);
-    } catch (error) {
+        if (error) {
+            console.error('Error fetching ads:', error);
+            // Return empty array if table doesn't exist
+            if (error.code === '42P01') {
+                return NextResponse.json([]);
+            }
+            throw error;
+        }
+        return NextResponse.json(data || []);
+    } catch (error: any) {
         console.error('Error fetching ads:', error);
-        return NextResponse.json({ error: 'Failed to fetch ads' }, { status: 500 });
+        return NextResponse.json({ error: error?.message || 'Failed to fetch ads' }, { status: 500 });
     }
 }
 
@@ -27,17 +34,41 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
+        // Validate required fields
+        if (!body.name || !body.image_url || !body.link_url) {
+            return NextResponse.json({
+                error: 'Vyžadované polia: name, image_url, link_url'
+            }, { status: 400 });
+        }
+
+        // Map frontend field names to database field names if needed
+        const adData = {
+            name: body.name,
+            placement: body.placement || 'sidebar',
+            image_url: body.image_url,
+            link_url: body.link_url,
+            expires_at: body.expires_at || null,
+            status: body.status || 'active',
+            impressions: body.impressions || 0,
+            clicks: body.clicks || 0,
+        };
+
         const { data, error } = await supabaseAdmin
             .from('banner_ads')
-            .insert(body)
+            .insert(adData)
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error creating ad:', error);
+            return NextResponse.json({
+                error: `Database error: ${error.message}`
+            }, { status: 500 });
+        }
         return NextResponse.json(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating ad:', error);
-        return NextResponse.json({ error: 'Failed to create ad' }, { status: 500 });
+        return NextResponse.json({ error: error?.message || 'Failed to create ad' }, { status: 500 });
     }
 }
 
@@ -57,11 +88,16 @@ export async function PUT(request: Request) {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error updating ad:', error);
+            return NextResponse.json({
+                error: `Database error: ${error.message}`
+            }, { status: 500 });
+        }
         return NextResponse.json(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating ad:', error);
-        return NextResponse.json({ error: 'Failed to update ad' }, { status: 500 });
+        return NextResponse.json({ error: error?.message || 'Failed to update ad' }, { status: 500 });
     }
 }
 
@@ -79,10 +115,15 @@ export async function DELETE(request: Request) {
             .delete()
             .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error deleting ad:', error);
+            return NextResponse.json({
+                error: `Database error: ${error.message}`
+            }, { status: 500 });
+        }
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error deleting ad:', error);
-        return NextResponse.json({ error: 'Failed to delete ad' }, { status: 500 });
+        return NextResponse.json({ error: error?.message || 'Failed to delete ad' }, { status: 500 });
     }
 }

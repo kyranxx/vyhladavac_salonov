@@ -17,10 +17,17 @@ export async function GET() {
             `)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return NextResponse.json(data);
-    } catch (error) {
+        if (error) {
+            console.error('Error fetching subscriptions:', error);
+            // Return empty array if table doesn't exist
+            if (error.code === '42P01') {
+                return NextResponse.json([]);
+            }
+            throw error;
+        }
+        return NextResponse.json(data || []);
+    } catch (error: any) {
         console.error('Error fetching subscriptions:', error);
-        return NextResponse.json({ error: 'Failed to fetch subscriptions' }, { status: 500 });
+        return NextResponse.json({ error: error?.message || 'Failed to fetch subscriptions' }, { status: 500 });
     }
 }

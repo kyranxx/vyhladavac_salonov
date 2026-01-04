@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TranslationKey } from '@/lib/translations';
+import { Select } from '@/components/ui/Select';
 import styles from './HeroSection.module.css';
 
 const rotatingWordsByLocale: Record<string, string[]> = {
@@ -41,12 +42,53 @@ export function HeroSection({ locale = 'sk', translations }: HeroSectionProps) {
     const cities = [
         { value: 'bratislava', label: 'Bratislava' },
         { value: 'kosice', label: 'Košice' },
+        { value: 'presov', label: 'Prešov' },
         { value: 'zilina', label: 'Žilina' },
         { value: 'nitra', label: 'Nitra' },
-        { value: 'presov', label: 'Prešov' },
         { value: 'banska-bystrica', label: 'Banská Bystrica' },
         { value: 'trnava', label: 'Trnava' },
         { value: 'trencin', label: 'Trenčín' },
+        { value: 'martin', label: 'Martin' },
+        { value: 'poprad', label: 'Poprad' },
+        { value: 'prievidza', label: 'Prievidza' },
+        { value: 'zvolen', label: 'Zvolen' },
+        { value: 'povazska-bystrica', label: 'Považská Bystrica' },
+        { value: 'nove-zamky', label: 'Nové Zámky' },
+        { value: 'michalovce', label: 'Michalovce' },
+        { value: 'spisska-nova-ves', label: 'Spišská Nová Ves' },
+        { value: 'komarno', label: 'Komárno' },
+        { value: 'humenne', label: 'Humenné' },
+        { value: 'levice', label: 'Levice' },
+        { value: 'bardejov', label: 'Bardejov' },
+        { value: 'liptovsky-mikulas', label: 'Liptovský Mikuláš' },
+        { value: 'ruzomberok', label: 'Ružomberok' },
+        { value: 'lucenec', label: 'Lučenec' },
+        { value: 'piestany', label: 'Piešťany' },
+        { value: 'topolcany', label: 'Topoľčany' },
+        { value: 'dubnica', label: 'Dubnica nad Váhom' },
+        { value: 'dunajska-streda', label: 'Dunajská Streda' },
+        { value: 'partizanske', label: 'Partizánske' },
+        { value: 'cadca', label: 'Čadca' },
+        { value: 'pezinok', label: 'Pezinok' },
+        { value: 'skalica', label: 'Skalica' },
+        { value: 'senec', label: 'Senec' },
+        { value: 'hlohovec', label: 'Hlohovec' },
+        { value: 'malacky', label: 'Malacky' },
+        { value: 'senica', label: 'Senica' },
+        { value: 'sala', label: 'Šaľa' },
+        { value: 'dolny-kubin', label: 'Dolný Kubín' },
+        { value: 'galanta', label: 'Galanta' },
+        { value: 'trebisov', label: 'Trebišov' },
+        { value: 'vranov', label: 'Vranov nad Topľou' },
+        { value: 'snina', label: 'Snina' },
+        { value: 'revuca', label: 'Revúca' },
+        { value: 'rimavska-sobota', label: 'Rimavská Sobota' },
+        { value: 'brezno', label: 'Brezno' },
+        { value: 'detva', label: 'Detva' },
+        { value: 'krupina', label: 'Krupina' },
+        { value: 'zarnovica', label: 'Žarnovica' },
+        { value: 'banska-stiavnica', label: 'Banská Štiavnica' },
+        { value: 'sturovo', label: 'Štúrovo' },
     ];
 
     const handleSearch = (e: React.FormEvent) => {
@@ -69,13 +111,13 @@ export function HeroSection({ locale = 'sk', translations }: HeroSectionProps) {
             <div className={styles.container}>
                 <div className={styles.content}>
                     <h1 className={styles.title}>
-                        {t?.hero.title || 'Nájdite'}{' '}
+                        {t?.hero.title || 'Nájdite'}
                         <span className={`${styles.highlight} ${styles.rotatingText}`}>
                             <span className={`${styles.word} ${isAnimating ? styles.fadeOut : styles.fadeIn}`}>
                                 {rotatingWords[currentWordIndex]}
                             </span>
                         </span>
-                        <br />{t?.hero.titleEnd || 'vo vašom meste'}
+                        {t?.hero.titleEnd || 'vo vašom meste'}
                     </h1>
 
                     <p className={styles.subtitle}>
@@ -101,25 +143,21 @@ export function HeroSection({ locale = 'sk', translations }: HeroSectionProps) {
                                 />
                             </div>
 
-                            <div className={styles.inputWrapper}>
+                            <div className={styles.citySelectWrapper}>
                                 <span className={styles.inputIcon}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
                                 </span>
-                                <select
-                                    className={styles.citySelect}
+                                <Select
+                                    options={[{ value: '', label: t?.hero.allCities || 'Všetky mestá' }, ...cities]}
                                     value={selectedCity}
-                                    onChange={(e) => setSelectedCity(e.target.value)}
-                                >
-                                    <option value="">{t?.hero.allCities || 'Všetky mestá'}</option>
-                                    {cities.map((city) => (
-                                        <option key={city.value} value={city.value}>
-                                            {city.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={setSelectedCity}
+                                    placeholder={t?.hero.allCities || 'Všetky mestá'}
+                                    searchable
+                                    className={styles.citySelect}
+                                />
                             </div>
 
                             <button type="submit" className={styles.searchButton}>
