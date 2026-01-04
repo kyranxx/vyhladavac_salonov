@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createBrowserSupabaseClient } from '@/lib/supabase-browser';
@@ -79,7 +79,7 @@ const addons = [
     },
 ];
 
-export default function SubscriptionPage() {
+function SubscriptionContent() {
     const { user } = useAuth();
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState<string | null>(null);
@@ -346,5 +346,13 @@ export default function SubscriptionPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function SubscriptionPage() {
+    return (
+        <Suspense fallback={<div className={styles.loading}>Načítavam...</div>}>
+            <SubscriptionContent />
+        </Suspense>
     );
 }

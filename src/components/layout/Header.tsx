@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from '@/components/providers/AuthProvider';
@@ -13,148 +13,159 @@ interface HeaderProps {
     locale?: string;
 }
 
-export function Header({ locale = 'sk' }: HeaderProps) {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { user, loading, signOut } = useAuth();
-    const t = getTranslation(locale);
-    const toast = useToast();
+// Separate component for login toast to handle Suspense boundary
+function LoginToastHandler() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const toast = useToast();
+    const { user } = useAuth();
 
-    // Show login success toast
     useEffect(() => {
         if (searchParams.get('login_success') === 'true' && user) {
             toast.success('Vitajte späť! Boli ste úspešne prihlásený.');
-            // Remove the param from URL
             const url = new URL(window.location.href);
             url.searchParams.delete('login_success');
             router.replace(url.pathname + url.search, { scroll: false });
         }
     }, [searchParams, user, toast, router]);
 
+    return null;
+}
+
+export function Header({ locale = 'sk' }: HeaderProps) {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { user, loading, signOut } = useAuth();
+    const t = getTranslation(locale);
+    const toast = useToast();
+
     // Base path for links (add locale prefix for non-default)
     const basePath = locale === 'sk' ? '' : `/${locale}`;
 
     return (
-        <header className={styles.header}>
-            <div className={styles.container}>
-                {/* Logo */}
-                <Link href={basePath || '/'} className={styles.logo}>
-                    <img
-                        src="/logo_register_salonov.png"
-                        alt="Register salónov"
-                        className={styles.logoImage}
-                    />
-                </Link>
+        <>
+            <Suspense fallback={null}>
+                <LoginToastHandler />
+            </Suspense>
+            <header className={styles.header}>
+                <div className={styles.container}>
+                    {/* Logo */}
+                    <Link href={basePath || '/'} className={styles.logo}>
+                        <img
+                            src="/logo_register_salonov.png"
+                            alt="Register salónov"
+                            className={styles.logoImage}
+                        />
+                    </Link>
 
-                {/* Desktop Navigation */}
-                <nav className={styles.desktopNav}>
-                    <Link href={`${basePath}/salony`} className={styles.navLink}>
-                        {t.nav.allSalons}
-                    </Link>
-                    <Link href={`${basePath}/pre-majitelov`} className={styles.navLink}>
-                        {t.nav.forOwners}
-                    </Link>
-                </nav>
+                    {/* Desktop Navigation */}
+                    <nav className={styles.desktopNav}>
+                        <Link href={`${basePath}/salony`} className={styles.navLink}>
+                            {t.nav.allSalons}
+                        </Link>
+                        <Link href={`${basePath}/pre-majitelov`} className={styles.navLink}>
+                            {t.nav.forOwners}
+                        </Link>
+                    </nav>
 
-                {/* Desktop Actions - show different buttons based on login state */}
-                <div className={styles.actions}>
-                    <LanguageSwitcher />
-                    {!loading && (
-                        user ? (
-                            <>
-                                <Link href="/dashboard" className={styles.userButton}>
-                                    {user.user_metadata?.avatar_url ? (
-                                        <img
-                                            src={user.user_metadata.avatar_url}
-                                            alt="Avatar"
-                                            className={styles.userAvatar}
-                                        />
-                                    ) : (
-                                        <span className={styles.userInitial}>
-                                            {user.email?.charAt(0).toUpperCase() || 'U'}
-                                        </span>
-                                    )}
-                                    <span className={styles.userName}>Môj účet</span>
-                                </Link>
-                                <button
-                                    onClick={() => signOut()}
-                                    className={styles.logoutButton}
-                                >
-                                    Odhlásiť
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link href={`${basePath}/prihlasenie`} className={styles.loginButton}>
-                                    {t.nav.signIn}
-                                </Link>
-                                <Link href={`${basePath}/registracia`} className={styles.registerButton}>
-                                    {t.nav.addSalon}
-                                </Link>
-                            </>
-                        )
-                    )}
-                </div>
-
-                {/* Mobile Menu Button */}
-                <button
-                    className={styles.mobileMenuButton}
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label="Menu"
-                >
-                    <span className={`${styles.hamburger} ${mobileMenuOpen ? styles.open : ''}`}>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-                </button>
-            </div>
-
-            {/* Mobile Menu */}
-            <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.open : ''}`}>
-                <nav className={styles.mobileNav}>
-                    <Link href={`${basePath}/salony`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                        {t.nav.allSalons}
-                    </Link>
-                    <Link href={`${basePath}/kategorie`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                        {t.nav.categories}
-                    </Link>
-                    <Link href={`${basePath}/pre-majitelov`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
-                        {t.nav.forOwners}
-                    </Link>
-                    <div className={styles.mobileActions}>
-                        {user ? (
-                            <>
-                                <Link href="/dashboard" className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
-                                    Dashboard
-                                </Link>
-                                <Link href="/dashboard/moj-salon" className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
-                                    Môj salón
-                                </Link>
-                                <button
-                                    onClick={() => {
-                                        signOut();
-                                        setMobileMenuOpen(false);
-                                    }}
-                                    className={styles.mobileLogoutButton}
-                                >
-                                    Odhlásiť
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link href={`${basePath}/prihlasenie`} className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
-                                    {t.nav.signIn}
-                                </Link>
-                                <Link href={`${basePath}/registracia`} className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
-                                    {t.nav.addSalon}
-                                </Link>
-                            </>
+                    {/* Desktop Actions - show different buttons based on login state */}
+                    <div className={styles.actions}>
+                        <LanguageSwitcher />
+                        {!loading && (
+                            user ? (
+                                <>
+                                    <Link href="/dashboard" className={styles.userButton}>
+                                        {user.user_metadata?.avatar_url ? (
+                                            <img
+                                                src={user.user_metadata.avatar_url}
+                                                alt="Avatar"
+                                                className={styles.userAvatar}
+                                            />
+                                        ) : (
+                                            <span className={styles.userInitial}>
+                                                {user.email?.charAt(0).toUpperCase() || 'U'}
+                                            </span>
+                                        )}
+                                        <span className={styles.userName}>Môj účet</span>
+                                    </Link>
+                                    <button
+                                        onClick={() => signOut()}
+                                        className={styles.logoutButton}
+                                    >
+                                        Odhlásiť
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href={`${basePath}/prihlasenie`} className={styles.loginButton}>
+                                        {t.nav.signIn}
+                                    </Link>
+                                    <Link href={`${basePath}/registracia`} className={styles.registerButton}>
+                                        {t.nav.addSalon}
+                                    </Link>
+                                </>
+                            )
                         )}
                     </div>
-                </nav>
-            </div>
-        </header>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        className={styles.mobileMenuButton}
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label="Menu"
+                    >
+                        <span className={`${styles.hamburger} ${mobileMenuOpen ? styles.open : ''}`}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </button>
+                </div>
+
+                {/* Mobile Menu */}
+                <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.open : ''}`}>
+                    <nav className={styles.mobileNav}>
+                        <Link href={`${basePath}/salony`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                            {t.nav.allSalons}
+                        </Link>
+                        <Link href={`${basePath}/kategorie`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                            {t.nav.categories}
+                        </Link>
+                        <Link href={`${basePath}/pre-majitelov`} className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                            {t.nav.forOwners}
+                        </Link>
+                        <div className={styles.mobileActions}>
+                            {user ? (
+                                <>
+                                    <Link href="/dashboard" className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                                        Dashboard
+                                    </Link>
+                                    <Link href="/dashboard/moj-salon" className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
+                                        Môj salón
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            signOut();
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        className={styles.mobileLogoutButton}
+                                    >
+                                        Odhlásiť
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href={`${basePath}/prihlasenie`} className={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                                        {t.nav.signIn}
+                                    </Link>
+                                    <Link href={`${basePath}/registracia`} className={styles.mobileRegisterButton} onClick={() => setMobileMenuOpen(false)}>
+                                        {t.nav.addSalon}
+                                    </Link>
+                                </>
+                            )}
+                        </div>
+                    </nav>
+                </div>
+            </header>
+        </>
     );
 }
