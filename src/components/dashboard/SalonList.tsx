@@ -4,18 +4,18 @@ import Link from 'next/link';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import styles from './SalonList.module.css';
 
-interface Salon {
+interface BaseSalon {
     id: string;
     name: string;
     city: string;
     status: string;
     tier: string;
-    is_verified: boolean;
+    is_verified?: boolean;
 }
 
 interface SalonListProps {
-    salons: Salon[];
-    onEdit: (salon: Salon) => void;
+    salons: BaseSalon[];
+    onEdit: (salon: BaseSalon) => void;
     onAdd: () => void;
     loading: boolean;
 }

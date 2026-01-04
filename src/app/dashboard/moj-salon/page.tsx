@@ -117,10 +117,14 @@ export default function MySalonsPage() {
         }
     };
 
-    const handleEditSalon = (salon: Salon) => {
-        setEditingSalon(salon);
-        setActiveTab('info');
-        loadSalonDetails(salon);
+    const handleEditSalon = (salon: { id: string; name: string; city: string; status: string; tier: string }) => {
+        // Find the full salon data from state
+        const fullSalon = salons.find(s => s.id === salon.id);
+        if (fullSalon) {
+            setEditingSalon(fullSalon);
+            setActiveTab('info');
+            loadSalonDetails(fullSalon);
+        }
     };
 
     const handleSaveInfo = async (data: any) => {
