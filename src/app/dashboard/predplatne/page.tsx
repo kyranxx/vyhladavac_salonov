@@ -13,6 +13,18 @@ interface SalonOption {
     tier: string;
     is_verified: boolean;
     is_featured: boolean;
+    featured_until?: string;
+    verified_until?: string;
+}
+
+interface ActiveSubscription {
+    id: string;
+    type: string;
+    status: string;
+    start_date: string;
+    end_date: string;
+    amount_paid?: number;
+    stripe_subscription_id?: string;
 }
 
 const plans = [
@@ -83,9 +95,12 @@ function SubscriptionContent() {
     const { user } = useAuth();
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState<string | null>(null);
+    const [managingPortal, setManagingPortal] = useState(false);
+    const [canceling, setCanceling] = useState(false);
     const [currentTier, setCurrentTier] = useState<string>('free');
     const [salonId, setSalonId] = useState<string | null>(null);
     const [salons, setSalons] = useState<SalonOption[]>([]);
+    const [activeSubscription, setActiveSubscription] = useState<ActiveSubscription | null>(null);
     const [_isVerified, setIsVerified] = useState(false);
     const [_isFeatured, setIsFeatured] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -155,7 +170,7 @@ function SubscriptionContent() {
             // Get all user's salons
             const { data: userSalons } = await supabase
                 .from('salons')
-                .select('id, name, tier, is_verified, is_featured')
+                .select('id, name, tier, is_verified, is_featured, featured_until, verified_until')
                 .eq('owner_id', user.id);
 
             if (userSalons && userSalons.length > 0) {
@@ -166,6 +181,19 @@ function SubscriptionContent() {
                 setCurrentTier(firstSalon.tier || 'free');
                 setIsVerified(firstSalon.is_verified || false);
                 setIsFeatured(firstSalon.is_featured || false);
+
+                // Fetch active subscription for this salon
+                try {
+                    const response = await fetch(`/api/subscriptions/status?userId=${user.id}&salonId=${firstSalon.id}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.activeSubscription) {
+                            setActiveSubscription(data.activeSubscription);
+                        }
+                    }
+                } catch {
+                    // Ignore subscription fetch errors
+                }
             }
         } catch {
             // User might not have a salon yet
@@ -230,6 +258,74 @@ function SubscriptionContent() {
         }
     };
 
+    const handleManagePortal = async () => {
+        if (!user) {
+            toast.error('Musíte byť prihlásený.');
+            return;
+        }
+
+        setManagingPortal(true);
+        try {
+            const response = await fetch('/api/subscriptions/portal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.id,
+                    returnUrl: window.location.href,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.error || 'Failed to open portal');
+            }
+        } catch (error) {
+            console.error('Portal error:', error);
+            toast.error('Nepodarilo sa otvoriť správu predplatného.');
+        } finally {
+            setManagingPortal(false);
+        }
+    };
+
+    const handleCancelSubscription = async () => {
+        if (!user || !activeSubscription) {
+            toast.error('Žiadna aktívna podpiska na zrušenie.');
+            return;
+        }
+
+        if (!window.confirm('Naozaj chcete zrušiť predplatné? Prístup zostane aktívny do konca fakturačného obdobia.')) {
+            return;
+        }
+
+        setCanceling(true);
+        try {
+            const response = await fetch('/api/subscriptions/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subscriptionId: activeSubscription.id,
+                    userId: user.id,
+                    cancelAtPeriodEnd: true,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                toast.success('Predplatné bolo zrušené. Prístup zostáva aktívny do ' + new Date(data.currentPeriodEnd).toLocaleDateString('sk-SK'));
+                setActiveSubscription({ ...activeSubscription, status: 'canceling' });
+            } else {
+                throw new Error(data.error || 'Failed to cancel');
+            }
+        } catch (error) {
+            console.error('Cancel error:', error);
+            toast.error('Nepodarilo sa zrušiť predplatné.');
+        } finally {
+            setCanceling(false);
+        }
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -264,6 +360,66 @@ function SubscriptionContent() {
             )}
 
             <div className={styles.content}>
+                {/* Active Subscription Management */}
+                {activeSubscription && activeSubscription.status === 'active' && (
+                    <div className={styles.activeSubscription}>
+                        <div className={styles.activeHeader}>
+                            <div className={styles.activeIcon}>✨</div>
+                            <div>
+                                <h3 className={styles.activeTitle}>Aktívne predplatné</h3>
+                                <p className={styles.activeType}>
+                                    {activeSubscription.type === 'premium' ? 'Premium' :
+                                        activeSubscription.type === 'featured' ? 'Zvýraznený salón' :
+                                            activeSubscription.type === 'verified' ? 'Overený salón' : activeSubscription.type}
+                                </p>
+                            </div>
+                        </div>
+                        <div className={styles.activeDetails}>
+                            <div className={styles.activeDetailItem}>
+                                <span className={styles.activeLabel}>Platné od:</span>
+                                <span>{new Date(activeSubscription.start_date).toLocaleDateString('sk-SK')}</span>
+                            </div>
+                            <div className={styles.activeDetailItem}>
+                                <span className={styles.activeLabel}>Platné do:</span>
+                                <span>{new Date(activeSubscription.end_date).toLocaleDateString('sk-SK')}</span>
+                            </div>
+                            {activeSubscription.amount_paid && (
+                                <div className={styles.activeDetailItem}>
+                                    <span className={styles.activeLabel}>Zaplatené:</span>
+                                    <span>{activeSubscription.amount_paid}€</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className={styles.activeActions}>
+                            <button
+                                className={styles.manageButton}
+                                onClick={handleManagePortal}
+                                disabled={managingPortal}
+                            >
+                                {managingPortal ? 'Otváram...' : '⚙️ Spravovať predplatné'}
+                            </button>
+                            <button
+                                className={styles.cancelButton}
+                                onClick={handleCancelSubscription}
+                                disabled={canceling}
+                            >
+                                {canceling ? 'Ruším...' : '❌ Zrušiť predplatné'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Canceling notice */}
+                {activeSubscription && activeSubscription.status === 'canceling' && (
+                    <div className={styles.cancelingNotice}>
+                        <span>⚠️</span>
+                        <p>
+                            Vaše predplatné bolo zrušené. Prístup k prémiovým funkciám zostáva aktívny do{' '}
+                            <strong>{new Date(activeSubscription.end_date).toLocaleDateString('sk-SK')}</strong>.
+                        </p>
+                    </div>
+                )}
+
                 {/* Pricing Plans */}
                 <div className={styles.plansGrid}>
                     {plans.map((plan) => {
