@@ -118,8 +118,14 @@ npm run build
 # Lint
 npm run lint
 
-# Type check
-npm run type-check
+# End-to-end test
+npm run test
+
+# Production test
+npm run test:prod
+
+# Lighthouse audit
+npm run audit
 ```
 
 ---

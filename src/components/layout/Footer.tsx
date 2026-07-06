@@ -95,6 +95,9 @@ export function Footer({ locale = 'sk', translations: t }: FooterProps) {
                             <Link href={`${basePath}/ochrana-sukromia`}>{t?.footer.privacyPolicy || 'Ochrana súkromia'}</Link>
                             <Link href={`${basePath}/obchodne-podmienky`}>{t?.footer.termsOfService || 'Obchodné podmienky'}</Link>
                             <Link href={`${basePath}/cookies`}>{t?.footer.cookies || 'Cookies'}</Link>
+                            <Link href={`${basePath}/site-map`}>
+                                {locale === 'en' ? 'Sitemap' : locale === 'hu' ? 'Oldaltérkép' : 'Mapa stránky'}
+                            </Link>
                         </nav>
                     </div>
                 </div>

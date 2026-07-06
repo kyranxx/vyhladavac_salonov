@@ -55,11 +55,16 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', subscriptionId);
 
+        // Get the period end from the subscription object
+        const periodEnd = 'current_period_end' in canceledSubscription
+            ? (canceledSubscription as { current_period_end?: number }).current_period_end
+            : null;
+
         return NextResponse.json({
             success: true,
             cancelAtPeriodEnd,
-            currentPeriodEnd: canceledSubscription.current_period_end
-                ? new Date(canceledSubscription.current_period_end * 1000).toISOString()
+            currentPeriodEnd: periodEnd
+                ? new Date(periodEnd * 1000).toISOString()
                 : null,
         });
     } catch (error) {

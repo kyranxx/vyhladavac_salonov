@@ -25,7 +25,7 @@ async function getSalons() {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vyhladavac-salonov.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vyhladavacsalonov.vercel.app';
 
     // Static pages
     const staticPages = [
